@@ -10,23 +10,23 @@ For information about different technologies considered and the reasoning behind
 [Figma](https://www.figma.com/)
 
 ### Frontend
-Framework: [Angular v19](https://angular.dev/)
-Component Library: [Angular Material](https://material.angular.io/)
-Charts: ???
+* Framework: [Angular v19](https://angular.dev/)
+* Component Library: [Angular Material](https://material.angular.io/)
+* Charts: ???
 
 ### Backend
-Framework: [ASP.NET 8.0](https://dotnet.microsoft.com/es-es/apps/aspnet)
-For ORM: [Entity Framework Core](https://learn.microsoft.com/es-es/ef/core/)
+* Framework: [ASP.NET 8.0](https://dotnet.microsoft.com/es-es/apps/aspnet)
+* For ORM: [Entity Framework Core](https://learn.microsoft.com/es-es/ef/core/)
 
 ### Testing
-API Testing: [PostMan](https://www.postman.com/)
-Frontend Testing: Karma
-Backend Testing: xUnit
+* API Testing: [PostMan](https://www.postman.com/)
+* Frontend Testing: Karma
+* Backend Testing: xUnit
 
 ### Devops
-Container: [Docker](https://www.docker.com/)
-CI/CD: ???
-CI/CD Libraries: Husky???
+* Container: [Docker](https://www.docker.com/)
+* CI/CD: ???
+* CI/CD Libraries: Husky???
 
 
 ## Branching strategy = Feature Branching
