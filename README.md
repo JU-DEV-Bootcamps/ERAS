@@ -38,7 +38,7 @@ Steps to Implement Feature Branching in Submodules
 ```bash
 prefix = release|feature|ci|docs|bugfix|refactor|chore|style
 storyNumber = "ERAS-BE #13".specialTrim() // "BE13"
-stroyTitle = verb + object // "importcosmic"
-`${prefix}/${storyNumber}/${stroyTitle}`
+storyTitle = verb + object // "importcosmic"
+`${prefix}/${storyNumber}/${storyTitle}`
 ```
 ## Story point assignment
