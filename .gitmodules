@@ -1,0 +1,6 @@
+[submodule "ERAS-FE"]
+	path = ERAS-FE
+	url = https://github.com/JU-DEV-Bootcamps/ERAS-FE.git
+[submodule "ERAS-BE"]
+	path = ERAS-BE
+	url = https://github.com/JU-DEV-Bootcamps/ERAS-BE.git
