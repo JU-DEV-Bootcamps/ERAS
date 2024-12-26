@@ -35,9 +35,10 @@ For a quick manual check our wiki: [Submodules Git manual](https://github.com/JU
 The Feature Branching Strategy allows developers to work on new features or bug fixes in isolated branches within submodules. This approach helps maintain a stable main branch while enabling parallel development.
 Steps to Implement Feature Branching in Submodules
 ### Name branching
+```bash
 prefix = release|feature|ci|docs|bugfix|refactor|chore|style
 storyNumber = "ERAS-BE #13".specialTrim() // "BE13"
 stroyTitle = verb + object // "importcosmic"
 `${prefix}/${storyNumber}/${stroyTitle}`
-
+```
 ## Story point assignment
