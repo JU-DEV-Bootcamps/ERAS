@@ -42,3 +42,6 @@ storyTitle = verb + object // "importcosmic"
 `${prefix}/${storyNumber}/${storyTitle}`
 ```
 ## Story point assignment
+
+## System Design
+The system design diagrams can be checked in the wiki: [C4 Model](https://github.com/JU-DEV-Bootcamps/ERAS/wiki/C4-Model)
