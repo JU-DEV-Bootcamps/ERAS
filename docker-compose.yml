@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  backend:
+    build:
+      context: ./ERAS-BE
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./ERAS-BE:/app
+      - /app/node_modules
+    depends_on:
+      - database
+    networks:
+      - eras_network
+
+  frontend:
+    build:
+      context: ./ERAS-FE
+    ports:
+      - "4200:80"
+    volumes:
+      - ./ERAS-FE:/app
+    depends_on:
+      - backend
+    networks:
+      - eras_network
+
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: eras_user
+      POSTGRES_PASSWORD: eras_password
+      POSTGRES_DB: eras_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - eras_network
+
+volumes:
+  postgres_data:
+
+networks:
+  eras_network:
