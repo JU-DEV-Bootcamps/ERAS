@@ -1,0 +1,38 @@
+name: Print Submodule Commits
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  print-submodule-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false # No clonar submódulos, solo leer referencias
+
+      - name: Print Submodule Commits
+        run: |
+          echo "Obteniendo commits actuales de los submódulos..."
+
+          git config --file .gitmodules --get-regexp path | awk '{ print $2 }' > submodules.txt
+
+          while IFS= read -r submodule; do
+            FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
+            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7) # Versión simple (puede ser diferente a GitHub)
+
+            # Generar SHORT_SHA como lo hace GitHub Actions
+            GH_SHORT_SHA=$(echo -n "$FULL_COMMIT" | sha256sum | cut -c1-7)
+
+            echo " Submódulo '$submodule':"
+            echo "   - Full Commit: $FULL_COMMIT"
+            echo "   - Short Commit (Git Default): $SHORT_COMMIT"
+            echo "   - Short Commit (GitHub Style): $GH_SHORT_SHA"
+          done < submodules.txt
