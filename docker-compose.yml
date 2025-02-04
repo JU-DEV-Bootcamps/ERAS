@@ -52,6 +52,7 @@ services:
     command: start-dev
     environment:
       - KC_HEALTH_ENABLED=true
+      - KEYCLOAK_IMPORT= ./realm-export.json
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
     ports:
