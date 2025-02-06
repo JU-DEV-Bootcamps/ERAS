@@ -15,16 +15,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
-
-      # Cosmic Latte API
-      - COSMIC_LATTE_BASE_URL=${COSMIC_LATTE_BASE_URL}
-      - COSMIC_LATTE_API_KEY=${COSMIC_LATTE_API_KEY}
-
-      # Keycloak Authentication
-      - KEYCLOAK_BASE_URL=${KEYCLOAK_BASE_URL}
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      
     volumes:
       - /app/node_modules
     depends_on:
