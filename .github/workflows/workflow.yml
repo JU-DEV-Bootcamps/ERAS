@@ -11,34 +11,48 @@ on:
 jobs:
   print-submodule-commits:
     runs-on: ubuntu-latest
+    outputs:
+      submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          submodules: false # No clonar submódulos, solo leer referencias
+          submodules: false # Only submodules references
 
-      - name: Print Submodule Commits
+      - name: Extract Submodule SHAs
+        id: extract-shas
         run: |
-          echo "Obteniendo commits actuales de los submódulos..."
-
+          echo "Actual submodules commits..."
           git config --file .gitmodules --get-regexp path | awk '{ print $2 }' > submodules.txt
+
+          SUBMODULE_SHAS_JSON="["
 
           while IFS= read -r submodule; do
             FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
-            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7) # Versión simple (puede ser diferente a GitHub)
+            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7) # Versión simple
 
-            # Generar SHORT_SHA como lo hace GitHub Actions
+            # Generate SHORT_SHA like GitHub Actions does (apparently)
             GH_SHORT_SHA=$(echo -n "$FULL_COMMIT" | sha256sum | cut -c1-7)
 
-            echo " Submódulo '$submodule':"
+            echo " Submodule '$submodule':"
             echo "   - Full Commit: $FULL_COMMIT"
             echo "   - Short Commit (Git Default): $SHORT_COMMIT"
             echo "   - Short Commit (GitHub Style): $GH_SHORT_SHA"
+
+            SUBMODULE_SHAS_JSON+="{\"submodule\": \"$submodule\", \"sha\": \"$GH_SHORT_SHA\"},"
           done < submodules.txt
+
+          SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}]"
+          echo "Submodule SHAs JSON: $SUBMODULE_SHAS_JSON"
+
+          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_ENV"
+          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_OUTPUT"
 
   deploy:
     runs-on: ubuntu-latest
+    needs: print-submodule-commits
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,5 +67,5 @@ jobs:
       - name: Connect and Run Commands
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
-            echo "Connection Success" > ~/connection_test.txt
+            echo '${{ needs.print-submodule-commits.outputs.submodule_shas }}' > submodule_commit.json
           EOF
