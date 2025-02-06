@@ -36,3 +36,22 @@ jobs:
             echo "   - Short Commit (Git Default): $SHORT_COMMIT"
             echo "   - Short Commit (GitHub Style): $GH_SHORT_SHA"
           done < submodules.txt
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.AWS_EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Connect and Run Commands
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            echo "Connection Success" > ~/connection_test.txt
+          EOF
