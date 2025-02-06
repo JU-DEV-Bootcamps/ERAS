@@ -8,6 +8,23 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://0.0.0.0:8080
+
+      # Database Connection
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+      # Cosmic Latte API
+      - COSMIC_LATTE_BASE_URL=${COSMIC_LATTE_BASE_URL}
+      - COSMIC_LATTE_API_KEY=${COSMIC_LATTE_API_KEY}
+
+      # Keycloak Authentication
+      - KEYCLOAK_BASE_URL=${KEYCLOAK_BASE_URL}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
     volumes:
       - /app/node_modules
     depends_on:
@@ -41,7 +58,7 @@ services:
     networks:
       - eras_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U eras_user -d eras_db || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1"]
       interval: ${POSTGRES_HEALTHCHECK_INTERVAL}
       timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}
       retries: ${POSTGRES_HEALTHCHECK_RETRIES}
