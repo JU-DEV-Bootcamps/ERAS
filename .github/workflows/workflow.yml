@@ -1,4 +1,4 @@
-name: Print Submodule Commits
+name: Automatic deploy process
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  print-submodule-commits:
+  submodule-commits:
     runs-on: ubuntu-latest
     outputs:
       submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          submodules: false # Only submodules references
+          submodules: false # Only submodules reference
 
       - name: Extract Submodule SHAs
         id: extract-shas
@@ -40,7 +40,7 @@ jobs:
             echo "   - Short Commit (Git Default): $SHORT_COMMIT"
             echo "   - Short Commit (GitHub Style): $GH_SHORT_SHA"
 
-            SUBMODULE_SHAS_JSON+="{\"submodule\": \"$submodule\", \"sha\": \"$GH_SHORT_SHA\"},"
+            SUBMODULE_SHAS_JSON+="\"$submodule\": \"$GH_SHORT_SHA\","
           done < submodules.txt
 
           SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}]"
@@ -51,7 +51,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: print-submodule-commits
+    needs: submodule-commits
 
     steps:
       - name: Checkout code
@@ -67,5 +67,5 @@ jobs:
       - name: Connect and Run Commands
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
-            echo '${{ needs.print-submodule-commits.outputs.submodule_shas }}' > submodule_commit.json
+            echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > deploy/versions.json
           EOF
