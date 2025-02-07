@@ -29,6 +29,61 @@ For information about different technologies considered and the reasoning behind
 * CI/CD Libraries: Husky???
 
 
+## How to Run Locally
+
+To set up and run the project locally, you can follow these steps:
+
+### 1. Clone the repository and initialize submodules
+
+Since the main repository (`ERAS`) includes submodules for `ERAS-BE` (backend) and `ERAS-FE` (frontend):
+
+```bash
+git clone --recurse-submodules https://github.com/JU-DEV-Bootcamps/ERAS.git
+cd ERAS
+```
+or use the SSH option for cloning
+
+If you have already cloned the repository without submodules, run:
+
+```bash
+git submodule update --init --recursive
+```
+
+### 2. Set up environment variables
+
+Copy the sample environment file:
+
+```bash
+cp .env.sample .env
+```
+
+Modify the `.env` file if needed (e.g., change ports or database credentials).
+
+### 3. Run the project using Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+This will spin up the required services using the environment variables from your `.env` file.
+
+### 4. Updating submodules
+
+If changes are made to `ERAS-BE` or `ERAS-FE` repositories, update them with:
+
+```bash
+git submodule update --remote --merge
+```
+
+### 5. Access the application
+
+- Backend: [http://localhost:8080](http://localhost:8080)
+- Frontend: [http://localhost:4200](http://localhost:4200)
+
+⚠ **Important:** The `.env` file should not be committed to the repository. Use `.env.sample` as a reference for required environment variables.
+
+
+
 ## Branching strategy = Submodules -> Feature Branching + Release Branching (on demand)
 For a quick manual check our wiki: [Submodules Git manual](https://github.com/JU-DEV-Bootcamps/ERAS/wiki/Submodules-Git-manual)
 

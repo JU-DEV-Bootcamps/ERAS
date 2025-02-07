@@ -8,6 +8,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://0.0.0.0:8080
+
+      # Database Connection
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      
     volumes:
       - /app/node_modules
     depends_on:
@@ -23,6 +31,7 @@ services:
       - "${FRONTEND_PORT}:80"
     volumes:
       - ./ERAS-FE:/app
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
     networks:
@@ -41,7 +50,7 @@ services:
     networks:
       - eras_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U eras_user -d eras_db || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1"]
       interval: ${POSTGRES_HEALTHCHECK_INTERVAL}
       timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}
       retries: ${POSTGRES_HEALTHCHECK_RETRIES}
