@@ -40,7 +40,7 @@ jobs:
             echo "   - Short Commit (Git Default): $SHORT_COMMIT"
             echo "   - Short Commit (GitHub Style): $GH_SHORT_SHA"
 
-            SUBMODULE_SHAS_JSON+="\"$submodule\": \"$GH_SHORT_SHA\","
+            SUBMODULE_SHAS_JSON+="\"$submodule\": \"$SHORT_COMMIT\","
           done < submodules.txt
 
           SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}}"
@@ -69,5 +69,10 @@ jobs:
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
             mkdir -p ~/deploy
             echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/versions.json
-            bash ~/deploy/setVersions.sh
+            if [ -f ~/deploy/versions.json ]; then
+              bash ~/deploy/setVersions.sh
+            else
+              echo "Error: versions.json not found"
+              exit 1
+            fi
           EOF
