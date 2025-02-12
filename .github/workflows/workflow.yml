@@ -26,7 +26,7 @@ jobs:
           echo "Actual submodules commits..."
           git config --file .gitmodules --get-regexp path | awk '{ print $2 }' > submodules.txt
 
-          SUBMODULE_SHAS_JSON="["
+          SUBMODULE_SHAS_JSON="{"
 
           while IFS= read -r submodule; do
             FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
@@ -43,7 +43,7 @@ jobs:
             SUBMODULE_SHAS_JSON+="\"$submodule\": \"$GH_SHORT_SHA\","
           done < submodules.txt
 
-          SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}]"
+          SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}}"
           echo "Submodule SHAs JSON: $SUBMODULE_SHAS_JSON"
 
           echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_ENV"
@@ -67,5 +67,7 @@ jobs:
       - name: Connect and Run Commands
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
-            echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > versions.json
+            mkdir -p ~/deploy
+            echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/versions.json
+            bash ~/deploy/setVersions.sh
           EOF
