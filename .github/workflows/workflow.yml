@@ -62,7 +62,7 @@ jobs:
 
       - name: Connect and Run Commands
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ vars.AWS_EC2_HOST }} << 'EOF'
             mkdir -p ~/deploy
             echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/versions.json
             bash ~/deploy/setVersions.sh
