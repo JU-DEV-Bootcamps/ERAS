@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
 
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    image: quay.io/keycloak/keycloak:26.1
     command: start-dev --verbose --import-realm
     environment:
       - KC_HEALTH_ENABLED=true

@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - main
+  pullrequest:
+    branches:
+      - main
 
 jobs:
   submodule-commits:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
 
@@ -43,7 +46,7 @@ jobs:
           echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_OUTPUT"
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: submodule-commits
 
     steps:

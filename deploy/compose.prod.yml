@@ -72,7 +72,7 @@ services:
           memory: '350M'
 
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    image: quay.io/keycloak/keycloak:26.1
     command: start-dev --import-realm --verbose
     environment:
       - KC_HEALTH_ENABLED=true
