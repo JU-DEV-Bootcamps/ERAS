@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   submodule-commits:
@@ -30,15 +27,11 @@ jobs:
 
           while IFS= read -r submodule; do
             FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
-            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7) # Versión simple
-
-            # Generate SHORT_SHA like GitHub Actions does (apparently)
-            GH_SHORT_SHA=$(echo -n "$FULL_COMMIT" | sha256sum | cut -c1-7)
+            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7)
 
             echo " Submodule '$submodule':"
             echo "   - Full Commit: $FULL_COMMIT"
-            echo "   - Short Commit (Git Default): $SHORT_COMMIT"
-            echo "   - Short Commit (GitHub Style): $GH_SHORT_SHA"
+            echo "   - Short Commit: $SHORT_COMMIT"
 
             SUBMODULE_SHAS_JSON+="\"$submodule\": \"$SHORT_COMMIT\","
           done < submodules.txt
