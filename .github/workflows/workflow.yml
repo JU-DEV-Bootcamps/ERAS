@@ -69,10 +69,5 @@ jobs:
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
             mkdir -p ~/deploy
             echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/versions.json
-            if [ -f ~/deploy/versions.json ]; then
-              bash ~/deploy/setVersions.sh
-            else
-              echo "Error: versions.json not found"
-              exit 1
-            fi
+            bash ~/deploy/setVersions.sh
           EOF
