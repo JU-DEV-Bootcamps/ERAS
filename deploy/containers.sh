@@ -7,6 +7,9 @@ cd ~/app || exit 1
 echo "Stop containers running..."
 docker compose down
 
+echo "Pull images lastest versions..."
+docker compose pull
+
 echo "Setting up containers - detach mode..."
 docker compose up -d
 
