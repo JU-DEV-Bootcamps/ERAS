@@ -70,4 +70,5 @@ jobs:
             mkdir -p ~/deploy
             echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/versions.json
             bash ~/deploy/setVersions.sh
+            bash ~/deploy/containers.sh
           EOF
