@@ -75,7 +75,6 @@ services:
 volumes:
   postgres_data:
   keycloak_data:
-  logs-volume:
 
 networks:
   eras_network:
