@@ -18,6 +18,7 @@ services:
 
     volumes:
       - /app/node_modules
+      - ./backend-logs:/app/Logs
     depends_on:
       database:
         condition: service_healthy
