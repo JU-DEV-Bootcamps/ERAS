@@ -16,6 +16,7 @@ services:
     volumes:
       - /app/node_modules
       - /home/ubuntu/ssl-certificates/eras-backend.pfx:/https/aspnetapp.pfx:ro
+      - /home/ubuntu/backend-logs:/app/Logs
     depends_on:
       database:
         condition: service_healthy
