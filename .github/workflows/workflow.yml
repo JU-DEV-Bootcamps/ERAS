@@ -1,0 +1,67 @@
+name: Automatic deploy process
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  submodule-commits:
+    runs-on: ubuntu-24.04
+    outputs:
+      submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false # Only submodules reference
+
+      - name: Extract Submodule SHAs
+        id: extract-shas
+        run: |
+          echo "Actual submodules commits..."
+          git config --file .gitmodules --get-regexp path | awk '{ print $2 }' > submodules.txt
+
+          SUBMODULE_SHAS_JSON="{"
+
+          while IFS= read -r submodule; do
+            FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
+            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7)
+
+            echo " Submodule '$submodule':"
+            echo "   - Full Commit: $FULL_COMMIT"
+            echo "   - Short Commit: $SHORT_COMMIT"
+
+            SUBMODULE_SHAS_JSON+="\"$submodule\": \"$SHORT_COMMIT\","
+          done < submodules.txt
+
+          SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}}"
+          echo "Submodule SHAs JSON: $SUBMODULE_SHAS_JSON"
+
+          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_ENV"
+          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    runs-on: ubuntu-24.04
+    needs: submodule-commits
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ vars.AWS_EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Connect and Run Commands
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ vars.AWS_EC2_HOST }} << 'EOF'
+            mkdir -p ~/deploy
+            echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/versions.json
+            bash ~/deploy/setVersions.sh
+            bash ~/deploy/containers.sh
+          EOF
