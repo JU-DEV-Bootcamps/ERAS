@@ -1,9 +1,6 @@
 name: Automatic deploy process into Stage
 
-on:
-  push:
-    branches:
-      - main
+on: workflow_dispatch
 
 jobs:
   submodule-commits:
