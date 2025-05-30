@@ -1,6 +1,13 @@
-name: Automatic deploy process into Stage
+name: Ad Hoc deploy process into Stage
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: 'Versions json'
+        required: true
+        default: '{"ERAS-FE": "612e93f","ERAS-BE": "ebf109c"}'
+        type: string
 
 jobs:
   submodule-commits:
@@ -50,7 +57,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ vars.ERAS_STAGE_HOST }} << 'EOF'
             mkdir -p ~/deploy
-            echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/versions.json
+            echo '${{ inputs.versions }}' > ~/deploy/versions.json
             bash ~/deploy/setVersions.sh
             bash ~/deploy/containers.sh
           EOF
