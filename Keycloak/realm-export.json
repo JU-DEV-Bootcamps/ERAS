@@ -57,6 +57,24 @@
         "attributes": {}
       },
       {
+        "id": "5ac44429-0828-4086-a638-a2aba2217e6e",
+        "name": "Student Service",
+        "description": "Able to check students' remissions, sees own remissions, declare own remissions' state",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
+        "attributes": {}
+      },
+      {
+        "id": "d9587cef-9110-4ba2-95fe-75f5b39853e0",
+        "name": "Professional",
+        "description": "Sees own remissions and declare own remissions' state",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
+        "attributes": {}
+      },
+      {
         "id": "e51ed42b-a4a0-4a79-9419-c7cbc17f0f98",
         "name": "default-roles-eras",
         "description": "${role_default-roles}",
@@ -80,6 +98,15 @@
         "id": "82121330-86ea-4534-907a-fe09d025830d",
         "name": "offline_access",
         "description": "${role_offline-access}",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
+        "attributes": {}
+      },
+      {
+        "id": "a954f4d0-d38e-4228-a029-3204650b9542",
+        "name": "Eras Admin",
+        "description": "Able to create Service Providers and Configurations",
         "composite": false,
         "clientRole": false,
         "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
@@ -1706,13 +1733,13 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-property-mapper",
-            "oidc-usermodel-property-mapper",
             "oidc-full-name-mapper",
+            "oidc-address-mapper",
+            "oidc-usermodel-property-mapper",
             "saml-user-attribute-mapper",
+            "saml-user-property-mapper",
             "saml-role-list-mapper",
             "oidc-usermodel-attribute-mapper",
-            "oidc-address-mapper",
             "oidc-sha256-pairwise-sub-mapper"
           ]
         }
@@ -1752,14 +1779,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-property-mapper",
+            "saml-user-attribute-mapper",
             "oidc-usermodel-property-mapper",
+            "oidc-full-name-mapper",
+            "saml-user-property-mapper",
             "oidc-address-mapper",
             "saml-role-list-mapper",
-            "oidc-usermodel-attribute-mapper",
             "oidc-sha256-pairwise-sub-mapper",
-            "saml-user-attribute-mapper",
-            "oidc-full-name-mapper"
+            "oidc-usermodel-attribute-mapper"
           ]
         }
       },
