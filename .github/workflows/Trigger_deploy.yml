@@ -1,0 +1,38 @@
+
+name: Combine Tags and Trigger Deploy
+
+on:
+  workflow_dispatch: # o workflow_run si quieres que se dispare automáticamente
+
+jobs:
+  prepare-and-dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download BE tag
+        uses: actions/download-artifact@v3
+        with:
+          name: eras-be-tag
+
+      - name: Download FE tag
+        uses: actions/download-artifact@v3
+        with:
+          name: eras-fe-tag
+
+      - name: Combine tags into versions.json
+        id: combine
+        run: |
+          BE_TAG=$(jq -r '.["ERAS-BE"]' be_tag.json)
+          FE_TAG=$(jq -r '.["ERAS-FE"]' fe_tag.json)
+          echo "BE_TAG=$BE_TAG"
+          echo "FE_TAG=$FE_TAG"
+          echo "{\"ERAS-FE\": \"$FE_TAG\", \"ERAS-BE\": \"$BE_TAG\"}" > versions.json
+          echo "versions=$(cat versions.json)" >> $GITHUB_OUTPUT
+
+      - name: Trigger Deploy Workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: tu-org/tu-repo-principal
+          event-type: deploy-trigger
+          client-payload: '{"versions": ${{ steps.combine.outputs.versions }}}'
