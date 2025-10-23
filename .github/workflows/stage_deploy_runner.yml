@@ -56,11 +56,17 @@ jobs:
           echo "${{ secrets.ERAS_STAGE_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ vars.ERAS_STAGE_HOST }}" >> ~/.ssh/known_hosts
+      
       - name: Connect and Run Commands
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ vars.ERAS_STAGE_HOST }} << 'EOF'
             mkdir -p ~/deploy
-            echo '${{ github.event.client_payload.versions || inputs.versions }}' > ~/deploy/versions.json
+            VERSIONS='${{ github.event.client_payload.versions }}'
+            if [ -z "$VERSIONS" ]; then
+              VERSIONS='${{ inputs.versions }}'
+            fi
+            echo "$VERSIONS" > ~/deploy/versions.json
             bash ~/deploy/setVersions.sh
             bash ~/deploy/containers.sh
           EOF
+
