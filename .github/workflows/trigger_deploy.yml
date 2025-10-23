@@ -10,12 +10,12 @@ jobs:
     
     steps:
       - name: Download BE tag
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: eras-be-tag
 
       - name: Download FE tag
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: eras-fe-tag
 
