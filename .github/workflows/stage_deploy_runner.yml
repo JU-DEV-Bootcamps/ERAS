@@ -75,8 +75,6 @@ jobs:
             echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
             echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/submodules.json        
             test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1)
-            dos2unix ~/deploy/setVersions.sh
-            dos2unix ~/deploy/containers.sh
             bash ~/deploy/setVersions.sh
             bash ~/deploy/containers.sh
           EOF
