@@ -13,12 +13,12 @@ jobs:
       - name: Open the BE JSON
         run: |
           cp /home/ubuntu/Eras_versions/eras-be-tag.zip ./eras-be-tag.zip
-          unzip eras-be-tag.zip
+          unzip -o -q eras-be-tag.zip
 
       - name: Open the FE JSON
         run: |
           cp /home/ubuntu/Eras_versions/eras-fe-tag.zip ./eras-fe-tag.zip
-          unzip eras-fe-tag.zip
+          unzip -o -q eras-fe-tag.zip
 
       - name: Combine tags into versions.json
         id: combine
