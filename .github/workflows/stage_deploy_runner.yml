@@ -2,19 +2,35 @@ name: Deploy process on runner
 
 on:
   workflow_dispatch:
-    inputs:
-      versions:
-        description: 'Versions.json'
-        required: true
-        default: '{"ERAS-FE": "xxx","ERAS-BE": "yyy"}'
-        type: string
-  repository_dispatch:
-    types: [deploy-trigger]
-
 
 jobs:
+  prepare-and-dispatch:
+    runs-on: self-hosted
+    outputs:
+      versions: ${{ steps.combine.outputs.versions }}
+
+    steps:
+      - name: Open the BE JSON
+        run: |
+          cp /home/ubuntu/Eras_versions/eras-be-tag.zip ./eras-be-tag.zip
+          unzip eras-be-tag.zip
+
+      - name: Open the FE JSON
+        run: |
+          cp /home/ubuntu/Eras_versions/eras-fe-tag.zip ./eras-fe-tag.zip
+          unzip eras-fe-tag.zip
+
+      - name: Combine tags into versions.json
+        id: combine
+        run: |
+          BE_TAG=$(jq -r '.["ERAS-BE"]' be_tag.json)
+          FE_TAG=$(jq -r '.["ERAS-FE"]' fe_tag.json)
+          echo "{\"ERAS-FE\": \"$FE_TAG\", \"ERAS-BE\": \"$BE_TAG\"}" > versions.json
+          echo "versions=$(cat versions.json)" >> $GITHUB_OUTPUT
+
   submodule-commits:
     runs-on: self-hosted
+    needs: prepare-and-dispatch
     outputs:
       submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
 
@@ -22,29 +38,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          submodules: false # Only submodules reference
+          submodules: false
 
       - name: Extract Submodule SHAs
         id: extract-shas
         run: |
-          echo "Actual submodules commits..."
           git config --file .gitmodules --get-regexp path | awk '{ print $2 }' > submodules.txt
           SUBMODULE_SHAS_JSON="{"
           while IFS= read -r submodule; do
             FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
             SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7)
-            echo " Submodule '$submodule':"
-            echo "   - Full Commit: $FULL_COMMIT"
-            echo "   - Short Commit: $SHORT_COMMIT"
             SUBMODULE_SHAS_JSON+="\"$submodule\": \"$SHORT_COMMIT\","
           done < submodules.txt
           SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}}"
-          echo "Submodule SHAs JSON: $SUBMODULE_SHAS_JSON"
-          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_ENV"
-          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> "$GITHUB_OUTPUT"
+          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> $GITHUB_OUTPUT
+
   deploy:
     runs-on: self-hosted
-    needs: submodule-commits
+    needs: [prepare-and-dispatch, submodule-commits]
 
     steps:
       - name: Checkout code
@@ -56,17 +67,13 @@ jobs:
           echo "${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ vars.ERAS_LOCAL_ENV }}" >> ~/.ssh/known_hosts
-      
+
       - name: Connect and Run Commands
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ vars.ERAS_LOCAL_ENV }} << 'EOF'
             mkdir -p ~/deploy
-            VERSIONS='${{ github.event.client_payload.versions }}'
-            if [ -z "$VERSIONS" ]; then
-              VERSIONS='${{ inputs.versions }}'
-            fi
-            echo "$VERSIONS" > ~/deploy/versions.json
+            echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
+            echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/submodules.json
             bash ~/deploy/setVersions.sh
             bash ~/deploy/containers.sh
           EOF
-
