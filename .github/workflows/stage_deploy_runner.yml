@@ -74,9 +74,9 @@ jobs:
             mkdir -p ~/deploy
             echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
             echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/submodules.json        
-            test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1
-            sed -i 's/\r$//' setVersions.sh
-            sed -i 's/\r$//' containers.sh
+            test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1    
+            sed -i 's/\r$//' ~/deploy/setVersions.sh
+            sed -i 's/\r$//' ~/deploy/containers.sh
             bash ~/deploy/setVersions.sh
             bash ~/deploy/containers.sh
           EOF
