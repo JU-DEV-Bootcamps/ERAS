@@ -28,6 +28,12 @@ jobs:
           echo "{\"ERAS-FE\": \"$FE_TAG\", \"ERAS-BE\": \"$BE_TAG\"}" > versions.json
           echo "versions=$(cat versions.json)" >> $GITHUB_OUTPUT
 
+      - name: Upload versions.json as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: versions
+          path: versions.json
+
   submodule-commits:
     runs-on: self-hosted
     needs: prepare-and-dispatch
@@ -67,6 +73,11 @@ jobs:
           echo "${{ secrets.ERAS_STAGE_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ vars.ERAS_STAGE_HOST }}" >> ~/.ssh/known_hosts
+          
+      - name: Download versions.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: versions
       
       - name: Copy or replace the required files to the target machine
         run: |
