@@ -1,9 +1,46 @@
 name: Deploy process on runner
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:   
+    inputs:
+      environment:
+        description: 'Select the environment'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - staging
+          - develop
+          - testing
 
 jobs:
+  trigger-backend:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Verificar secrets del environment
+        run: |
+          echo "COSMIC_API_URL=${{ secrets.COSMIC_API_URL }}"
+          echo "DB_HOST=${{ secrets.DB_HOST }}"
+          echo "KEYCLOAK_URL=${{ secrets.KEYCLOAK_URL }}"
+          echo "KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}"
+          echo "ENVIRONMENT_TAG=${{ secrets.ENVIRONMENT_TAG }}"
+
+      - name: Trigger workflow en BE
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: JU-DEV-Bootcamps/ERAS-BE
+          workflow: RW-test-package-BE-Runner.yml
+          ref: main
+          inputs:
+            branch: develop
+            cosmic_api_url: ${{ secrets.COSMIC_API_URL }}
+            db_host: ${{ secrets.DB_HOST }}
+            keycloak_url: ${{ secrets.KEYCLOAK_URL }}
+            keycloak_client_id: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+            environment_tag: ${{ secrets.ENVIRONMENT_TAG }}
+            
   prepare-and-dispatch:
     runs-on: self-hosted
     outputs:
