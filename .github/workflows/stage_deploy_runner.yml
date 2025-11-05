@@ -2,8 +2,109 @@ name: Deploy process on runner
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select the environment'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - staging
+          - develop
+          - testing
 
 jobs:
+  Set_and_Deploy_submodules:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Set Environment variables
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "develop" ]; then
+            echo "COSMIC_API_URL=${{ vars.ERAS_DEV_COSMIC_API_URL }}" >> $GITHUB_ENV
+            echo "API_URL=${{ vars.ERAS_DEV_API_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_URL=${{ vars.ERAS_DEV_KEYCLOAK_URL }}" >> $GITHUB_ENV
+            echo "URL=${{ vars.ERAS_DEV_WEB_URL }}" >> $GITHUB_ENV
+            echo "HOST=${{ vars.AWS_EC2_HOST }}" >> $GITHUB_ENV
+            echo "DOCKER_HUB_USER=${{ vars.ERAS_DEV_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT=${{ vars.ERAS_DEV_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_DEV_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_DEV_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_DEV_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_DEV_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_DEV_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+            echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          
+          elif [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "COSMIC_API_URL=${{ vars.ERAS_STAGE_COSMIC_API_URL }}" >> $GITHUB_ENV
+            echo "API_URL=${{ vars.ERAS_STAGE_API_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_URL=${{ vars.ERAS_STAGE_KEYCLOAK_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_AUDIENCE=${{ vars.ERAS_STAGE_KEYCLOAK_AUDIENCE }}" >> $GITHUB_ENV
+            echo "URL=${{ vars.ERAS_STAGE_WEB_URL }}" >> $GITHUB_ENV
+            echo "HOST=${{ vars.ERAS_STAGE_HOST }}" >> $GITHUB_ENV
+            echo "DOCKER_HUB_USER=${{ vars.ERAS_STAGE_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_STAGE_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_STAGE_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_STAGE_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_STAGE_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+            echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          
+          elif [ "${{ github.event.inputs.environment }}" = "testing" ]; then
+            echo "COSMIC_API_URL=${{ vars.ERAS_TEST_COSMIC_API_URL }}" >> $GITHUB_ENV
+            echo "API_URL=${{ vars.ERAS_TEST_API_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_URL=${{ vars.ERAS_TEST_KEYCLOAK_URL }}" >> $GITHUB_ENV
+            echo "URL=${{ vars.ERAS_TEST_WEB_URL }}" >> $GITHUB_ENV
+            echo "HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
+            echo "DOCKER_HUB_USER=${{ vars.ERAS_TEST_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT=${{ vars.ERAS_TEST_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_TEST_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_TEST_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_TEST_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_TEST_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+            echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          fi
+
+      - name: Trigger workflow en BE
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: JU-DEV-Bootcamps/ERAS-BE
+          workflow: RW-test-package-BE-Runner.yml
+          ref: main
+          inputs:
+            branch: 'develop'
+            cosmic_api_url: ${{ env.COSMIC_API_URL }}
+            db_host: 'database'
+            keycloak_url: ${{ env.KEYCLOAK_URL }}
+            keycloak_client_id: ${{ env.ERAS_CLIENT }}
+            Keycloack_audience: 'account'
+            environment_tag: ${{ env.SELECTED_ENV }}
+
+      - name: Trigger workflow en FE
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: JU-DEV-Bootcamps/ERAS-FE
+          workflow: RW-test-package-FE-Runner.yml
+          ref: main
+          inputs:
+            branch: 'develop'
+            api_url: ${{ env.API_URL }}
+            keycloak_url: ${{ env.KEYCLOAK_URL }}
+            client_id: ${{ env.ERAS_CLIENT_FE }}
+            web_url: ${{ env.URL }}
+            dockerhub_username: ${{ env.DOCKER_HUB_USER }}
+            environment_tag: ${{ env.SELECTED_ENV }}
+        
+      - name: Send the environment
+        run: |
+          echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          
+
   prepare-and-dispatch:
     runs-on: self-hosted
     outputs:
@@ -67,12 +168,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      
+      - name: Get the right SSH KEY and Host
+        run: |
+          ENV="${{ needs.set-and-deploy-submodules.outputs.selected_env }}"
+          if [ "$ENV" = "develop" ]; then
+            echo "SSH_KEY=${{ secrets.AWS_SSH_PRIVATE_KEY }}" >> $GITHUB_ENV
+            echo "SSH_HOST=${{ vars.AWS_EC2_HOST }}" >> $GITHUB_ENV
+          elif [ "$ENV" = "staging" ]; then
+            echo "SSH_KEY=${{ secrets.ERAS_STAGE_SSH_KEY }}" >> $GITHUB_ENV
+            echo "SSH_HOST=${{ vars.ERAS_STAGE_HOST }}" >> $GITHUB_ENV
+          elif [ "$ENV" = "testing" ]; then
+            echo "SSH_KEY=${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}" >> $GITHUB_ENV
+            echo "SSH_HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
+          fi
+
+
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.ERAS_STAGE_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ env.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ vars.ERAS_STAGE_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ env.SSH_HOST }}" >> ~/.ssh/known_hosts
           
       - name: Download versions.json artifact
         uses: actions/download-artifact@v4
@@ -81,11 +198,12 @@ jobs:
       
       - name: Copy or replace the required files to the target machine
         run: |
-          scp -i ~/.ssh/id_rsa versions.json ubuntu@${{ vars.ERAS_STAGE_HOST }}:~/deploy/
+          scp -i ~/.ssh/id_rsa versions.json ubuntu@${{ env.SSH_HOST }}:~/deploy/
       
+
       - name: Connect and Run Commands
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ vars.ERAS_STAGE_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ env.SSH_HOST }} << 'EOF'
             mkdir -p ~/deploy
             echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
             test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1)    
