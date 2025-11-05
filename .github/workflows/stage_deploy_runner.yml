@@ -38,7 +38,8 @@ jobs:
           elif [ "${{ github.event.inputs.environment }}" = "staging" ]; then
             echo "COSMIC_API_URL=${{ vars.ERAS_STAGE_COSMIC_API_URL }}" >> $GITHUB_ENV
             echo "API_URL=${{ vars.ERAS_STAGE_API_URL }}" >> $GITHUB_ENV
-            echo "KEYCLOAK_URL=${{ vars.ERAS_STAGE_KEYCLOAK_AUDIENCE }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_URL=${{ vars.ERAS_STAGE_KEYCLOAK_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_AUDIENCE=${{ vars.ERAS_STAGE_KEYCLOAK_AUDIENCE }}" >> $GITHUB_ENV
             echo "URL=${{ vars.ERAS_STAGE_WEB_URL }}" >> $GITHUB_ENV
             echo "HOST=${{ vars.ERAS_STAGE_HOST }}" >> $GITHUB_ENV
             echo "DOCKER_HUB_USER=${{ vars.ERAS_STAGE_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
@@ -57,7 +58,7 @@ jobs:
             echo "HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
             echo "DOCKER_HUB_USER=${{ vars.ERAS_TEST_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_TEST_CLIENT_ID }}" >> $GITHUB_ENV
-            echo "ERAS_CLIENT_FE=${{ vars.ERAS_KEYCLOAK_TEST_ID_FE}}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
             echo "COSMIC_LATTE_API_KEY=${{ secrets.ERES_TEST_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
             echo "DB_PASSWORD=${{ secrets.ERAS_TEST_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
             echo "KEYCLOAK_SECRET=${{ secrets.ERAS_TEST_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
@@ -74,11 +75,12 @@ jobs:
           ref: main
           inputs:
             branch: 'develop'
-            cosmic_api_url: ${{ env.COSMIC_API_URL }}
-            db_host: ${{ env.HOST }}
-            keycloak_url: ${{ env.KEYCLOAK_URL }}
-            keycloak_client_id: ${{ env.ERAS_CLIENT }}
-            environment_tag: ${{ env.SELECTED_ENV }}
+            cosmic_api_url: ${{ env.COSMIC_API_URL || '' }}
+            db_host: 'database'
+            keycloak_url: ${{ env.KEYCLOAK_URL || '' }}
+            keycloak_client_id: ${{ env.ERAS_CLIENT || '' }}
+            Keycloack_audience: 'account'
+            environment_tag: ${{ env.SELECTED_ENV || '' }}
 
       - name: Trigger workflow en FE
         uses: peter-evans/workflow-dispatch@v1
@@ -89,12 +91,12 @@ jobs:
           ref: main
           inputs:
             branch: 'develop'
-            api_url: ${{ env.API_URL }}
-            keycloak_url: ${{ env.KEYCLOAK_URL }}
-            client_id: ${{ env.ERAS_CLIENT_FE }}
-            web_url: ${{ env.URL }}
-            dockerhub_username: ${{ env.DOCKER_HUB_USER}}
-            environment_tag: ${{ env.SELECTED_ENV }}
+            api_url: ${{ env.API_URL || '' }}
+            keycloak_url: ${{ env.KEYCLOAK_URL || '' }}
+            client_id: ${{ env.ERAS_CLIENT_FE || '' }}
+            web_url: ${{ env.URL || '' }}
+            dockerhub_username: ${{ env.DOCKER_HUB_USER || '' }}
+            environment_tag: ${{ env.SELECTED_ENV || '' }}
         
       - name: Send the environment
         run: |
