@@ -114,12 +114,12 @@ jobs:
       - name: Open the BE JSON
         run: |
           cp /home/ubuntu/Eras_versions/eras-be-tag.zip ./eras-be-tag.zip
-          unzip eras-be-tag.zip
+          unzip -o -q eras-be-tag.zip
 
       - name: Open the FE JSON
         run: |
           cp /home/ubuntu/Eras_versions/eras-fe-tag.zip ./eras-fe-tag.zip
-          unzip eras-fe-tag.zip
+          unzip -o -q eras-fe-tag.zip
 
       - name: Combine tags into versions.json
         id: combine
@@ -128,6 +128,12 @@ jobs:
           FE_TAG=$(jq -r '.["ERAS-FE"]' fe_tag.json)
           echo "{\"ERAS-FE\": \"$FE_TAG\", \"ERAS-BE\": \"$BE_TAG\"}" > versions.json
           echo "versions=$(cat versions.json)" >> $GITHUB_OUTPUT
+
+      - name: Upload versions.json as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: versions
+          path: versions.json
 
   submodule-commits:
     runs-on: self-hosted
@@ -184,13 +190,25 @@ jobs:
           echo "${{ env.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ env.SSH_HOST }}" >> ~/.ssh/known_hosts
+          
+      - name: Download versions.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: versions
+      
+      - name: Copy or replace the required files to the target machine
+        run: |
+          scp -i ~/.ssh/id_rsa versions.json ubuntu@${{ env.SSH_HOST }}:~/deploy/
+      
 
       - name: Connect and Run Commands
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ env.SSH_HOST }} << 'EOF'
             mkdir -p ~/deploy
             echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
-            echo '${{ needs.submodule-commits.outputs.submodule_shas }}' > ~/deploy/submodules.json
+            test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1)    
+            sed -i 's/\r$//' ~/deploy/setVersions.sh
+            sed -i 's/\r$//' ~/deploy/containers.sh
             bash ~/deploy/setVersions.sh
             bash ~/deploy/containers.sh
           EOF
