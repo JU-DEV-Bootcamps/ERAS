@@ -94,7 +94,7 @@ jobs:
           -d '{
             "ref": "main",
             "inputs": {
-              "branch": "develop"
+              "branch": "develop",
               "api_url": "${{ env.API_URL }}",
               "keycloak_url": "${{ env.KEYCLOAK_URL }}",
               "client_id": "${{ env.ERAS_CLIENT_FE }}",
