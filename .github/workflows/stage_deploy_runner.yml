@@ -40,7 +40,6 @@ jobs:
             echo "COSMIC_API_URL=${{ vars.ERAS_STAGE_COSMIC_API_URL }}" >> $GITHUB_ENV
             echo "API_URL=${{ vars.ERAS_STAGE_API_URL }}" >> $GITHUB_ENV
             echo "KEYCLOAK_URL=${{ vars.ERAS_STAGE_KEYCLOAK_URL }}" >> $GITHUB_ENV
-            echo "KEYCLOAK_AUDIENCE=${{ vars.ERAS_STAGE_KEYCLOAK_AUDIENCE }}" >> $GITHUB_ENV
             echo "URL=${{ vars.ERAS_STAGE_WEB_URL }}" >> $GITHUB_ENV
             echo "HOST=${{ vars.ERAS_STAGE_HOST }}" >> $GITHUB_ENV
             echo "DOCKER_HUB_USER=${{ vars.ERAS_STAGE_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
@@ -99,7 +98,7 @@ jobs:
               "keycloak_url": "${{ env.KEYCLOAK_URL }}",
               "client_id": "${{ env.ERAS_CLIENT_FE }}",
               "web_url": "${{ env.URL }}",
-              "dockerhub_username": "${{ env.DOCKER_HUB_USER }}"
+              "dockerhub_username": "${{ env.DOCKER_HUB_USER }}",
               "environment_tag": "${{ env.SELECTED_ENV }}"
             }
           }'
