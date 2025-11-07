@@ -59,7 +59,7 @@ jobs:
             echo "HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
             echo "DOCKER_HUB_USER=${{ vars.ERAS_TEST_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_TEST_CLIENT_ID }}" >> $GITHUB_ENV
-            echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
             echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_TEST_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
             echo "DB_PASSWORD=${{ secrets.ERAS_TEST_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
             echo "KEYCLOAK_SECRET=${{ secrets.ERAS_TEST_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
@@ -74,7 +74,7 @@ jobs:
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/workflows/RW-test-package-BE-Runner.yml/dispatches \
           -d '{
-            "ref": "main",
+            "ref": "develop",
             "inputs": {
               "branch": "develop",
               "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
@@ -92,7 +92,7 @@ jobs:
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/workflows/RW-test-package-FE-Runner.yml/dispatches \
           -d '{
-            "ref": "main",
+            "ref": "develop",
             "inputs": {
               "branch": "develop",
               "api_url": "${{ env.API_URL }}",
