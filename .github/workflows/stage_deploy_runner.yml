@@ -75,14 +75,13 @@ jobs:
           repository: JU-DEV-Bootcamps/ERAS-BE
           workflow: RW-test-package-BE-Runner.yml
           ref: main
-          inputs:
-            branch: 'develop'
-            cosmic_api_url: ${{ env.COSMIC_API_URL }}
-            db_host: 'database'
-            keycloak_url: ${{ env.KEYCLOAK_URL }}
-            keycloak_client_id: ${{ env.ERAS_CLIENT }}
-            Keycloack_audience: 'account'
-            environment_tag: ${{ env.SELECTED_ENV }}
+          branch: 'develop'
+          cosmic_api_url: ${{ env.COSMIC_API_URL }}
+          db_host: 'database'
+          keycloak_url: ${{ env.KEYCLOAK_URL }}
+          keycloak_client_id: ${{ env.ERAS_CLIENT }}
+          Keycloack_audience: 'account'
+          environment_tag: ${{ env.SELECTED_ENV }}
 
       - name: Trigger workflow en FE
         uses: peter-evans/workflow-dispatch@v1
@@ -91,14 +90,13 @@ jobs:
           repository: JU-DEV-Bootcamps/ERAS-FE
           workflow: RW-test-package-FE-Runner.yml
           ref: main
-          inputs:
-            branch: 'develop'
-            api_url: ${{ env.API_URL }}
-            keycloak_url: ${{ env.KEYCLOAK_URL }}
-            client_id: ${{ env.ERAS_CLIENT_FE }}
-            web_url: ${{ env.URL }}
-            dockerhub_username: ${{ env.DOCKER_HUB_USER }}
-            environment_tag: ${{ env.SELECTED_ENV }}
+          branch: 'develop'
+          api_url: ${{ env.API_URL }}
+          keycloak_url: ${{ env.KEYCLOAK_URL }}
+          client_id: ${{ env.ERAS_CLIENT_FE }}
+          web_url: ${{ env.URL }}
+          dockerhub_username: ${{ env.DOCKER_HUB_USER }}
+          environment_tag: ${{ env.SELECTED_ENV }}
         
       - name: Send the environment
         run: |
