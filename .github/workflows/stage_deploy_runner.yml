@@ -84,7 +84,10 @@ jobs:
               "environment_tag": "${{ env.SELECTED_ENV }}"
             }
           }'
-          
+      
+      - name: Esperar compilación en Docker Hub
+        run: sleep 210
+  
       - name: Trigger workflow en FE via API
         run: |
           curl -X POST \
@@ -103,6 +106,9 @@ jobs:
               "environment_tag": "${{ env.SELECTED_ENV }}"
             }
           }'
+
+      - name: Esperar compilación en Docker Hub
+        run: sleep 210
         
       - name: Send the environment
         run: |
