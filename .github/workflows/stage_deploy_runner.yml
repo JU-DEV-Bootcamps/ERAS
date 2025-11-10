@@ -119,6 +119,7 @@ jobs:
 
   prepare-and-dispatch:
     runs-on: self-hosted
+    needs: [Set_and_Deploy_submodules]
     outputs:
       versions: ${{ steps.combine.outputs.versions }}
 
