@@ -15,7 +15,7 @@ on:
 
 jobs:
   Set_and_Deploy_submodules:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: ${{ github.event.inputs.environment }}
 
     steps:
@@ -109,10 +109,12 @@ jobs:
 
       - name: Esperar compilación en Docker Hub
         run: sleep 210
-        
+              
       - name: Send the environment
+        id: send-env
         run: |
-          echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+
           
 
   prepare-and-dispatch:
@@ -178,10 +180,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setear variable de entorno seleccionada
+        id: send-env
+        run: |
+          echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+
+      - name: Usar variable en otro paso
+        run: |
+          echo "El ambiente seleccionado es: ${{ steps.send-env.outputs.selected_env }}"
       
       - name: Get the right SSH KEY and Host
         run: |
-          ENV="${{ needs.set-and-deploy-submodules.outputs.selected_env }}"
+          ENV="${{ steps.send-env.outputs.selected_env }}"
           if [ "$ENV" = "develop" ]; then
             echo "SSH_KEY=${{ secrets.AWS_SSH_PRIVATE_KEY }}" >> $GITHUB_ENV
             echo "SSH_HOST=${{ vars.AWS_EC2_HOST }}" >> $GITHUB_ENV
