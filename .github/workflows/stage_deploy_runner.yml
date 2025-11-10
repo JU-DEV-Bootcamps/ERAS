@@ -191,7 +191,7 @@ jobs:
           echo "El ambiente seleccionado es: ${{ steps.send-env.outputs.selected_env }}"
       
       - name: Setear SSH para develop
-        if: env.ENV == 'develop'
+        if: ${{ steps.send-env.outputs.selected_env == 'develop' }}
         env:
           SSH_KEY: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           SSH_HOST: ${{ vars.AWS_EC2_HOST }}
@@ -203,7 +203,7 @@ jobs:
           echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
 
       - name: Setear SSH para staging
-        if: env.ENV == 'staging'
+        if: ${{ steps.send-env.outputs.selected_env == 'staging' }}
         env:
           SSH_KEY: ${{ secrets.ERAS_STAGE_SSH_KEY }}
           SSH_HOST: ${{ vars.ERAS_STAGE_HOST }}
@@ -215,7 +215,7 @@ jobs:
           echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
 
       - name: Setear SSH para testing
-        if: env.ENV == 'testing'
+        if: ${{ steps.send-env.outputs.selected_env == 'testing' }}
         env:
           SSH_KEY: ${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}
           SSH_HOST: ${{ vars.ERAS_TEST_HOST }}
