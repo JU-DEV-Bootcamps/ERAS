@@ -190,27 +190,41 @@ jobs:
         run: |
           echo "El ambiente seleccionado es: ${{ steps.send-env.outputs.selected_env }}"
       
-      - name: Get the right SSH KEY and Host
-        run: |
-          ENV="${{ steps.send-env.outputs.selected_env }}"
-          if [ "$ENV" = "develop" ]; then
-            echo "SSH_KEY=${{ secrets.AWS_SSH_PRIVATE_KEY }}" >> $GITHUB_ENV
-            echo "SSH_HOST=${{ vars.AWS_EC2_HOST }}" >> $GITHUB_ENV
-          elif [ "$ENV" = "staging" ]; then
-            echo "SSH_KEY=${{ secrets.ERAS_STAGE_SSH_KEY }}" >> $GITHUB_ENV
-            echo "SSH_HOST=${{ vars.ERAS_STAGE_HOST }}" >> $GITHUB_ENV
-          elif [ "$ENV" = "testing" ]; then
-            echo "SSH_KEY=${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}" >> $GITHUB_ENV
-            echo "SSH_HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
-          fi
-
-
-      - name: Setup SSH Key
+      - name: Setear SSH para develop
+        if: env.ENV == 'develop'
+        env:
+          SSH_KEY: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ vars.AWS_EC2_HOST }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ env.SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ env.SSH_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+
+      - name: Setear SSH para staging
+        if: env.ENV == 'staging'
+        env:
+          SSH_KEY: ${{ secrets.ERAS_STAGE_SSH_KEY }}
+          SSH_HOST: ${{ vars.ERAS_STAGE_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+
+      - name: Setear SSH para testing
+        if: env.ENV == 'testing'
+        env:
+          SSH_KEY: ${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}
+          SSH_HOST: ${{ vars.ERAS_TEST_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
           
       - name: Download versions.json artifact
         uses: actions/download-artifact@v4
