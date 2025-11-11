@@ -54,7 +54,7 @@ jobs:
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           fi
-		  
+	
       - name: Trigger workflow en BE y capturar run_id
         id: trigger_be
         run: |
@@ -173,7 +173,7 @@ jobs:
         run: |
           echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
 
-		  
+
   prepare-and-dispatch:
     runs-on: self-hosted
     needs: [Set_and_Deploy_submodules]
@@ -233,7 +233,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     needs: [prepare-and-dispatch, submodule-commits]
-
+	
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
