@@ -15,7 +15,7 @@ on:
 
 jobs:
   Set_and_Deploy_submodules:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: ${{ github.event.inputs.environment }}
 
     steps:
@@ -59,7 +59,7 @@ jobs:
             echo "HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
             echo "DOCKER_HUB_USER=${{ vars.ERAS_TEST_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_TEST_CLIENT_ID }}" >> $GITHUB_ENV
-            echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
             echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_TEST_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
             echo "DB_PASSWORD=${{ secrets.ERAS_TEST_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
             echo "KEYCLOAK_SECRET=${{ secrets.ERAS_TEST_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
@@ -179,14 +179,17 @@ jobs:
             echo "Esperando 30 segundos..."
             sleep 30
           done
-        
+              
       - name: Send the environment
+        id: send-env
         run: |
-          echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+
           
 
   prepare-and-dispatch:
     runs-on: self-hosted
+    needs: [Set_and_Deploy_submodules]
     outputs:
       versions: ${{ steps.combine.outputs.versions }}
 
@@ -248,28 +251,50 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      
-      - name: Get the right SSH KEY and Host
+      - name: Setear variable de entorno seleccionada
+        id: send-env
         run: |
-          ENV="${{ needs.set-and-deploy-submodules.outputs.selected_env }}"
-          if [ "$ENV" = "develop" ]; then
-            echo "SSH_KEY=${{ secrets.AWS_SSH_PRIVATE_KEY }}" >> $GITHUB_ENV
-            echo "SSH_HOST=${{ vars.AWS_EC2_HOST }}" >> $GITHUB_ENV
-          elif [ "$ENV" = "staging" ]; then
-            echo "SSH_KEY=${{ secrets.ERAS_STAGE_SSH_KEY }}" >> $GITHUB_ENV
-            echo "SSH_HOST=${{ vars.ERAS_STAGE_HOST }}" >> $GITHUB_ENV
-          elif [ "$ENV" = "testing" ]; then
-            echo "SSH_KEY=${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}" >> $GITHUB_ENV
-            echo "SSH_HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
-          fi
+          echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
 
-
-      - name: Setup SSH Key
+      - name: Usar variable en otro paso
+        run: |
+          echo "El ambiente seleccionado es: ${{ steps.send-env.outputs.selected_env }}"
+      
+      - name: Setear SSH para develop
+        if: ${{ steps.send-env.outputs.selected_env == 'develop' }}
+        env:
+          SSH_KEY: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ vars.AWS_EC2_HOST }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ env.SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ env.SSH_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+
+      - name: Setear SSH para staging
+        if: ${{ steps.send-env.outputs.selected_env == 'staging' }}
+        env:
+          SSH_KEY: ${{ secrets.ERAS_STAGE_SSH_KEY }}
+          SSH_HOST: ${{ vars.ERAS_STAGE_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+
+      - name: Setear SSH para testing
+        if: ${{ steps.send-env.outputs.selected_env == 'testing' }}
+        env:
+          SSH_KEY: ${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}
+          SSH_HOST: ${{ vars.ERAS_TEST_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
           
       - name: Download versions.json artifact
         uses: actions/download-artifact@v4
