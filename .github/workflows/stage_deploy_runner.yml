@@ -65,12 +65,12 @@ jobs:
           -d '{
             "ref": "develop",
             "inputs": {
-            "branch": "develop",
-            "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
-            "db_host": "database",
-            "keycloak_url": "${{ env.KEYCLOAK_URL }}",
-            "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
-            "environment_tag": "${{ env.SELECTED_ENV }}"
+              "branch": "develop",
+              "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
+              "db_host": "database",
+              "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+              "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
+              "environment_tag": "${{ env.SELECTED_ENV }}"
             }
          }'
 
