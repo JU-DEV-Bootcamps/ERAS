@@ -78,9 +78,9 @@ jobs:
          sleep 10
 
          run_info=$(curl -s \
-         -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-         -H "Accept: application/vnd.github.v3+json" \
-         "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs?event=workflow_dispatch&branch=develop")
+           -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+           -H "Accept: application/vnd.github.v3+json" \
+           "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs?event=workflow_dispatch&branch=develop")
 
          run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
          echo "BE_RUN_ID=$run_id" >> $GITHUB_ENV
@@ -89,27 +89,27 @@ jobs:
         run: |
           while true; do
            response=$(curl -s \
-           -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-           -H "Accept: application/vnd.github.v3+json" \
-           https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs/${{ env.BE_RUN_ID }})
+             -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+             -H "Accept: application/vnd.github.v3+json" \
+             https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs/${{ env.BE_RUN_ID }})
 
            status=$(echo "$response" | jq -r '.status')
            conclusion=$(echo "$response" | jq -r '.conclusion')
 
            echo "Estado actual: $status - Conclusión: $conclusion"
 
-          if [[ "$status" == "completed" ]]; then
-            if [[ "$conclusion" == "success" ]]; then
-              echo "Workflow BE completado exitosamente."
-              break
-            else
-          echo "Workflow BE falló."
-          exit 1
+           if [[ "$status" == "completed" ]]; then
+             if [[ "$conclusion" == "success" ]]; then
+               echo "Workflow BE completado exitosamente."
+               break
+             else
+               echo "Workflow BE falló."
+               exit 1
             fi
           fi
 
-          echo "Esperando 30 segundos..."
-          sleep 30
+            echo "Esperando 30 segundos..."
+            sleep 30
           done
 		
       - name: Trigger workflow en FE y capturar run_id
@@ -147,9 +147,9 @@ jobs:
         run: |
           while true; do
             response=$(curl -s \
-            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs/${{ env.FE_RUN_ID }})
+              -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs/${{ env.FE_RUN_ID }})
 
             status=$(echo "$response" | jq -r '.status')
             conclusion=$(echo "$response" | jq -r '.conclusion')
@@ -168,7 +168,7 @@ jobs:
 
            echo "Esperando 30 segundos..."
            sleep 30
-           done
+          done
             
       - name: Send the environment
         id: send-env
