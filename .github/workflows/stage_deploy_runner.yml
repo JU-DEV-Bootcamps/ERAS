@@ -30,10 +30,6 @@ jobs:
             echo "DOCKER_HUB_USER=${{ vars.ERAS_DEV_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_DEV_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_DEV_CLIENT_ID_FE}}" >> $GITHUB_ENV
-            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_DEV_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
-            echo "DB_PASSWORD=${{ secrets.ERAS_DEV_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
-            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_DEV_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
-            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_DEV_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           
           elif [ "${{ github.event.inputs.environment }}" = "staging" ]; then
@@ -45,10 +41,6 @@ jobs:
             echo "DOCKER_HUB_USER=${{ vars.ERAS_STAGE_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID_FE}}" >> $GITHUB_ENV
-            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_STAGE_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
-            echo "DB_PASSWORD=${{ secrets.ERAS_STAGE_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
-            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_STAGE_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
-            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_STAGE_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           
           elif [ "${{ github.event.inputs.environment }}" = "testing" ]; then
@@ -60,55 +52,125 @@ jobs:
             echo "DOCKER_HUB_USER=${{ vars.ERAS_TEST_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_TEST_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
-            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_TEST_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
-            echo "DB_PASSWORD=${{ secrets.ERAS_TEST_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
-            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_TEST_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
-            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_TEST_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           fi
 
-      - name: Trigger workflow en BE via API
+      - name: Trigger workflow en BE y capturar run_id
+        id: trigger_be
         run: |
-          curl -X POST \
+         curl -s -X POST \
           -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/workflows/RW-test-package-BE-Runner.yml/dispatches \
           -d '{
             "ref": "develop",
             "inputs": {
-              "branch": "develop",
-              "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
-              "db_host": "database",
-              "keycloak_url": "${{ env.KEYCLOAK_URL }}",
-              "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
-              "environment_tag": "${{ env.SELECTED_ENV }}"
+            "branch": "develop",
+            "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
+            "db_host": "database",
+            "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+            "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
+            "environment_tag": "${{ env.SELECTED_ENV }}"
             }
-          }'
-      
-      - name: Esperar compilación en Docker Hub
-        run: sleep 210
-  
-      - name: Trigger workflow en FE via API
+         }'
+
+         echo "Esperando ejecución del workflow..."
+         sleep 10
+
+         run_info=$(curl -s \
+         -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+         -H "Accept: application/vnd.github.v3+json" \
+         "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs?event=workflow_dispatch&branch=develop")
+
+         run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
+         echo "BE_RUN_ID=$run_id" >> $GITHUB_ENV
+
+      - name: Esperar a que termine el workflow en BE
         run: |
-          curl -X POST \
+          while true; do
+           response=$(curl -s \
+           -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+           -H "Accept: application/vnd.github.v3+json" \
+           https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs/${{ env.BE_RUN_ID }})
+
+           status=$(echo "$response" | jq -r '.status')
+           conclusion=$(echo "$response" | jq -r '.conclusion')
+
+           echo "Estado actual: $status - Conclusión: $conclusion"
+
+          if [[ "$status" == "completed" ]]; then
+            if [[ "$conclusion" == "success" ]]; then
+              echo "Workflow BE completado exitosamente."
+              break
+            else
+          echo "Workflow BE falló."
+          exit 1
+            fi
+          fi
+
+          echo "Esperando 30 segundos..."
+          sleep 30
+          done
+	
+	
+      - name: Trigger workflow en FE y capturar run_id
+        id: trigger_fe
+        run: |
+          curl -s -X POST \
           -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/workflows/RW-test-package-FE-Runner.yml/dispatches \
           -d '{
-            "ref": "develop",
-            "inputs": {
-              "branch": "develop",
-              "api_url": "${{ env.API_URL }}",
-              "keycloak_url": "${{ env.KEYCLOAK_URL }}",
-              "client_id": "${{ env.ERAS_CLIENT_FE }}",
-              "web_url": "${{ env.URL }}",
-              "dockerhub_username": "${{ env.DOCKER_HUB_USER }}",
-              "environment_tag": "${{ env.SELECTED_ENV }}"
+          "ref": "develop",
+          "inputs": {
+            "branch": "develop",
+            "api_url": "${{ env.API_URL }}",
+            "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+            "client_id": "${{ env.ERAS_CLIENT_FE }}",
+            "web_url": "${{ env.URL }}",
+            "dockerhub_username": "${{ env.DOCKER_HUB_USER }}",
+            "environment_tag": "${{ env.SELECTED_ENV }}"
             }
           }'
 
-      - name: Esperar compilación en Docker Hub
-        run: sleep 210
+          echo "Esperando ejecución del workflow..."
+          sleep 10
+
+          run_info=$(curl -s \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs?event=workflow_dispatch&branch=develop")
+
+          run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
+          echo "FE_RUN_ID=$run_id" >> $GITHUB_ENV
+
+      - name: Esperar a que termine el workflow en FE
+        run: |
+          while true; do
+            response=$(curl -s \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs/${{ env.FE_RUN_ID }})
+
+            status=$(echo "$response" | jq -r '.status')
+            conclusion=$(echo "$response" | jq -r '.conclusion')
+
+            echo "Estado actual: $status - Conclusión: $conclusion"
+
+            if [[ "$status" == "completed" ]]; then
+              if [[ "$conclusion" == "success" ]]; then
+                echo "Workflow FE completado exitosamente."
+                break
+             else
+               echo "Workflow FE falló."
+               exit 1
+             fi
+           fi
+
+           echo "Esperando 30 segundos..."
+           sleep 30
+           done
+
               
       - name: Send the environment
         id: send-env
