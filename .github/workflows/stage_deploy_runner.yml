@@ -54,64 +54,63 @@ jobs:
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           fi
-
+		  
       - name: Trigger workflow en BE y capturar run_id
         id: trigger_be
         run: |
-         curl -s -X POST \
-          -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/workflows/RW-test-package-BE-Runner.yml/dispatches \
-          -d '{
-            "ref": "develop",
-            "inputs": {
-              "branch": "develop",
-              "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
-              "db_host": "database",
-              "keycloak_url": "${{ env.KEYCLOAK_URL }}",
-              "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
-              "environment_tag": "${{ env.SELECTED_ENV }}"
-            }
-         }'
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/workflows/RW-test-package-BE-Runner.yml/dispatches \
+            -d '{
+              "ref": "develop",
+              "inputs": {
+                "branch": "develop",
+                "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
+                "db_host": "database",
+                "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+                "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
+                "environment_tag": "${{ env.SELECTED_ENV }}"
+              }
+            }'
 
-         echo "Esperando ejecución del workflow..."
-         sleep 10
+          echo "Esperando ejecución del workflow..."
+          sleep 10
 
-         run_info=$(curl -s \
-           -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-           -H "Accept: application/vnd.github.v3+json" \
-           "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs?event=workflow_dispatch&branch=develop")
+          run_info=$(curl -s \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs?event=workflow_dispatch&branch=develop")
 
-         run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
-         echo "BE_RUN_ID=$run_id" >> $GITHUB_ENV
+          run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
+          echo "BE_RUN_ID=$run_id" >> $GITHUB_ENV
 
       - name: Esperar a que termine el workflow en BE
         run: |
           while true; do
-           response=$(curl -s \
-             -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-             -H "Accept: application/vnd.github.v3+json" \
-             https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs/${{ env.BE_RUN_ID }})
+            response=$(curl -s \
+              -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs/${{ env.BE_RUN_ID }})
 
-           status=$(echo "$response" | jq -r '.status')
-           conclusion=$(echo "$response" | jq -r '.conclusion')
+            status=$(echo "$response" | jq -r '.status')
+            conclusion=$(echo "$response" | jq -r '.conclusion')
 
-           echo "Estado actual: $status - Conclusión: $conclusion"
+            echo "Estado actual: $status - Conclusión: $conclusion"
 
-           if [[ "$status" == "completed" ]]; then
-             if [[ "$conclusion" == "success" ]]; then
-               echo "Workflow BE completado exitosamente."
-               break
-             else
-               echo "Workflow BE falló."
-               exit 1
+            if [[ "$status" == "completed" ]]; then
+              if [[ "$conclusion" == "success" ]]; then
+                echo "Workflow BE completado exitosamente."
+                break
+              else
+                echo "Workflow BE falló."
+                exit 1
+              fi
             fi
-          fi
-
             echo "Esperando 30 segundos..."
             sleep 30
           done
-		
+
       - name: Trigger workflow en FE y capturar run_id
         id: trigger_fe
         run: |
@@ -160,22 +159,21 @@ jobs:
               if [[ "$conclusion" == "success" ]]; then
                 echo "Workflow FE completado exitosamente."
                 break
-             else
-               echo "Workflow FE falló."
-               exit 1
-             fi
-           fi
-
-           echo "Esperando 30 segundos..."
-           sleep 30
+              else
+                echo "Workflow FE falló."
+                exit 1
+              fi
+            fi
+            echo "Esperando 30 segundos..."
+            sleep 30
           done
-            
+
       - name: Send the environment
         id: send-env
         run: |
           echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
 
-          
+		  
   prepare-and-dispatch:
     runs-on: self-hosted
     needs: [Set_and_Deploy_submodules]
