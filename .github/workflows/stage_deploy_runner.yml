@@ -30,6 +30,10 @@ jobs:
             echo "DOCKER_HUB_USER=${{ vars.ERAS_DEV_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_DEV_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_DEV_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_DEV_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_DEV_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_DEV_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_DEV_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           
           elif [ "${{ github.event.inputs.environment }}" = "staging" ]; then
@@ -41,6 +45,10 @@ jobs:
             echo "DOCKER_HUB_USER=${{ vars.ERAS_STAGE_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_STAGE_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_STAGE_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_STAGE_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_STAGE_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           
           elif [ "${{ github.event.inputs.environment }}" = "testing" ]; then
@@ -52,9 +60,13 @@ jobs:
             echo "DOCKER_HUB_USER=${{ vars.ERAS_TEST_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT=${{ vars.ERAS_TEST_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_TEST_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_TEST_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_TEST_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_TEST_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
             echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           fi
-	
+
       - name: Trigger workflow en BE via API
         run: |
           curl -X POST \
@@ -97,11 +109,13 @@ jobs:
 
       - name: Esperar compilación en Docker Hub
         run: sleep 210
+              
       - name: Send the environment
         id: send-env
         run: |
           echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
 
+          
 
   prepare-and-dispatch:
     runs-on: self-hosted
@@ -162,7 +176,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     needs: [prepare-and-dispatch, submodule-commits]
-	
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
