@@ -111,8 +111,7 @@ jobs:
           echo "Esperando 30 segundos..."
           sleep 30
           done
-	
-	
+		
       - name: Trigger workflow en FE y capturar run_id
         id: trigger_fe
         run: |
@@ -170,15 +169,13 @@ jobs:
            echo "Esperando 30 segundos..."
            sleep 30
            done
-
-              
+            
       - name: Send the environment
         id: send-env
         run: |
           echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
 
           
-
   prepare-and-dispatch:
     runs-on: self-hosted
     needs: [Set_and_Deploy_submodules]
