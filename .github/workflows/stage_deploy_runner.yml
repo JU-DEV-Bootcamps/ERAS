@@ -49,7 +49,7 @@ jobs:
             echo "DB_PASSWORD=${{ secrets.ERAS_STAGE_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
             echo "KEYCLOAK_SECRET=${{ secrets.ERAS_STAGE_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
             echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_STAGE_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
-            echo "SELECTED_ENV="stage" }}" >> $GITHUB_ENV
+            echo "SELECTED_ENV=stage" >> $GITHUB_ENV
           
           elif [ "${{ github.event.inputs.environment }}" = "testing" ]; then
             echo "COSMIC_API_URL=${{ vars.ERAS_TEST_COSMIC_API_URL }}" >> $GITHUB_ENV
