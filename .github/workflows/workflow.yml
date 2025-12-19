@@ -3,7 +3,7 @@ name: Automatic deploy process
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   submodule-commits:

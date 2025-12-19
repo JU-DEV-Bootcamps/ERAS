@@ -1,0 +1,319 @@
+name: Deploy process on runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select the environment'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - staging
+          - develop
+          - testing
+
+jobs:
+  Set_and_Deploy_submodules:
+    runs-on: self-hosted
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Set Environment variables
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "develop" ]; then
+            echo "COSMIC_API_URL=${{ vars.ERAS_DEV_COSMIC_API_URL }}" >> $GITHUB_ENV
+            echo "API_URL=${{ vars.ERAS_DEV_API_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_URL=${{ vars.ERAS_DEV_KEYCLOAK_URL }}" >> $GITHUB_ENV
+            echo "URL=${{ vars.ERAS_DEV_WEB_URL }}" >> $GITHUB_ENV
+            echo "HOST=${{ vars.AWS_EC2_HOST }}" >> $GITHUB_ENV
+            echo "DOCKER_HUB_USER=${{ vars.ERAS_DEV_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT=${{ vars.ERAS_DEV_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_DEV_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_DEV_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_DEV_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_DEV_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_DEV_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+            echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          
+          elif [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "COSMIC_API_URL=${{ vars.ERAS_STAGE_COSMIC_API_URL }}" >> $GITHUB_ENV
+            echo "API_URL=${{ vars.ERAS_STAGE_API_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_URL=${{ vars.ERAS_STAGE_KEYCLOAK_URL }}" >> $GITHUB_ENV
+            echo "URL=${{ vars.ERAS_STAGE_WEB_URL }}" >> $GITHUB_ENV
+            echo "HOST=${{ vars.ERAS_STAGE_HOST }}" >> $GITHUB_ENV
+            echo "DOCKER_HUB_USER=${{ vars.ERAS_STAGE_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_STAGE_KEYCLOAK_CLIENT_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_STAGE_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_STAGE_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_STAGE_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_STAGE_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+            echo "SELECTED_ENV=stage" >> $GITHUB_ENV
+          
+          elif [ "${{ github.event.inputs.environment }}" = "testing" ]; then
+            echo "COSMIC_API_URL=${{ vars.ERAS_TEST_COSMIC_API_URL }}" >> $GITHUB_ENV
+            echo "API_URL=${{ vars.ERAS_TEST_API_URL }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_URL=${{ vars.ERAS_TEST_KEYCLOAK_URL }}" >> $GITHUB_ENV
+            echo "URL=${{ vars.ERAS_TEST_WEB_URL }}" >> $GITHUB_ENV
+            echo "HOST=${{ vars.ERAS_TEST_HOST }}" >> $GITHUB_ENV
+            echo "DOCKER_HUB_USER=${{ vars.ERAS_TEST_DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT=${{ vars.ERAS_TEST_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ERAS_CLIENT_FE=${{ vars.ERAS_TEST_KEYCLOAK_ID_FE}}" >> $GITHUB_ENV
+            echo "COSMIC_LATTE_API_KEY=${{ secrets.ERAS_TEST_COSMIC_LATTE_API_KEY }}" >> $GITHUB_ENV
+            echo "DB_PASSWORD=${{ secrets.ERAS_TEST_POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEYCLOAK_SECRET=${{ secrets.ERAS_TEST_KEYCLOAK_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "DOCKERHUB_TOKEN=${{ secrets.ERAS_TEST_DOCKERHUB_TOKEN }}" >> $GITHUB_ENV
+            echo "SELECTED_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          fi
+
+      - name: Trigger workflow en BE y capturar run_id
+        id: trigger_be
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/workflows/RW-test-package-BE-Runner.yml/dispatches \
+            -d '{
+              "ref": "develop",
+              "inputs": {
+                "branch": "develop",
+                "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
+                "db_host": "database",
+                "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+                "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
+                "environment_tag": "${{ env.SELECTED_ENV }}"
+              }
+            }'
+
+          echo "Esperando ejecución del workflow..."
+          sleep 10
+
+          run_info=$(curl -s \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs?event=workflow_dispatch&branch=develop")
+
+          run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
+          echo "BE_RUN_ID=$run_id" >> $GITHUB_ENV
+
+      - name: Esperar a que termine el workflow en BE
+        run: |
+          while true; do
+            response=$(curl -s \
+              -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs/${{ env.BE_RUN_ID }})
+
+            status=$(echo "$response" | jq -r '.status')
+            conclusion=$(echo "$response" | jq -r '.conclusion')
+
+            echo "Estado actual: $status - Conclusión: $conclusion"
+
+            if [[ "$status" == "completed" ]]; then
+              if [[ "$conclusion" == "success" ]]; then
+                echo "Workflow BE completado exitosamente."
+                break
+              else
+                echo "Workflow BE falló."
+                exit 1
+              fi
+            fi
+            echo "Esperando 30 segundos..."
+            sleep 30
+          done
+
+      - name: Trigger workflow en FE y capturar run_id
+        id: trigger_fe
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/workflows/RW-test-package-FE-Runner.yml/dispatches \
+            -d '{
+              "ref": "develop",
+              "inputs": {
+                "branch": "develop",
+                "api_url": "${{ env.API_URL }}",
+                "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+                "client_id": "${{ env.ERAS_CLIENT_FE }}",
+                "web_url": "${{ env.URL }}",
+                "dockerhub_username": "${{ env.DOCKER_HUB_USER }}",
+                "environment_tag": "${{ env.SELECTED_ENV }}"
+              }
+            }'
+
+          echo "Esperando ejecución del workflow..."
+          sleep 10
+
+          run_info=$(curl -s \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs?event=workflow_dispatch&branch=develop")
+
+          run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
+          echo "FE_RUN_ID=$run_id" >> $GITHUB_ENV
+
+      - name: Esperar a que termine el workflow en FE
+        run: |
+          while true; do
+            response=$(curl -s \
+              -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs/${{ env.FE_RUN_ID }})
+
+            status=$(echo "$response" | jq -r '.status')
+            conclusion=$(echo "$response" | jq -r '.conclusion')
+
+            echo "Estado actual: $status - Conclusión: $conclusion"
+
+            if [[ "$status" == "completed" ]]; then
+              if [[ "$conclusion" == "success" ]]; then
+                echo "Workflow FE completado exitosamente."
+                break
+              else
+                echo "Workflow FE falló."
+                exit 1
+              fi
+            fi
+            echo "Esperando 30 segundos..."
+            sleep 30
+          done
+              
+      - name: Send the environment
+        id: send-env
+        run: |
+          echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+
+          
+
+  prepare-and-dispatch:
+    runs-on: self-hosted
+    needs: [Set_and_Deploy_submodules]
+    outputs:
+      versions: ${{ steps.combine.outputs.versions }}
+
+    steps:
+      - name: Open the BE JSON
+        run: |
+          cp /home/ubuntu/Eras_versions/eras-be-tag.zip ./eras-be-tag.zip
+          unzip -o -q eras-be-tag.zip
+
+      - name: Open the FE JSON
+        run: |
+          cp /home/ubuntu/Eras_versions/eras-fe-tag.zip ./eras-fe-tag.zip
+          unzip -o -q eras-fe-tag.zip
+
+      - name: Combine tags into versions.json
+        id: combine
+        run: |
+          BE_TAG=$(jq -r '.["ERAS-BE"]' be_tag.json)
+          FE_TAG=$(jq -r '.["ERAS-FE"]' fe_tag.json)
+          echo "{\"ERAS-FE\": \"$FE_TAG\", \"ERAS-BE\": \"$BE_TAG\"}" > versions.json
+          echo "versions=$(cat versions.json)" >> $GITHUB_OUTPUT
+
+      - name: Upload versions.json as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: versions
+          path: versions.json
+
+  submodule-commits:
+    runs-on: self-hosted
+    needs: prepare-and-dispatch
+    outputs:
+      submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Extract Submodule SHAs
+        id: extract-shas
+        run: |
+          git config --file .gitmodules --get-regexp path | awk '{ print $2 }' > submodules.txt
+          SUBMODULE_SHAS_JSON="{"
+          while IFS= read -r submodule; do
+            FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
+            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7)
+            SUBMODULE_SHAS_JSON+="\"$submodule\": \"$SHORT_COMMIT\","
+          done < submodules.txt
+          SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}}"
+          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> $GITHUB_OUTPUT
+
+  deploy:
+    runs-on: self-hosted
+    needs: [prepare-and-dispatch, submodule-commits]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setear variable de entorno seleccionada
+        id: send-env
+        run: |
+          echo "selected_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+
+      - name: Usar variable en otro paso
+        run: |
+          echo "El ambiente seleccionado es: ${{ steps.send-env.outputs.selected_env }}"
+      
+      - name: Setear SSH para develop
+        if: ${{ steps.send-env.outputs.selected_env == 'develop' }}
+        env:
+          SSH_KEY: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ vars.AWS_EC2_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+
+      - name: Setear SSH para staging
+        if: ${{ steps.send-env.outputs.selected_env == 'staging' }}
+        env:
+          SSH_KEY: ${{ secrets.ERAS_STAGE_SSH_KEY }}
+          SSH_HOST: ${{ vars.ERAS_STAGE_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+
+      - name: Setear SSH para testing
+        if: ${{ steps.send-env.outputs.selected_env == 'testing' }}
+        env:
+          SSH_KEY: ${{ secrets.ERAS_LOCAL_ENV_SSH_KEY }}
+          SSH_HOST: ${{ vars.ERAS_TEST_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+          
+      - name: Download versions.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: versions
+      
+      - name: Copy or replace the required files to the target machine
+        run: |
+          scp -i ~/.ssh/id_rsa versions.json ubuntu@${{ env.SSH_HOST }}:~/deploy/
+      
+
+      - name: Connect and Run Commands
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ env.SSH_HOST }} << 'EOF'
+            mkdir -p ~/deploy
+            echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
+            test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1)    
+            sed -i 's/\r$//' ~/deploy/setVersions.sh
+            sed -i 's/\r$//' ~/deploy/containers.sh
+            bash ~/deploy/setVersions.sh
+            bash ~/deploy/containers.sh
+          EOF
