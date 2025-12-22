@@ -64,6 +64,7 @@ jobs:
           echo "COSMIC_API_URL=${{ vars[format('ERAS_{0}_COSMIC_API_URL', steps.setup.outputs.suffix)] }}"     >> "$GITHUB_ENV"
           echo "API_URL=${{        vars[format('ERAS_{0}_API_URL',            steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "KEYCLOAK_URL=${{   vars[format('ERAS_{0}_KEYCLOAK_URL',       steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
+          echo "KEYCLOAK_REALM=${{   vars[format('ERAS_{0}_KEYCLOAK_REALM',       steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "URL=${{            vars[format('ERAS_{0}_WEB_URL',            steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "HOST=${{           vars[format('ERAS_{0}_HOST',               steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "DOCKER_HUB_USER=${{vars[format('ERAS_{0}_DOCKERHUB_USERNAME', steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
@@ -91,6 +92,7 @@ jobs:
                 "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
                 "db_host": "database",
                 "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+                "keycloak_realm": "${{ env.KEYCLOAK_REALM }}",
                 "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
                 "environment_tag": "${{ env.SELECTED_ENV }}"
               }
@@ -146,6 +148,7 @@ jobs:
                 "branch": "${{ env.TARGET_BRANCH }}",
                 "api_url": "${{ env.API_URL }}",
                 "keycloak_url": "${{ env.KEYCLOAK_URL }}",
+                "keycloak_realm": "${{ env.KEYCLOAK_REALM }}",
                 "client_id": "${{ env.ERAS_CLIENT_FE }}",
                 "web_url": "${{ env.URL }}",
                 "dockerhub_username": "${{ env.DOCKER_HUB_USER }}",
