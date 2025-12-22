@@ -67,8 +67,8 @@ jobs:
           echo "URL=${{            vars[format('ERAS_{0}_WEB_URL',            steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "HOST=${{           vars[format('ERAS_{0}_HOST',               steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "DOCKER_HUB_USER=${{vars[format('ERAS_{0}_DOCKERHUB_USERNAME', steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
-          echo "ERAS_CLIENT=${{    vars[format('ERAS_{0}_CLIENT_ID',          steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
-          echo "ERAS_CLIENT_FE=${{ vars[format('ERAS_{0}_CLIENT_ID_FE',       steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
+          echo "ERAS_CLIENT=${{    vars[format('ERAS_{0}_KEYCLOAK_CLIENT_ID',          steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
+          echo "ERAS_CLIENT_FE=${{ vars[format('ERAS_{0}_KEYCLOAK_CLIENT_ID_FE',       steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
 
       - name: Verify (non-secret) variables
         shell: bash
