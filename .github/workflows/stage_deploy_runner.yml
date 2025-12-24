@@ -33,7 +33,7 @@ jobs:
               ;;
             staging|stagging)  # normaliza 'stagging' a 'stage'
               echo "suffix=STAGE"      >> "$GITHUB_OUTPUT"
-              echo "env_name=stage"    >> "$GITHUB_OUTPUT"
+              echo "env_name=dev"    >> "$GITHUB_OUTPUT"
               echo "branch=develop"       >> "$GITHUB_OUTPUT"
               ;;
             testing)
