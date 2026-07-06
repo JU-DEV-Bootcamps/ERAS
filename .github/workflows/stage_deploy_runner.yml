@@ -29,7 +29,7 @@ jobs:
             develop)
               echo "suffix=DEV"        >> "$GITHUB_OUTPUT"
               echo "env_name=dev"  >> "$GITHUB_OUTPUT"
-              echo "branch=${{vars.ERAS_RELEASE_BRANCH || 'develop'}}" >> "$GITHUB_OUTPUT"
+              echo "branch=${{vars.ERAS_DEV_BRANCH || 'develop'}}" >> "$GITHUB_OUTPUT"
               ;;
             staging|stagging)  # normaliza 'stagging' a 'stage'
               echo "suffix=STAGE"      >> "$GITHUB_OUTPUT"
