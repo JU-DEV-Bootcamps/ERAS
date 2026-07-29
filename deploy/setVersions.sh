@@ -15,7 +15,7 @@ cat "$VERSION_FILE"
 
 # Extraer versiones
 FE_HASH=$(jq -r '."ERAS-FE"' "$VERSION_FILE" | cut -c1-8)
-BE_HASH=$(jq -r '."ERAS-BE"' "$VERSION_FILE" | cut -c1-7)
+BE_HASH=$(jq -r '."ERAS-BE"' "$VERSION_FILE" | cut -c1-8)
 
 # Extraer environment
 FE_ENV=$(jq -r '."ERAS-FE"' "$VERSION_FILE" | cut -c10-)
