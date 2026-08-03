@@ -329,6 +329,7 @@ jobs:
       - name: Copy or replace the required files to the target machine
         run: |
           scp -i ~/.ssh/id_rsa versions.json ubuntu@${{ env.SSH_HOST }}:~/deploy/
+          scp -i ~/.ssh/id_rsa "deploy/setVersions.sh" ubuntu@${{ env.SSH_HOST }}:~/deploy/
       
 
       - name: Connect and Run Commands
