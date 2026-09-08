@@ -45,30 +45,13 @@
   "quickLoginCheckMilliSeconds": 1000,
   "maxDeltaTimeSeconds": 43200,
   "failureFactor": 30,
+  "maxSecondaryAuthFailures": 0,
   "roles": {
     "realm": [
       {
         "id": "9277844a-90a1-4550-8630-ade4a66b51cb",
         "name": "uma_authorization",
         "description": "${role_uma_authorization}",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
-        "attributes": {}
-      },
-      {
-        "id": "5ac44429-0828-4086-a638-a2aba2217e6e",
-        "name": "Student Service",
-        "description": "Able to check students' remissions, sees own remissions, declare own remissions' state",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
-        "attributes": {}
-      },
-      {
-        "id": "d9587cef-9110-4ba2-95fe-75f5b39853e0",
-        "name": "Professional",
-        "description": "Sees own remissions and declare own remissions' state",
         "composite": false,
         "clientRole": false,
         "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
@@ -98,15 +81,6 @@
         "id": "82121330-86ea-4534-907a-fe09d025830d",
         "name": "offline_access",
         "description": "${role_offline-access}",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
-        "attributes": {}
-      },
-      {
-        "id": "a954f4d0-d38e-4228-a029-3204650b9542",
-        "name": "Eras Admin",
-        "description": "Able to create Service Providers and Configurations",
         "composite": false,
         "clientRole": false,
         "containerId": "25ba8fe6-5c5d-47ae-9614-452937bcc295",
@@ -196,6 +170,15 @@
           "attributes": {}
         },
         {
+          "id": "1c19e088-e3f8-4f5b-96c6-9cc17dd4a8f5",
+          "name": "query-organizations",
+          "description": "${role_query-organizations}",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "8c0fb278-481a-4a52-99c6-aa06f2e34d56",
+          "attributes": {}
+        },
+        {
           "id": "b7bdbe21-78f2-4c68-a4dd-40262f406fa8",
           "name": "query-clients",
           "description": "${role_query-clients}",
@@ -250,6 +233,22 @@
           "attributes": {}
         },
         {
+          "id": "1b48a17c-cace-4247-b91f-d515725c3f2c",
+          "name": "view-organizations",
+          "description": "${role_view-organizations}",
+          "composite": true,
+          "composites": {
+            "client": {
+              "realm-management": [
+                "query-organizations"
+              ]
+            }
+          },
+          "clientRole": true,
+          "containerId": "8c0fb278-481a-4a52-99c6-aa06f2e34d56",
+          "attributes": {}
+        },
+        {
           "id": "fded4803-52a9-4efe-8a3c-de529d37531c",
           "name": "manage-clients",
           "description": "${role_manage-clients}",
@@ -262,6 +261,15 @@
           "id": "cb3f19a6-d2f3-49d3-aea5-1c78c1a428b4",
           "name": "manage-realm",
           "description": "${role_manage-realm}",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "8c0fb278-481a-4a52-99c6-aa06f2e34d56",
+          "attributes": {}
+        },
+        {
+          "id": "2c933d90-8789-4c4c-b92e-1b385e0662ae",
+          "name": "manage-organizations",
+          "description": "${role_manage-organizations}",
           "composite": false,
           "clientRole": true,
           "containerId": "8c0fb278-481a-4a52-99c6-aa06f2e34d56",
@@ -308,14 +316,17 @@
                 "view-users",
                 "manage-users",
                 "view-authorization",
+                "query-organizations",
                 "query-clients",
                 "view-events",
                 "impersonation",
                 "query-users",
                 "manage-authorization",
                 "manage-identity-providers",
+                "view-organizations",
                 "manage-clients",
                 "manage-realm",
+                "manage-organizations",
                 "view-clients",
                 "view-realm"
               ]
@@ -326,8 +337,64 @@
           "attributes": {}
         }
       ],
-      "public-client": [],
-      "api-client": [],
+      "public-client": [
+        {
+          "id": "8543a925-3689-4b24-8216-327b034a71eb",
+          "name": "ERAS Administrator",
+          "description": "Full application access.",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "c73172c8-3150-4301-8dd5-142bb499134d",
+          "attributes": {}
+        },
+        {
+          "id": "96c10e19-4013-4488-8ce9-263d0a5e6c3b",
+          "name": "ERAS Professional",
+          "description": "Access to own Assessments and Interventions.",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "c73172c8-3150-4301-8dd5-142bb499134d",
+          "attributes": {}
+        },
+        {
+          "id": "608231dc-8f90-4bb6-9991-716998aa9186",
+          "name": "ERAS Student Services Officer",
+          "description": "Access to Students, Evaluation Processes, Reports, Assessments, and Interventions.",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "c73172c8-3150-4301-8dd5-142bb499134d",
+          "attributes": {}
+        }
+      ],
+      "api-client": [
+        {
+          "id": "db812b25-f419-4946-b3a4-138b7ac31071",
+          "name": "ERAS Administrator",
+          "description": "Full API access.",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "b709ffca-8b89-4d67-8f41-04da9e6778da",
+          "attributes": {}
+        },
+        {
+          "id": "57d420e1-abfb-4d9d-83ef-d2c6f9e18928",
+          "name": "ERAS Student Services Officer",
+          "description": "Access to Students, Evaluations, Reports, Assessments, and Interventions resources.",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "b709ffca-8b89-4d67-8f41-04da9e6778da",
+          "attributes": {}
+        },
+        {
+          "id": "9fc78004-db62-467c-aba8-a76c242c8e20",
+          "name": "ERAS Professional",
+          "description": "Access to own Assessments and Interventions resources.",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "b709ffca-8b89-4d67-8f41-04da9e6778da",
+          "attributes": {}
+        }
+      ],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -395,6 +462,7 @@
   "webAuthnPolicyAttestationConveyancePreference": "not specified",
   "webAuthnPolicyAuthenticatorAttachment": "not specified",
   "webAuthnPolicyRequireResidentKey": "not specified",
+  "webAuthnPolicyResidentKey": "not specified",
   "webAuthnPolicyUserVerificationRequirement": "not specified",
   "webAuthnPolicyCreateTimeout": 0,
   "webAuthnPolicyAvoidSameAuthenticatorRegister": false,
@@ -409,6 +477,7 @@
   "webAuthnPolicyPasswordlessAttestationConveyancePreference": "not specified",
   "webAuthnPolicyPasswordlessAuthenticatorAttachment": "not specified",
   "webAuthnPolicyPasswordlessRequireResidentKey": "not specified",
+  "webAuthnPolicyPasswordlessResidentKey": "required",
   "webAuthnPolicyPasswordlessUserVerificationRequirement": "not specified",
   "webAuthnPolicyPasswordlessCreateTimeout": 0,
   "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister": false,
@@ -419,8 +488,8 @@
       "id": "2c452576-d88a-45a4-984e-7815060f3b30",
       "username": "service-account-api-client",
       "emailVerified": false,
-      "createdTimestamp": 1751481727778,
       "enabled": true,
+      "createdTimestamp": 1751481727778,
       "totp": false,
       "serviceAccountClientId": "api-client",
       "disableableCredentialTypes": [],
@@ -601,7 +670,7 @@
     {
       "id": "b709ffca-8b89-4d67-8f41-04da9e6778da",
       "clientId": "api-client",
-      "name": "",
+      "name": "ERAS Backend",
       "description": "",
       "rootUrl": "https://localhost:7119/",
       "adminUrl": "https://localhost:7119/",
@@ -629,15 +698,19 @@
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
-        "realm_client": "false",
-        "oidc.ciba.grant.enabled": "false",
+        "logout.confirmation.enabled": "false",
         "client.secret.creation.time": "1736878663",
-        "backchannel.logout.session.required": "true",
+        "standard.token.exchange.enabled": "false",
+        "oauth2.jwt.authorization.grant.enabled": "false",
         "post.logout.redirect.uris": "+",
         "frontchannel.logout.session.required": "true",
         "oauth2.device.authorization.grant.enabled": "true",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
         "display.on.consent.screen": "false",
-        "backchannel.logout.revoke.offline.tokens": "false"
+        "dpop.bound.access.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
@@ -741,7 +814,7 @@
     {
       "id": "c73172c8-3150-4301-8dd5-142bb499134d",
       "clientId": "public-client",
-      "name": "",
+      "name": "ERAS Frontend",
       "description": "",
       "rootUrl": "http://localhost:4200",
       "adminUrl": "",
@@ -768,12 +841,17 @@
       "protocol": "openid-connect",
       "attributes": {
         "realm_client": "false",
+        "logout.confirmation.enabled": "false",
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
+        "standard.token.exchange.enabled": "false",
+        "oauth2.jwt.authorization.grant.enabled": "false",
         "post.logout.redirect.uris": "+",
+        "frontchannel.logout.session.required": "true",
         "oauth2.device.authorization.grant.enabled": "false",
         "display.on.consent.screen": "false",
-        "backchannel.logout.revoke.offline.tokens": "false"
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "dpop.bound.access.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
@@ -1543,6 +1621,23 @@
       ]
     },
     {
+      "id": "73847414-6a2f-4b65-af30-e4eaf1301a1a",
+      "name": "AuthnContextClassRef",
+      "description": "AuthnContextClassRef Level of Authentiation",
+      "protocol": "saml",
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "id": "f07b779b-c9a1-4081-9681-333880b8fda4",
+          "name": "AuthnContextClassRef",
+          "protocol": "saml",
+          "protocolMapper": "saml-authn-context-class-ref-mapper",
+          "consentRequired": false,
+          "config": {}
+        }
+      ]
+    },
+    {
       "id": "3e1a83c7-3f73-438f-830d-cedb43c5c244",
       "name": "roles",
       "description": "OpenID Connect scope for add user roles to the access token",
@@ -1650,7 +1745,8 @@
     "roles",
     "web-origins",
     "acr",
-    "basic"
+    "basic",
+    "AuthnContextClassRef"
   ],
   "defaultOptionalClientScopes": [
     "offline_access",
@@ -1684,7 +1780,6 @@
       "internalId": "4c98221c-e47c-49b3-885c-5146877862c1",
       "providerId": "google",
       "enabled": true,
-      "updateProfileFirstLoginMode": "on",
       "trustEmail": false,
       "storeToken": false,
       "addReadTokenRoleOnCreate": false,
@@ -1699,7 +1794,8 @@
         "filteredByClaim": "false",
         "clientSecret": "**********",
         "caseSensitiveOriginalUsername": "false"
-      }
+      },
+      "types": []
     }
   ],
   "identityProviderMappers": [],
@@ -1733,14 +1829,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-full-name-mapper",
-            "oidc-address-mapper",
-            "oidc-usermodel-property-mapper",
-            "saml-user-attribute-mapper",
             "saml-user-property-mapper",
-            "saml-role-list-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
             "oidc-usermodel-attribute-mapper",
-            "oidc-sha256-pairwise-sub-mapper"
+            "oidc-usermodel-property-mapper",
+            "oidc-address-mapper",
+            "saml-role-list-mapper",
+            "saml-user-attribute-mapper",
+            "oidc-full-name-mapper"
           ]
         }
       },
@@ -1780,13 +1876,13 @@
         "config": {
           "allowed-protocol-mapper-types": [
             "saml-user-attribute-mapper",
-            "oidc-usermodel-property-mapper",
+            "oidc-address-mapper",
+            "oidc-usermodel-attribute-mapper",
             "oidc-full-name-mapper",
             "saml-user-property-mapper",
-            "oidc-address-mapper",
-            "saml-role-list-mapper",
             "oidc-sha256-pairwise-sub-mapper",
-            "oidc-usermodel-attribute-mapper"
+            "oidc-usermodel-property-mapper",
+            "saml-role-list-mapper"
           ]
         }
       },
@@ -1877,7 +1973,6 @@
     ]
   },
   "internationalizationEnabled": false,
-  "supportedLocales": [],
   "authenticationFlows": [
     {
       "id": "36c9b65e-5f31-41d3-87f3-ec7dc8783493",
@@ -2502,30 +2597,12 @@
   ],
   "requiredActions": [
     {
-      "alias": "CONFIGURE_TOTP",
-      "name": "Configure OTP",
-      "providerId": "CONFIGURE_TOTP",
-      "enabled": true,
-      "defaultAction": false,
-      "priority": 10,
-      "config": {}
-    },
-    {
       "alias": "TERMS_AND_CONDITIONS",
       "name": "Terms and Conditions",
       "providerId": "TERMS_AND_CONDITIONS",
       "enabled": false,
       "defaultAction": false,
       "priority": 20,
-      "config": {}
-    },
-    {
-      "alias": "UPDATE_PASSWORD",
-      "name": "Update Password",
-      "providerId": "UPDATE_PASSWORD",
-      "enabled": true,
-      "defaultAction": false,
-      "priority": 30,
       "config": {}
     },
     {
@@ -2544,6 +2621,24 @@
       "enabled": true,
       "defaultAction": false,
       "priority": 50,
+      "config": {}
+    },
+    {
+      "alias": "CONFIGURE_TOTP",
+      "name": "Configure OTP",
+      "providerId": "CONFIGURE_TOTP",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 54,
+      "config": {}
+    },
+    {
+      "alias": "UPDATE_PASSWORD",
+      "name": "Update Password",
+      "providerId": "UPDATE_PASSWORD",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 57,
       "config": {}
     },
     {
@@ -2592,6 +2687,15 @@
       "config": {}
     },
     {
+      "alias": "idp_link",
+      "name": "Linking Identity Provider",
+      "providerId": "idp_link",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 120,
+      "config": {}
+    },
+    {
       "alias": "update_user_locale",
       "name": "Update User Locale",
       "providerId": "update_user_locale",
@@ -2622,11 +2726,12 @@
     "cibaInterval": "5",
     "realmReusableOtpCode": "false"
   },
-  "keycloakVersion": "26.1.5",
+  "keycloakVersion": "26.7.2",
   "userManagedAccessAllowed": false,
   "organizationsEnabled": false,
   "verifiableCredentialsEnabled": false,
   "adminPermissionsEnabled": false,
+  "scimApiEnabled": false,
   "clientProfiles": {
     "profiles": []
   },
