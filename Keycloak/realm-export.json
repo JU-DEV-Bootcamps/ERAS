@@ -496,6 +496,102 @@
       "requiredActions": [],
       "notBefore": 0,
       "groups": []
+    },
+    {
+      "username": "admin@eras.local",
+      "email": "admin@eras.local",
+      "firstName": "Ada",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Eras-ok7UoXCYeC_k",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-eras"
+      ],
+      "clientRoles": {
+        "public-client": [
+          "ERAS Administrator"
+        ],
+        "api-client": [
+          "ERAS Administrator"
+        ]
+      }
+    },
+    {
+      "username": "officer@eras.local",
+      "email": "officer@eras.local",
+      "firstName": "Olivia",
+      "lastName": "Officer",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Eras-ok7UoXCYeC_k",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-eras"
+      ],
+      "clientRoles": {
+        "public-client": [
+          "ERAS Student Services Officer"
+        ],
+        "api-client": [
+          "ERAS Student Services Officer"
+        ]
+      }
+    },
+    {
+      "username": "professional@eras.local",
+      "email": "professional@eras.local",
+      "firstName": "Pablo",
+      "lastName": "Professional",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Eras-ok7UoXCYeC_k",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-eras"
+      ],
+      "clientRoles": {
+        "public-client": [
+          "ERAS Professional"
+        ],
+        "api-client": [
+          "ERAS Professional"
+        ]
+      }
+    },
+    {
+      "username": "guest@eras.local",
+      "email": "guest@eras.local",
+      "firstName": "Gael",
+      "lastName": "Guest",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Eras-ok7UoXCYeC_k",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-eras"
+      ]
     }
   ],
   "scopeMappings": [
