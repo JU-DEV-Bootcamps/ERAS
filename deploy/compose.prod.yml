@@ -17,6 +17,8 @@ services:
       - /app/node_modules
       - /home/ubuntu/ssl-certificates/eras-backend.pfx:/https/aspnetapp.pfx:ro
       - /home/ubuntu/backend-logs:/app/Logs
+      - /home/ubuntu/eras-uploads:/app/uploads
+    restart: unless-stopped
     depends_on:
       database:
         condition: service_healthy
@@ -35,6 +37,7 @@ services:
       - "443:443"
     networks:
       - eras_network
+    restart: unless-stopped
     depends_on:
       - backend
     volumes:
