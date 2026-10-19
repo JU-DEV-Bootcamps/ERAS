@@ -1,0 +1,41 @@
+#!/bin/bash
+# Fake curl for dispatch-workflow-and-wait tests.
+# Each call consumes the next line of $FAKE_DIR/<endpoint>.seq (the last line repeats): "<curl exit code>|<http code>|<body>".
+
+method=GET
+url=""
+output=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -X) method=$2; shift ;;
+    --output) output=$2; shift ;;
+    --max-time | --write-out | -H | --data) shift ;;
+    http*) url=$1 ;;
+  esac
+  shift
+done
+
+case "$method $url" in
+  "POST "*/dispatches) endpoint=dispatch ;;
+  "GET "*"/runs?"*) endpoint=list ;;
+  "GET "*/actions/runs/*) endpoint=run ;;
+  *) echo "fake curl: unexpected request $method $url" >&2; exit 99 ;;
+esac
+
+echo "$method $url" >> "$FAKE_DIR/calls.log"
+count_file="$FAKE_DIR/$endpoint.count"
+count=$(cat "$count_file" 2>/dev/null || echo 0)
+count=$((count + 1))
+echo "$count" > "$count_file"
+
+line=$(sed -n "${count}p" "$FAKE_DIR/$endpoint.seq")
+[ -z "$line" ] && line=$(tail -n 1 "$FAKE_DIR/$endpoint.seq")
+
+rc=${line%%|*}
+rest=${line#*|}
+code=${rest%%|*}
+body=${rest#*|}
+
+[ -n "$output" ] && printf '%s' "$body" > "$output"
+printf '%s' "$code"
+exit "$rc"

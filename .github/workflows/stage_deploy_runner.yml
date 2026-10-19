@@ -10,9 +10,14 @@ on:
         type: choice
         options: [staging, develop, testing, production]
 
+concurrency:
+  group: eras-deploy
+  cancel-in-progress: false
+
 jobs:
   Set_and_Deploy_submodules:
     runs-on: self-hosted
+    timeout-minutes: 90
     environment: ${{ github.event.inputs.environment }}
 
     steps:
@@ -82,125 +87,42 @@ jobs:
           echo "Target branch: $TARGET_BRANCH"
           # Ejemplo de uso (evita loguear secretos):
           
-      - name: Trigger workflow en BE y capturar run_id
-        id: trigger_be
+      - name: Build the BE image through its workflow
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          curl -s -X POST \
-            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/workflows/RW-test-package-BE-Runner.yml/dispatches \
-            -d '{
-              "ref": "${{ env.TARGET_BRANCH }}",
-              "inputs": {
-                "branch": "${{ env.TARGET_BRANCH }}",
-                "cosmic_api_url": "${{ env.COSMIC_API_URL }}",
-                "db_host": "database",
-                "keycloak_url": "${{ env.KEYCLOAK_URL }}",
-                "keycloak_realm": "${{ env.KEYCLOAK_REALM }}",
-                "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
-                "keycloak_roles_resource": "${{ env.KC_ROLES_RESOURCE }}",
-                "keycloak_role_administrator": "${{ env.KC_ROLE_ADMINISTRATOR }}",
-                "keycloak_role_officer": "${{ env.KC_ROLE_OFFICER }}",
-                "keycloak_role_professional": "${{ env.KC_ROLE_PROFESSIONAL }}",
-                "environment_tag": "${{ env.SELECTED_ENV }}"
-              }
-            }'
+          set -euo pipefail
+          payload=$(jq -n \
+            --arg ref "$TARGET_BRANCH" \
+            --arg cosmic_api_url "$COSMIC_API_URL" \
+            --arg keycloak_url "$KEYCLOAK_URL" \
+            --arg keycloak_realm "$KEYCLOAK_REALM" \
+            --arg keycloak_client_id "$ERAS_CLIENT" \
+            --arg keycloak_roles_resource "$KC_ROLES_RESOURCE" \
+            --arg keycloak_role_administrator "$KC_ROLE_ADMINISTRATOR" \
+            --arg keycloak_role_officer "$KC_ROLE_OFFICER" \
+            --arg keycloak_role_professional "$KC_ROLE_PROFESSIONAL" \
+            --arg environment_tag "$SELECTED_ENV" \
+            '{ref: $ref, inputs: {branch: $ref, cosmic_api_url: $cosmic_api_url, db_host: "database", keycloak_url: $keycloak_url, keycloak_realm: $keycloak_realm, keycloak_client_id: $keycloak_client_id, keycloak_roles_resource: $keycloak_roles_resource, keycloak_role_administrator: $keycloak_role_administrator, keycloak_role_officer: $keycloak_role_officer, keycloak_role_professional: $keycloak_role_professional, environment_tag: $environment_tag}}')
+          bash deploy/dispatch-workflow-and-wait.sh JU-DEV-Bootcamps/ERAS-BE RW-test-package-BE-Runner.yml "$payload"
 
-          echo "Esperando ejecución del workflow..."
-          sleep 10					 
-
-          run_info=$(curl -s \
-            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs?event=workflow_dispatch&branch=${{ env.TARGET_BRANCH }}")	
-
-          run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
-          echo "BE_RUN_ID=$run_id" >> $GITHUB_ENV
-
-      - name: Esperar a que termine el workflow en BE
+      - name: Build the FE image through its workflow
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          while true; do
-            response=$(curl -s \
-              -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-BE/actions/runs/${{ env.BE_RUN_ID }})
+          set -euo pipefail
+          payload=$(jq -n \
+            --arg ref "$TARGET_BRANCH" \
+            --arg api_url "$API_URL" \
+            --arg keycloak_url "$KEYCLOAK_URL" \
+            --arg keycloak_realm "$KEYCLOAK_REALM" \
+            --arg client_id "$ERAS_CLIENT_FE" \
+            --arg web_url "$URL" \
+            --arg dockerhub_username "$DOCKER_HUB_USER" \
+            --arg environment_tag "$SELECTED_ENV" \
+            '{ref: $ref, inputs: {branch: $ref, api_url: $api_url, keycloak_url: $keycloak_url, keycloak_realm: $keycloak_realm, client_id: $client_id, web_url: $web_url, dockerhub_username: $dockerhub_username, environment_tag: $environment_tag}}')
+          bash deploy/dispatch-workflow-and-wait.sh JU-DEV-Bootcamps/ERAS-FE RW-test-package-FE-Runner.yml "$payload"
 
-            status=$(echo "$response" | jq -r '.status')
-            conclusion=$(echo "$response" | jq -r '.conclusion')
-
-            echo "Estado actual: $status - Conclusión: $conclusion"
-
-            if [[ "$status" == "completed" ]]; then
-              if [[ "$conclusion" == "success" ]]; then
-                echo "Workflow BE completado exitosamente."
-                break
-              else
-                echo "Workflow BE falló."
-                exit 1
-              fi
-            fi
-            echo "Esperando 30 segundos..."
-            sleep 30
-          done
-
-      - name: Trigger workflow en FE y capturar run_id
-        id: trigger_fe			 
-        run: |
-          curl -s -X POST \
-            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/workflows/RW-test-package-FE-Runner.yml/dispatches \
-            -d '{
-              "ref": "${{ env.TARGET_BRANCH }}",
-              "inputs": {
-                "branch": "${{ env.TARGET_BRANCH }}",
-                "api_url": "${{ env.API_URL }}",
-                "keycloak_url": "${{ env.KEYCLOAK_URL }}",
-                "keycloak_realm": "${{ env.KEYCLOAK_REALM }}",
-                "client_id": "${{ env.ERAS_CLIENT_FE }}",
-                "web_url": "${{ env.URL }}",
-                "dockerhub_username": "${{ env.DOCKER_HUB_USER }}",
-                "environment_tag": "${{ env.SELECTED_ENV }}"
-              }
-            }'
-
-          echo "Esperando ejecución del workflow..."
-          sleep 10	
-
-          run_info=$(curl -s \
-            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs?event=workflow_dispatch&branch=${{ env.TARGET_BRANCH }}")
-
-          run_id=$(echo "$run_info" | jq '.workflow_runs[0].id')
-          echo "FE_RUN_ID=$run_id" >> $GITHUB_ENV																																		 
-
-      - name: Esperar a que termine el workflow en FE
-        run: |
-          while true; do
-            response=$(curl -s \
-              -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/JU-DEV-Bootcamps/ERAS-FE/actions/runs/${{ env.FE_RUN_ID }})
-
-            status=$(echo "$response" | jq -r '.status')
-            conclusion=$(echo "$response" | jq -r '.conclusion')
-
-            echo "Estado actual: $status - Conclusión: $conclusion"
-
-            if [[ "$status" == "completed" ]]; then
-              if [[ "$conclusion" == "success" ]]; then
-                echo "Workflow FE completado exitosamente."
-                break
-              else
-                echo "Workflow FE falló."
-                exit 1
-              fi
-            fi
-            echo "Esperando 30 segundos..."
-            sleep 30
-          done
-              
       - name: Send the environment
         id: send-env
         run: |
@@ -210,6 +132,7 @@ jobs:
 
   prepare-and-dispatch:
     runs-on: self-hosted
+    timeout-minutes: 15
     needs: [Set_and_Deploy_submodules]
     outputs:
       versions: ${{ steps.combine.outputs.versions }}
@@ -241,6 +164,7 @@ jobs:
 
   submodule-commits:
     runs-on: self-hosted
+    timeout-minutes: 15
     needs: prepare-and-dispatch
     outputs:
       submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
@@ -266,6 +190,7 @@ jobs:
 
   deploy:
     runs-on: self-hosted
+    timeout-minutes: 30
     needs: [prepare-and-dispatch, submodule-commits]
 
     steps:
@@ -336,16 +261,23 @@ jobs:
       
       - name: Copy or replace the required files to the target machine
         run: |
-          scp -i ~/.ssh/id_rsa versions.json ubuntu@${{ env.SSH_HOST }}:~/deploy/
-          scp -i ~/.ssh/id_rsa "deploy/setVersions.sh" ubuntu@${{ env.SSH_HOST }}:~/deploy/
-      
+          set -euo pipefail
+          SSH_OPTS="-i $HOME/.ssh/id_rsa -o ConnectTimeout=20 -o ServerAliveInterval=30 -o ServerAliveCountMax=6"
+          for file in versions.json deploy/setVersions.sh deploy/containers.sh; do
+            for attempt in 1 2 3; do
+              scp $SSH_OPTS "$file" ubuntu@${{ env.SSH_HOST }}:~/deploy/ && break
+              if [ "$attempt" -eq 3 ]; then exit 1; fi
+              sleep 5
+            done
+          done
 
       - name: Connect and Run Commands
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ env.SSH_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o ConnectTimeout=20 -o ServerAliveInterval=30 -o ServerAliveCountMax=6 ubuntu@${{ env.SSH_HOST }} << 'EOF'
+            set -euo pipefail
             mkdir -p ~/deploy
             echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
-            test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1)    
+            test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1)
             sed -i 's/\r$//' ~/deploy/setVersions.sh
             sed -i 's/\r$//' ~/deploy/containers.sh
             bash ~/deploy/setVersions.sh
