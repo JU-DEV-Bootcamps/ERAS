@@ -70,6 +70,10 @@ jobs:
           echo "DOCKER_HUB_USER=${{vars[format('ERAS_{0}_DOCKERHUB_USERNAME', steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "ERAS_CLIENT=${{    vars[format('ERAS_{0}_KEYCLOAK_CLIENT_ID',          steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "ERAS_CLIENT_FE=${{ vars[format('ERAS_{0}_KEYCLOAK_CLIENT_ID_FE',       steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
+          echo "KC_ROLES_RESOURCE=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLES_RESOURCE', steps.setup.outputs.suffix)] || 'eras' }}" >> "$GITHUB_ENV"
+          echo "KC_ROLE_ADMINISTRATOR=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLE_ADMINISTRATOR', steps.setup.outputs.suffix)] || 'admin' }}" >> "$GITHUB_ENV"
+          echo "KC_ROLE_OFFICER=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLE_OFFICER', steps.setup.outputs.suffix)] || 'Student Services Officer' }}" >> "$GITHUB_ENV"
+          echo "KC_ROLE_PROFESSIONAL=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLE_PROFESSIONAL', steps.setup.outputs.suffix)] || 'Professional' }}" >> "$GITHUB_ENV"
 
       - name: Verify (non-secret) variables
         shell: bash
@@ -94,6 +98,10 @@ jobs:
                 "keycloak_url": "${{ env.KEYCLOAK_URL }}",
                 "keycloak_realm": "${{ env.KEYCLOAK_REALM }}",
                 "keycloak_client_id": "${{ env.ERAS_CLIENT }}",
+                "keycloak_roles_resource": "${{ env.KC_ROLES_RESOURCE }}",
+                "keycloak_role_administrator": "${{ env.KC_ROLE_ADMINISTRATOR }}",
+                "keycloak_role_officer": "${{ env.KC_ROLE_OFFICER }}",
+                "keycloak_role_professional": "${{ env.KC_ROLE_PROFESSIONAL }}",
                 "environment_tag": "${{ env.SELECTED_ENV }}"
               }
             }'
