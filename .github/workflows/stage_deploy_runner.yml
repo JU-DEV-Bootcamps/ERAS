@@ -75,6 +75,10 @@ jobs:
           echo "DOCKER_HUB_USER=${{vars[format('ERAS_{0}_DOCKERHUB_USERNAME', steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "ERAS_CLIENT=${{    vars[format('ERAS_{0}_KEYCLOAK_CLIENT_ID',          steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
           echo "ERAS_CLIENT_FE=${{ vars[format('ERAS_{0}_KEYCLOAK_CLIENT_ID_FE',       steps.setup.outputs.suffix)] }}" >> "$GITHUB_ENV"
+          echo "KC_ROLES_RESOURCE=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLES_RESOURCE', steps.setup.outputs.suffix)] || 'eras' }}" >> "$GITHUB_ENV"
+          echo "KC_ROLE_ADMINISTRATOR=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLE_ADMINISTRATOR', steps.setup.outputs.suffix)] || 'admin' }}" >> "$GITHUB_ENV"
+          echo "KC_ROLE_OFFICER=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLE_OFFICER', steps.setup.outputs.suffix)] || 'Student Services Officer' }}" >> "$GITHUB_ENV"
+          echo "KC_ROLE_PROFESSIONAL=${{ vars[format('ERAS_{0}_KEYCLOAK_ROLE_PROFESSIONAL', steps.setup.outputs.suffix)] || 'Professional' }}" >> "$GITHUB_ENV"
 
       - name: Verify (non-secret) variables
         shell: bash
@@ -94,8 +98,12 @@ jobs:
             --arg keycloak_url "$KEYCLOAK_URL" \
             --arg keycloak_realm "$KEYCLOAK_REALM" \
             --arg keycloak_client_id "$ERAS_CLIENT" \
+            --arg keycloak_roles_resource "$KC_ROLES_RESOURCE" \
+            --arg keycloak_role_administrator "$KC_ROLE_ADMINISTRATOR" \
+            --arg keycloak_role_officer "$KC_ROLE_OFFICER" \
+            --arg keycloak_role_professional "$KC_ROLE_PROFESSIONAL" \
             --arg environment_tag "$SELECTED_ENV" \
-            '{ref: $ref, inputs: {branch: $ref, cosmic_api_url: $cosmic_api_url, db_host: "database", keycloak_url: $keycloak_url, keycloak_realm: $keycloak_realm, keycloak_client_id: $keycloak_client_id, environment_tag: $environment_tag}}')
+            '{ref: $ref, inputs: {branch: $ref, cosmic_api_url: $cosmic_api_url, db_host: "database", keycloak_url: $keycloak_url, keycloak_realm: $keycloak_realm, keycloak_client_id: $keycloak_client_id, keycloak_roles_resource: $keycloak_roles_resource, keycloak_role_administrator: $keycloak_role_administrator, keycloak_role_officer: $keycloak_role_officer, keycloak_role_professional: $keycloak_role_professional, environment_tag: $environment_tag}}')
           bash deploy/dispatch-workflow-and-wait.sh JU-DEV-Bootcamps/ERAS-BE RW-test-package-BE-Runner.yml "$payload"
 
       - name: Build the FE image through its workflow
