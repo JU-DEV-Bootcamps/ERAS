@@ -2,14 +2,17 @@
 # Dispatches a workflow_dispatch workflow in another repository and waits for that exact run to finish,
 # tolerating transient network failures.
 #
-# Usage: GH_TOKEN=<token> dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json>
+# Usage: GH_TOKEN=<token> dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json> [tag-output-file]
 # payload-json is the dispatch body: {"ref": "<branch>", "inputs": {...}}
+# When tag-output-file is given, the image tag published by the run (annotation titled "eras-image-tag" on its
+# "package" job) is written to that file once the run succeeds.
 
 set -euo pipefail
 
-REPO=${1:?usage: dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json>}
-WORKFLOW=${2:?usage: dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json>}
-PAYLOAD=${3:?usage: dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json>}
+REPO=${1:?usage: dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json> [tag-output-file]}
+WORKFLOW=${2:?usage: dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json> [tag-output-file]}
+PAYLOAD=${3:?usage: dispatch-workflow-and-wait.sh <owner/repo> <workflow-file> <payload-json> [tag-output-file]}
+TAG_OUTPUT=${4:-}
 : "${GH_TOKEN:?GH_TOKEN is required}"
 
 API=${GITHUB_API_URL:-https://api.github.com}
@@ -20,6 +23,9 @@ DISCOVER_INTERVAL=${DISCOVER_INTERVAL:-5}
 POLL_INTERVAL=${POLL_INTERVAL:-30}
 MAX_POLL_FAILURES=${MAX_POLL_FAILURES:-10}
 TOTAL_TIMEOUT=${TOTAL_TIMEOUT:-2700}
+TAG_JOB=${TAG_JOB:-package}
+TAG_TITLE=${TAG_TITLE:-eras-image-tag}
+TAG_TIMEOUT=${TAG_TIMEOUT:-60}
 
 TMP=$(mktemp)
 trap 'rm -f "$TMP"' EXIT
@@ -156,6 +162,25 @@ wait_for_run() {
   return 1
 }
 
+read_image_tag() {
+  local run_id=$1 output_file=$2
+  local deadline=$((SECONDS + TAG_TIMEOUT)) job_id tag
+  while [ "$SECONDS" -lt "$deadline" ]; do
+    job_id=$(gh_api GET "/repos/${REPO}/actions/runs/${run_id}/jobs?per_page=50" | jq -r --arg name "$TAG_JOB" '[.jobs[] | select(.name == $name) | .id] | .[0] // empty') || job_id=""
+    if [ -n "$job_id" ]; then
+      tag=$(gh_api GET "/repos/${REPO}/check-runs/${job_id}/annotations?per_page=50" | jq -r --arg title "$TAG_TITLE" '[.[] | select(.title == $title) | .message] | .[0] // empty') || tag=""
+      if [ -n "$tag" ]; then
+        printf '%s\n' "$tag" > "$output_file"
+        echo "Image tag of ${REPO} run ${run_id}: ${tag}"
+        return 0
+      fi
+    fi
+    sleep "$DISCOVER_INTERVAL"
+  done
+  echo "Could not read the image tag annotation '${TAG_TITLE}' of job '${TAG_JOB}' in run ${run_id}" >&2
+  return 1
+}
+
 BEFORE=$(latest_run_id)
 echo "Dispatching ${WORKFLOW} in ${REPO} on ${REF}"
 dispatch
@@ -167,3 +192,7 @@ RUN_ID=$(find_new_run) || {
 echo "Waiting for ${REPO} run ${RUN_ID}: https://github.com/${REPO}/actions/runs/${RUN_ID}"
 wait_for_run "$RUN_ID"
 echo "${REPO} run ${RUN_ID} completed successfully"
+
+if [ -n "$TAG_OUTPUT" ]; then
+  read_image_tag "$RUN_ID" "$TAG_OUTPUT"
+fi

@@ -16,9 +16,11 @@ concurrency:
 
 jobs:
   Set_and_Deploy_submodules:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 90
     environment: ${{ github.event.inputs.environment }}
+    outputs:
+      versions: ${{ steps.versions.outputs.versions }}
 
     steps:
       - name: Checkout
@@ -88,6 +90,7 @@ jobs:
           # Ejemplo de uso (evita loguear secretos):
           
       - name: Build the BE image through its workflow
+        id: build_be
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
@@ -104,9 +107,11 @@ jobs:
             --arg keycloak_role_professional "$KC_ROLE_PROFESSIONAL" \
             --arg environment_tag "$SELECTED_ENV" \
             '{ref: $ref, inputs: {branch: $ref, cosmic_api_url: $cosmic_api_url, db_host: "database", keycloak_url: $keycloak_url, keycloak_realm: $keycloak_realm, keycloak_client_id: $keycloak_client_id, keycloak_roles_resource: $keycloak_roles_resource, keycloak_role_administrator: $keycloak_role_administrator, keycloak_role_officer: $keycloak_role_officer, keycloak_role_professional: $keycloak_role_professional, environment_tag: $environment_tag}}')
-          bash deploy/dispatch-workflow-and-wait.sh JU-DEV-Bootcamps/ERAS-BE RW-test-package-BE-Runner.yml "$payload"
+          bash deploy/dispatch-workflow-and-wait.sh JU-DEV-Bootcamps/ERAS-BE RW-test-package-BE-Runner.yml "$payload" be_tag.txt
+          echo "tag=$(cat be_tag.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Build the FE image through its workflow
+        id: build_fe
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
@@ -121,7 +126,23 @@ jobs:
             --arg dockerhub_username "$DOCKER_HUB_USER" \
             --arg environment_tag "$SELECTED_ENV" \
             '{ref: $ref, inputs: {branch: $ref, api_url: $api_url, keycloak_url: $keycloak_url, keycloak_realm: $keycloak_realm, client_id: $client_id, web_url: $web_url, dockerhub_username: $dockerhub_username, environment_tag: $environment_tag}}')
-          bash deploy/dispatch-workflow-and-wait.sh JU-DEV-Bootcamps/ERAS-FE RW-test-package-FE-Runner.yml "$payload"
+          bash deploy/dispatch-workflow-and-wait.sh JU-DEV-Bootcamps/ERAS-FE RW-test-package-FE-Runner.yml "$payload" fe_tag.txt
+          echo "tag=$(cat fe_tag.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Combine the image tags
+        id: versions
+        env:
+          BE_TAG: ${{ steps.build_be.outputs.tag }}
+          FE_TAG: ${{ steps.build_fe.outputs.tag }}
+        run: |
+          set -euo pipefail
+          for tag in "$BE_TAG" "$FE_TAG"; do
+            if ! [[ "$tag" =~ ^[0-9a-f]{7,40}-[A-Za-z0-9._]+$ ]]; then
+              echo "Unexpected image tag '$tag'" >&2
+              exit 1
+            fi
+          done
+          echo "versions=$(jq -cn --arg fe "$FE_TAG" --arg be "$BE_TAG" '{"ERAS-FE": $fe, "ERAS-BE": $be}')" >> "$GITHUB_OUTPUT"
 
       - name: Send the environment
         id: send-env
@@ -130,68 +151,10 @@ jobs:
 
           
 
-  prepare-and-dispatch:
-    runs-on: self-hosted
-    timeout-minutes: 15
-    needs: [Set_and_Deploy_submodules]
-    outputs:
-      versions: ${{ steps.combine.outputs.versions }}
-
-    steps:
-      - name: Open the BE JSON
-        run: |
-          cp /home/ubuntu/Eras_versions/eras-be-tag.zip ./eras-be-tag.zip
-          unzip -o -q eras-be-tag.zip
-
-      - name: Open the FE JSON
-        run: |
-          cp /home/ubuntu/Eras_versions/eras-fe-tag.zip ./eras-fe-tag.zip
-          unzip -o -q eras-fe-tag.zip
-
-      - name: Combine tags into versions.json
-        id: combine
-        run: |
-          BE_TAG=$(jq -r '.["ERAS-BE"]' be_tag.json)
-          FE_TAG=$(jq -r '.["ERAS-FE"]' fe_tag.json)
-          echo "{\"ERAS-FE\": \"$FE_TAG\", \"ERAS-BE\": \"$BE_TAG\"}" > versions.json
-          echo "versions=$(cat versions.json)" >> $GITHUB_OUTPUT
-
-      - name: Upload versions.json as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: versions
-          path: versions.json
-
-  submodule-commits:
-    runs-on: self-hosted
-    timeout-minutes: 15
-    needs: prepare-and-dispatch
-    outputs:
-      submodule_shas: ${{ steps.extract-shas.outputs.submodule_shas }}
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          submodules: false
-
-      - name: Extract Submodule SHAs
-        id: extract-shas
-        run: |
-          git config --file .gitmodules --get-regexp path | awk '{ print $2 }' > submodules.txt
-          SUBMODULE_SHAS_JSON="{"
-          while IFS= read -r submodule; do
-            FULL_COMMIT=$(git ls-tree HEAD $submodule | awk '{print $3}')
-            SHORT_COMMIT=$(echo $FULL_COMMIT | cut -c1-7)
-            SUBMODULE_SHAS_JSON+="\"$submodule\": \"$SHORT_COMMIT\","
-          done < submodules.txt
-          SUBMODULE_SHAS_JSON="${SUBMODULE_SHAS_JSON%,}}"
-          echo "submodule_shas=$SUBMODULE_SHAS_JSON" >> $GITHUB_OUTPUT
-
   deploy:
     runs-on: self-hosted
     timeout-minutes: 30
-    needs: [prepare-and-dispatch, submodule-commits]
+    needs: [Set_and_Deploy_submodules]
 
     steps:
       - name: Checkout code
@@ -254,11 +217,11 @@ jobs:
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
           echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
           
-      - name: Download versions.json artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: versions
-      
+      - name: Write versions.json
+        env:
+          VERSIONS: ${{ needs.Set_and_Deploy_submodules.outputs.versions }}
+        run: printf '%s\n' "$VERSIONS" > versions.json
+
       - name: Copy or replace the required files to the target machine
         run: |
           set -euo pipefail
@@ -276,7 +239,7 @@ jobs:
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=20 -o ServerAliveInterval=30 -o ServerAliveCountMax=6 ubuntu@${{ env.SSH_HOST }} << 'EOF'
             set -euo pipefail
             mkdir -p ~/deploy
-            echo '${{ needs.prepare-and-dispatch.outputs.versions }}' > ~/deploy/versions.json
+            echo '${{ needs.Set_and_Deploy_submodules.outputs.versions }}' > ~/deploy/versions.json
             test -f ~/deploy/versions.json || (echo "versions.json not found" && exit 1)
             sed -i 's/\r$//' ~/deploy/setVersions.sh
             sed -i 's/\r$//' ~/deploy/containers.sh

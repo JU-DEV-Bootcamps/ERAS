@@ -20,6 +20,7 @@ EXIT_CODE=0
 
 new_scenario() {
   FAKE_DIR=$(mktemp -d)
+  TAG_FILE=""
   : > "$FAKE_DIR/calls.log"
 }
 
@@ -30,7 +31,7 @@ seq_file() {
 run_script() {
   OUTPUT=$(PATH="$TOOLS_PATH" FAKE_DIR="$FAKE_DIR" GH_TOKEN=test-token \
     RETRY_DELAY=0 DISCOVER_INTERVAL=0 POLL_INTERVAL=0 "$@" \
-    bash "$SCRIPT" owner/repo workflow.yml "$PAYLOAD" 2>&1)
+    bash "$SCRIPT" owner/repo workflow.yml "$PAYLOAD" ${TAG_FILE:+"$TAG_FILE"} 2>&1)
   EXIT_CODE=$?
 }
 
@@ -64,6 +65,7 @@ seq_file run "$RUN_IN_PROGRESS" "$RUN_SUCCESS"
 run_script env
 check "happy path: dispatches once and returns success" '[ "$EXIT_CODE" -eq 0 ] && [ "$(count_calls "POST ")" -eq 1 ]'
 check "happy path: waits for the new run id" 'echo "$OUTPUT" | grep -q "run 101"'
+check "happy path: does not read any tag when none is requested" '[ "$(count_calls annotations)" -eq 0 ]'
 
 new_scenario
 seq_file list "$RUNS_OLD" "$RUNS_OLD" "$RUNS_OLD" "$RUNS_NEW"
@@ -131,6 +133,49 @@ seq_file dispatch '0|204|'
 seq_file run "$RUN_SUCCESS"
 run_script env
 check "a workflow with no previous runs is handled" '[ "$EXIT_CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "run 7"'
+
+JOBS_PACKAGE='0|200|{"jobs":[{"id":556,"name":"coverage"},{"id":555,"name":"package"}]}'
+TAG_ANNOTATIONS='0|200|[{"title":"other","message":"ignored"},{"title":"eras-image-tag","message":"1fe615f4-dev"}]'
+
+new_scenario
+seq_file list "$RUNS_OLD" "$RUNS_NEW"
+seq_file dispatch '0|204|'
+seq_file run "$RUN_SUCCESS"
+seq_file jobs "$JOBS_PACKAGE"
+seq_file annotations "$TAG_ANNOTATIONS"
+TAG_FILE="$FAKE_DIR/tag.txt"
+run_script env
+check "the image tag is written to the requested file" '[ "$EXIT_CODE" -eq 0 ] && [ "$(cat "$TAG_FILE")" = "1fe615f4-dev" ]'
+
+new_scenario
+seq_file list "$RUNS_OLD" "$RUNS_NEW"
+seq_file dispatch '0|204|'
+seq_file run "$RUN_SUCCESS"
+seq_file jobs '0|200|{"jobs":[]}' "$JOBS_PACKAGE"
+seq_file annotations '0|200|[]' "$TAG_ANNOTATIONS"
+TAG_FILE="$FAKE_DIR/tag.txt"
+run_script env
+check "the image tag is awaited until the annotation appears" '[ "$EXIT_CODE" -eq 0 ] && [ "$(cat "$TAG_FILE")" = "1fe615f4-dev" ]'
+
+new_scenario
+seq_file list "$RUNS_OLD" "$RUNS_NEW"
+seq_file dispatch '0|204|'
+seq_file run "$RUN_SUCCESS"
+seq_file jobs "$JOBS_PACKAGE"
+seq_file annotations '0|200|[]'
+TAG_FILE="$FAKE_DIR/tag.txt"
+run_script env TAG_TIMEOUT=2 DISCOVER_INTERVAL=1
+check "a run without the tag annotation fails" '[ "$EXIT_CODE" -ne 0 ] && echo "$OUTPUT" | grep -q "image tag annotation" && [ ! -s "$TAG_FILE" ]'
+
+new_scenario
+seq_file list "$RUNS_OLD" "$RUNS_NEW"
+seq_file dispatch '0|204|'
+seq_file run "$RUN_FAILURE"
+seq_file jobs "$JOBS_PACKAGE"
+seq_file annotations "$TAG_ANNOTATIONS"
+TAG_FILE="$FAKE_DIR/tag.txt"
+run_script env
+check "the tag is not read from a failed run" '[ "$EXIT_CODE" -ne 0 ] && [ "$(count_calls annotations)" -eq 0 ]'
 
 echo
 echo "$PASSED passed, $FAILED failed"
