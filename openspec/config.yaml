@@ -1,0 +1,42 @@
+schema: spec-driven
+
+# Project context. AGENTS.md (repo root) is the full rulebook; this holds only the
+# constraints OpenSpec workflows must apply while planning and implementing.
+context: |
+  ERAS is a parent repo with two git submodules: ERAS-BE (.NET 8 Onion, EF Core + PostgreSQL,
+  MediatR, Keycloak JWT) and ERAS-FE (Angular 19 standalone, Angular Material). Specs live in the
+  parent repo; code is committed inside the submodules. AGENTS.md defines the target coding style
+  (the "golden path") and the legacy patterns that must not be copied into new code.
+  Every scenario is an Acceptance Criterion (AC) with the key <change-id>/AC-<n>. Each AC maps to
+  exactly one tagged test on each side it affects: xUnit in ERAS-BE/test/ with
+  [Trait("Change", "<change-id>")] and [Trait("AC", "<change-id>/AC-<n>")], and Jasmine in
+  ERAS-FE/src/app/**/*.spec.ts with the it() title starting with "[<change-id>/AC-<n>]".
+  Roles: ERAS Administrator, ERAS Student Services Officer, ERAS Professional, plus Guest.
+
+rules:
+  proposal:
+    - Link the GitHub issue (ERAS-BE#n / ERAS-FE#n) in Why
+    - State which submodules are affected (BE, FE or both) and what is out of scope
+    - State any change to who can do what (roles and ownership) explicitly
+  specs:
+    - Title every scenario "AC-<n> <short title>", numbered from 1, unique within the change and never renumbered
+    - Use GIVEN / WHEN / THEN (/ AND) bullets; every scenario must be verifiable by one automated test per affected side
+    - Cover authorization (allowed and denied roles) and validation-failure scenarios for every new endpoint or route
+  design:
+    - Required when the change spans BE and FE, adds a migration, touches auth, or changes an API contract
+    - For API changes, give the endpoint, policy, request and response DTOs, and the matching FE model and service
+    - End with a Follow-ups section for out-of-scope findings
+  tasks:
+    - Group tasks by side (BE, FE, Infra); for each AC put the test task before the implementation task
+    - "End with a ## Traceability table: | AC | Scenario | Side | Test | with one row per AC per affected side"
+    - Finish with a verification group that runs the AGENTS.md section 5.6 gates
+
+operations:
+  apply:
+    guidance:
+      - Do not start until a human has approved the change
+      - Write each AC test first, watch it fail, then implement; tick a task only after its tests pass
+      - If the spec turns out to be wrong, update the delta and re-run openspec validate --strict before continuing
+  archive:
+    guidance:
+      - Archive only after the submodule PRs are merged and every traceability row points to a passing test
