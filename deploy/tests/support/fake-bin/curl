@@ -18,6 +18,8 @@ done
 case "$method $url" in
   "POST "*/dispatches) endpoint=dispatch ;;
   "GET "*"/runs?"*) endpoint=list ;;
+  "GET "*/actions/runs/*/jobs*) endpoint=jobs ;;
+  "GET "*/check-runs/*/annotations*) endpoint=annotations ;;
   "GET "*/actions/runs/*) endpoint=run ;;
   *) echo "fake curl: unexpected request $method $url" >&2; exit 99 ;;
 esac

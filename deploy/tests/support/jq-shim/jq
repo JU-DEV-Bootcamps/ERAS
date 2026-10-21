@@ -12,6 +12,9 @@ const positional = [];
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '-r') {
     raw = true;
+  } else if (args[i] === '--arg') {
+    variables[args[i + 1]] = args[i + 2];
+    i += 2;
   } else if (args[i] === '--argjson') {
     variables[args[i + 1]] = JSON.parse(args[i + 2]);
     i += 2;
@@ -48,6 +51,12 @@ switch (filter) {
     print(ids.length ? Math.min(...ids) : undefined);
     break;
   }
+  case '[.jobs[] | select(.name == $name) | .id] | .[0] // empty':
+    print(input.jobs.filter(job => job.name === variables.name).map(job => job.id)[0]);
+    break;
+  case '[.[] | select(.title == $title) | .message] | .[0] // empty':
+    print(input.filter(annotation => annotation.title === variables.title).map(annotation => annotation.message)[0]);
+    break;
   default:
     console.error(`jq shim: unsupported filter ${filter}`);
     process.exit(99);
