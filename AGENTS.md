@@ -318,6 +318,13 @@ Project rules for OpenSpec artifacts (AC format, traceability table, design trig
 | `/opsx:sync` | 6 | Syncs the delta specs into `openspec/specs/` |
 | `/opsx:archive` | 6. Archive | Archives a completed change |
 
+**Project skills** (in `.claude/skills/`, optional spec-first path for step 1; they write only `proposal.md` and the delta spec, never code):
+
+| Command | Step (§3.2) | What it does |
+|---|---|---|
+| `/sdd-spec "<idea>"` | 1. Propose | Creates or updates the Draft spec (AC scenarios) of a change from an idea, with templates |
+| `/sdd-clarify <change-id>` | 1. Propose | Finds gaps in a Draft spec, asks at most 5 questions and records the answers. Then a human reviews, and `/opsx:propose` adds `design.md` and `tasks.md` |
+
 ### 5.2 Backend (`ERAS-BE/`)
 
 ```bash
