@@ -1,9 +1,7 @@
-name: Automatic deploy process
+name: Automatic deploy process (manual only)
 
 on:
-  push:
-    branches:
-      - develop
+  workflow_dispatch:
 
 jobs:
   submodule-commits:
