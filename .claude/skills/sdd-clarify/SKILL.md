@@ -1,7 +1,7 @@
 ---
 name: sdd-clarify
 description: Reviews an ERAS OpenSpec change whose spec is in Draft, finds ambiguities, gaps and contradictions, asks the user concrete questions (at most 5) and records the answers in the spec. Use after /sdd-spec and before a human approves the spec, or when a spec has [NEEDS CLARIFICATION] markers or open assumptions.
-allowed-tools: Bash(openspec:*)
+allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-spec/scripts/check-spec.sh:*)
 ---
 
 Reduce the risk in a **Draft spec** before anyone reviews or implements it, by asking the few questions
@@ -14,6 +14,10 @@ whose answers change behavior, and writing those answers back into the spec.
 **Templates:**
 - `.claude/skills/sdd-clarify/templates/question.md`: how to present each question
 - `.claude/skills/sdd-clarify/templates/clarification-log.md`: how to record answers in `proposal.md`
+
+**Worked example** (fictional, for shape only): `.claude/skills/sdd-clarify/examples/session.md`
+
+**Checker** (shared with `/sdd-spec`): `bash .claude/skills/sdd-spec/scripts/check-spec.sh <change-id>` (from the repo root).
 
 ## Steps
 
@@ -33,12 +37,13 @@ whose answers change behavior, and writing those answers back into the spec.
    2. **Authorization**: allowed and denied roles per endpoint/route; ownership and scope rules; Guest behavior.
    3. **Validation and errors**: invalid input, limits, duplicates, not-found, conflict, exact status codes and messages.
    4. **State and data**: lifecycle and status transitions, what is persisted or left untouched on failure, existing data/migration effects.
-   5. **BE ↔ FE contract**: behavior both sides must agree on (fields, enums, messages); a change in only one side.
+   5. **BE ↔ FE contract**: behavior both sides must agree on (fields, enums, messages); a change in only one side;
+      a missing or wrong `**Side:**` line (an API behavior with a user-visible message usually needs a BE AC and an FE AC).
    6. **Scope**: what is in or out; adjacent behavior that is silently affected; BREAKING effects.
    7. **Non-functional**: security, privacy of student data, performance or volume limits only when they change behavior.
    8. **Consistency**: contradictions between ACs, with an existing main spec, or with the code; duplicate or overlapping ACs; terms used with two meanings.
    9. **Testability**: ACs that are vague ("fast", "friendly", "properly"), compound (more than one behavior), or cannot be proven by one automated test per affected side.
-   10. **Format**: AC numbering unique and never reused, 4-`#` headings, WHEN/THEN present, requirements of 500 characters or fewer.
+   10. **Format**: run the checker first; it reports AC numbering, 4-`#` headings, WHEN/THEN, `**Side:**`, marker count and status. Also requirements of 500 characters or fewer.
 
    Format problems (10) and spec text that the evidence already settles are **fixed directly**, not asked.
 
@@ -63,7 +68,8 @@ whose answers change behavior, and writing those answers back into the spec.
    - Status: set `**Status:** Clarified` only when **no** `[NEEDS CLARIFICATION]` marker remains and no
      question was deferred; otherwise leave `Draft`. Never write `Approved`.
 
-7. **Validate.** `openspec validate "<change-id>" --strict`; fix and re-run until it passes.
+7. **Validate.** `openspec validate "<change-id>" --strict` and
+   `bash .claude/skills/sdd-spec/scripts/check-spec.sh "<change-id>"`; fix and re-run until both report no errors.
 
 8. **Report** (short):
    - Questions asked and answered (n/5), direct fixes applied, deferred items.
