@@ -15,4 +15,7 @@
 
 - [x] 3.1 `openspec validate 623-add-sdd-spec-and-clarify-skills --strict` passes
 - [x] 3.2 The spec template and the worked example pass `openspec validate --strict` and `check-spec.sh` in a scratch change
-- [ ] 3.3 Run `/sdd-spec` and `/sdd-clarify` on a real issue and adjust the skills from what is observed
+
+## Follow-ups
+
+The skills are set up but not used yet (no ticket to run them on). When the first real issue arrives, run `/sdd-spec` and `/sdd-clarify` on it and adjust the skills from what is observed, in its own change.
