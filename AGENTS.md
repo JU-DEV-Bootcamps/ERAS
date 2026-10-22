@@ -323,7 +323,9 @@ Project rules for OpenSpec artifacts (AC format, traceability table, design trig
 | Command | Step (§3.2) | What it does |
 |---|---|---|
 | `/sdd-spec "<idea>"` | 1. Propose | Creates or updates the Draft spec (AC scenarios) of a change from an idea, with templates |
-| `/sdd-clarify <change-id>` | 1. Propose | Finds gaps in a Draft spec, asks at most 5 questions and records the answers. Then a human reviews, and `/opsx:propose` adds `design.md` and `tasks.md` |
+| `/sdd-clarify <change-id>` | 1. Propose | Finds gaps in a Draft spec, asks at most 5 questions and records the answers. Then a human reviews and sets `Status: Approved` |
+| `/sdd-plan <change-id>` | 1. Propose | For an Approved spec, writes `design.md` (the plan: layers, API contract, test strategy) and `tasks.md` with the traceability table. Then a human sets `Plan: Approved` (step 2) |
+| `/sdd-implement <change-id>` | 3. Implement | Works through `tasks.md` in order, test first, one tagged test per AC per side, then runs the §5.6 gates and reports. Needs `Plan: Approved`; never commits |
 
 ### 5.2 Backend (`ERAS-BE/`)
 
