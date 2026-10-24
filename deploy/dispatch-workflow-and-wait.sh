@@ -162,6 +162,30 @@ wait_for_run() {
   return 1
 }
 
+# GitHub replaces any text equal to a secret's value with *** in annotations. If some secret is a short value such as
+# "1", every "1" in the commit sha becomes ***. Each *** stands for exactly one masked character of the sha, so the tag
+# is rebuilt from the run's head_sha, checking that the visible characters match.
+unmask_image_tag() {
+  local run_id=$1 tag=$2
+  local prefix suffix pattern head_sha candidate
+  case $tag in
+    *'***'*) ;;
+    *) printf '%s' "$tag"; return 0 ;;
+  esac
+  prefix=${tag%-*}
+  suffix=${tag##*-}
+  pattern=${prefix//\*\*\*/?}
+  head_sha=$(gh_api GET "/repos/${REPO}/actions/runs/${run_id}" | jq -r '.head_sha // empty') || head_sha=""
+  candidate=${head_sha:0:${#pattern}}
+  # shellcheck disable=SC2053
+  if [ -z "$head_sha" ] || [[ $candidate != $pattern ]]; then
+    echo "Image tag '${tag}' is masked and does not match the head sha of run ${run_id}" >&2
+    return 1
+  fi
+  echo "Image tag was masked by a secret value; restored from the run head sha" >&2
+  printf '%s-%s' "$candidate" "$suffix"
+}
+
 read_image_tag() {
   local run_id=$1 output_file=$2
   local deadline=$((SECONDS + TAG_TIMEOUT)) job_id tag
@@ -170,6 +194,7 @@ read_image_tag() {
     if [ -n "$job_id" ]; then
       tag=$(gh_api GET "/repos/${REPO}/check-runs/${job_id}/annotations?per_page=50" | jq -r --arg title "$TAG_TITLE" '[.[] | select(.title == $title) | .message] | .[0] // empty') || tag=""
       if [ -n "$tag" ]; then
+        tag=$(unmask_image_tag "$run_id" "$tag") || return 1
         printf '%s\n' "$tag" > "$output_file"
         echo "Image tag of ${REPO} run ${run_id}: ${tag}"
         return 0
