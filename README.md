@@ -5,17 +5,21 @@ This repository is the **parent repo**: it holds the specs, the local stack and 
 pulls in the backend and frontend as git submodules.
 
 > **Rule number one:** this project uses Spec-Driven Development (SDD). No code change is made without
-> an approved spec. Read [Spec-Driven Development](#spec-driven-development-sdd-with-openspec) before your first change.
+> an approved spec. Read [Spec-Driven Development](#spec-driven-development-sdd) before your first change.
 
 ## Contents
 
 - [Repository map](#repository-map)
 - [Tech stack](#tech-stack)
+- [Architecture](#architecture)
+- [ERAS roles](#eras-roles)
 - [Getting started](#getting-started)
 - [Working with submodules](#working-with-submodules)
-- [Working with Spec-Driven Development (SDD)](#spec-driven-development-sdd)
+- [Spec Driven Development (SDD)](#spec-driven-development-sdd)
+- [Working with AI agents (Claude Code)](#working-with-ai-agents-claude-code)
+- [New QA members](#new-qa-members)
+- [Testing](#testing)
 - [Branches and commits](#branches-and-commits)
-- [Quality gates](#quality-gates)
 - [More documentation](#more-documentation)
 
 ## Repository map
@@ -47,8 +51,28 @@ Designs live in [Figma](https://www.figma.com/).
 | DevOps | Docker and Docker Compose, GitHub Actions (`.github/workflows/`) |
 | Frontend tooling | ESLint, Prettier, Husky git hooks, commitlint |
 
-For the layer rules and the "golden path" for new backend and frontend code, see [AGENTS.md §2](AGENTS.md).
-The system design diagrams are in the wiki: [C4 Model](https://github.com/JU-DEV-Bootcamps/ERAS/wiki/C4-Model).
+## Architecture
+
+The backend follows an Onion Architecture with dependencies pointing inward: `Eras.Domain` (entities, validators,
+status transitions) is at the core, then `Eras.Application` (CQRS use cases with MediatR, DTOs, repository interfaces),
+`Eras.Infrastructure` (EF Core and PostgreSQL, Keycloak clients, background jobs) and `Eras.Api` (thin controllers
+and composition root). The Angular frontend talks to the API under `api/v1/` and signs users in through Keycloak.
+The layer rules and the "golden path" for new code are in [AGENTS.md §2](AGENTS.md), and the diagrams are in the wiki:
+[C4 Model](https://github.com/JU-DEV-Bootcamps/ERAS/wiki/C4-Model).
+
+## ERAS roles
+
+Access is controlled by Keycloak client roles in the `ERAS` realm. The backend enforces them with the policies in
+`ErasPolicies` and in the handlers, and the frontend with `ROUTE_METADATA` and the permissions service.
+
+| Role | Notes |
+|---|---|
+| `ERAS Administrator` | Passes every access check |
+| `ERAS Student Services Officer` | Staff role; access is defined per endpoint and route |
+| `ERAS Professional` | Scoped access, for example only the interventions assigned to them |
+| Guest | A signed-in user with no ERAS role |
+
+Any change to who can do what must be written as an Acceptance Criterion in a spec.
 
 ## Getting started
 
@@ -131,6 +155,36 @@ A quick manual is in the wiki: [Submodules Git manual](https://github.com/JU-DEV
 ## Spec Driven Development SDD
 
 You can see the full documentation here: [Spec Driven Development in ERAS](https://github.com/JU-DEV-Bootcamps/ERAS/wiki/Spec-Driven-Development-In-ERAS)
+
+## Working with AI agents (Claude Code)
+
+AI agents follow the same rules as everyone else: [AGENTS.md](AGENTS.md) is the single rulebook and
+[CLAUDE.md](CLAUDE.md) adds Claude Code specifics. The `/sdd-*` skills in `.claude/skills/` guide the spec-first
+pipeline (spec, clarify, plan, implement, validate, verify) while OpenSpec stores the change and validates it, so skills
+do not replace OpenSpec. An agent never edits `ERAS-BE/` or `ERAS-FE/` until a human has approved the spec and the plan,
+and it never commits or pushes unless you ask.
+
+## New QA members
+
+If you are joining the team as a QA engineer, start here: [QE Onboarding – Home](https://github.com/JU-DEV-Bootcamps/ERAS/wiki/QE-Onboarding-%E2%80%93-Home)
+
+## Testing
+
+Backend (xUnit), from `ERAS-BE/`:
+
+```bash
+dotnet test
+```
+
+Frontend (Karma + Jasmine), from `ERAS-FE/`:
+
+```bash
+ng test --code-coverage --watch=false --browsers=ChromeHeadless
+```
+
+CI requires at least 25% line coverage on the backend and 15% on the frontend. Each Acceptance Criterion has exactly one
+tagged test per affected side; see [AGENTS.md §4](AGENTS.md) for the tags and how to run a single AC.
+
 ## Branches and commits
 
 We use feature branching inside each submodule, plus release branches on demand.
@@ -147,11 +201,6 @@ example: feature/BE608/rejectduplicateconfig
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `test:`,
 `refactor:`, `docs:`, `ci:`, `chore:`. In `ERAS-FE`, commitlint and Husky hooks enforce this.
-
-Also required: every task in `tasks.md` is checked, the traceability table is complete with exactly one tagged
-test per AC per affected side (the check script is in [AGENTS.md §5.4](AGENTS.md)), and the CI coverage gates
-hold (backend 25% lines, frontend 15%). The skills ship their own checks, for example
-`bash .claude/skills/sdd-plan/tests/run-tests.sh` to self-test them.
 
 ## More documentation
 
