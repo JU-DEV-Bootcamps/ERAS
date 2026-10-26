@@ -18,6 +18,7 @@ No code changes without an approved spec (see §3).
 | `openspec/specs/` | Living specs: the current, agreed behavior of the system, grouped by capability |
 | `openspec/changes/<change-id>/` | Proposed or in-progress changes (proposal, spec deltas, design, tasks) |
 | `openspec/changes/archive/` | Completed changes (history) |
+| `openspec/adr/` | Architecture Decision Records: one durable decision per file (`NNNN-<title>.md`), index in `README.md` (§3.3) |
 | `Keycloak/realm-export.json` | Local realm `ERAS`: clients, roles, seed users |
 | `docker-compose.yml`, `docker-compose.local.yml` | Local stack: backend, frontend, postgres, keycloak |
 | `deploy/`, `nginx/`, `.github/workflows/` | Prod compose, nginx configs, deploy pipelines |
@@ -206,8 +207,8 @@ openspec/changes/<change-id>/
 
 | Step | Who | Action | Gate |
 |---|---|---|---|
-| 1. Propose | dev / agent | `openspec new change <id>`, then write the proposal, deltas, design and tasks | `openspec validate <id> --strict` passes |
-| 2. Approve | human reviewer | Reviews the change, ideally in a parent-repo PR | Explicit approval |
+| 1. Propose | dev / agent | `openspec new change <id>`, then write the proposal, deltas, design and tasks. Architectural decisions in `design.md` get an ADR in `openspec/adr/` (`/sdd-adr`, status `Proposed`) | `openspec validate <id> --strict` passes |
+| 2. Approve | human reviewer | Reviews the change and its new ADRs, ideally in a parent-repo PR, and sets the ADRs to `Accepted` | Explicit approval |
 | 3. Implement | dev / agent | Work through `tasks.md` in order. AC tests first, then code. Tick tasks as they finish | Tests green |
 | 4. Verify | dev / agent | Run all gates (§5) and the traceability check (§5.4) | All green, every AC traced |
 | 5. Ship | dev | Submodule PRs (BE and/or FE) link `openspec/changes/<id>`, then bump the parent pointer | CI green, PR approved |
@@ -220,7 +221,7 @@ openspec/changes/<change-id>/
 
 ### 3.3 SDD skill conventions
 
-The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` (§5.1) share these conventions. This section is their single source. Only `/sdd-implement` writes code; no skill commits.
+The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` (§5.1), plus `/sdd-adr` (called from `/sdd-plan` or on its own), share these conventions. This section is their single source. Only `/sdd-implement` writes code; no skill commits.
 
 | Item | Convention |
 |---|---|
@@ -230,7 +231,9 @@ The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` �
 | Tasks | `- [ ] <group>.<n> <description>`. A test task starts with "Write" and cites `(AC-<n>)`, and comes before its implementation task. Replaced tasks are struck through, never renumbered |
 | Logs | `## Clarifications` and `## Validation log` live in `proposal.md`. **Never in `spec.md`**: it is a delta that is merged into `openspec/specs/` on archive |
 | Done | Every task ticked, Traceability filled with real tests (exactly 1 per AC per side), §5.6 gates green, `openspec validate --strict`; then the submodule PRs merge and the change is archived. There is no separate `Implemented` status |
-| Checks | `.claude/skills/sdd-spec/scripts/check-spec.sh`, `sdd-plan/scripts/check-plan.sh`, `sdd-implement/scripts/check-impl.sh`, and `sdd-plan/tests/check-skills.sh` for the skills themselves. Self-test: `bash .claude/skills/sdd-plan/tests/run-tests.sh` |
+| ADR | One decision per file in `openspec/adr/NNNN-<kebab-title>.md`, numbered from `0001` with no gaps, never reused. Fields `**Status:**` (`Proposed`, `Accepted`, `Rejected`, `Deprecated`, `Superseded by ADR-NNNN`), `**Date:**`, `**Area:**` (`backend`, `frontend`, `auth`, `data`, `infra`, `process`), `**Change:**`, optional `**Supersedes:**`; sections Context, Decision, Alternatives, Consequences. Index: `openspec/adr/README.md`, grouped by Area |
+| ADR use | An ADR is for a decision that outlives its change: a dependency or pattern, an auth/role/ownership model, a data or migration approach, a cross-cutting BE ↔ FE contract, a departure from a golden path (§2). The `design.md` D-block links it as `**ADR:** ADR-NNNN`. **Only a human sets `Accepted`**, usually with `Plan: Approved`. An Accepted ADR is never rewritten: a new ADR supersedes it, and the old one's Status becomes `Superseded by ADR-MMMM` once the new one is Accepted. `/sdd-verify` requires every linked ADR to be Accepted |
+| Checks | `.claude/skills/sdd-spec/scripts/check-spec.sh`, `sdd-plan/scripts/check-plan.sh`, `sdd-implement/scripts/check-impl.sh`, `sdd-adr/scripts/check-adr.sh`, and `sdd-plan/tests/check-skills.sh` for the skills themselves. Self-test: `bash .claude/skills/sdd-plan/tests/run-tests.sh` |
 
 ---
 
@@ -341,7 +344,8 @@ Project rules for OpenSpec artifacts (AC format, traceability table, design trig
 | `/sdd-plan <change-id>` | 1. Propose | For an Approved spec, writes `design.md` (the plan: layers, API contract, test strategy) and `tasks.md` with the traceability table. Then a human sets `Plan: Approved` (step 2) |
 | `/sdd-implement <change-id>` | 3. Implement | Works through `tasks.md` in order, test first, one tagged test per AC per side, then runs the §5.6 gates and reports. Needs `Plan: Approved`; never commits |
 | `/sdd-validate-impl <change-id>` | 4. Verify | Manual validation gate, only when a BE controller or the FE changed: hands you a checklist per AC, logs the result in `proposal.md` and sends problems back to `/sdd-implement` |
-| `/sdd-verify <change-id>` | 4. Verify | Audit: tasks ticked, one tagged test per AC per side, §5.6 gates, no drift from the spec and `design.md`. Fills the Traceability table and recommends archiving; never archives |
+| `/sdd-verify <change-id>` | 4. Verify | Audit: tasks ticked, one tagged test per AC per side, §5.6 gates, linked ADRs Accepted, no drift from the spec and `design.md`. Fills the Traceability table and recommends archiving; never archives |
+| `/sdd-adr ["<decision>"]` | 1. Propose (or any time) | Writes an ADR in `openspec/adr/` (status `Proposed`) or supersedes one, and updates the index. `/sdd-plan` offers it for architectural decisions; a human sets `Accepted` |
 
 ### 5.2 Backend (`ERAS-BE/`)
 

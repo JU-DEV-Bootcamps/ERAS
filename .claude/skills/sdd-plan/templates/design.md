@@ -22,11 +22,14 @@ Delete every HTML comment and every section that truly does not apply to this ch
 
 ## Decisions
 
-<!-- One block per key technical choice, each with the alternative considered. -->
+<!-- One block per key technical choice, each with the alternative considered.
+     Add the **ADR:** line only when the decision is architectural (see /sdd-adr "Is it an ADR?") or
+     follows an existing ADR; otherwise delete it. -->
 
 ### D1. <decision>
 **Choice:** <what and why, in 1-3 lines>
 **Alternative:** <what else was possible> → <why not>
+**ADR:** ADR-NNNN
 
 ## Changes by layer
 

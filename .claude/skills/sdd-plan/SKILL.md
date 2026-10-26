@@ -1,7 +1,7 @@
 ---
 name: sdd-plan
 description: Generates the plan (design.md) and tasks.md for an approved ERAS OpenSpec spec, with changes by layer (Domain, Application, Infrastructure, Api for BE; route, model, service, component for FE), API contracts, authorization and a test strategy that maps every AC to one test per side. Use when a spec is in Approved status and you need to decide how to implement it. Does not write code.
-allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-plan/scripts/check-plan.sh:*) Bash(bash .claude/skills/sdd-spec/scripts/check-spec.sh:*)
+allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-plan/scripts/check-plan.sh:*) Bash(bash .claude/skills/sdd-spec/scripts/check-spec.sh:*) Bash(bash .claude/skills/sdd-adr/scripts/check-adr.sh:*)
 ---
 
 Turn an **Approved spec** into a plan a developer (or `/sdd-implement`) can follow without guessing.
@@ -54,6 +54,8 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
    - If the API contract changes, BE DTO, FE model and FE service move in the **same** change (principle 9).
    - Ownership and scope rules live in the handler and must already be ACs; if one is missing, that is a
      spec gap, not a task.
+   - Respect the Accepted ADRs in `openspec/adr/` (read the index `openspec/adr/README.md`). A decision that
+     contradicts one needs a superseding ADR, not a silent deviation.
 
 5. **Resolve open questions before tasks.** If an unknown would change the specs, the approach or the task
    breakdown, ask the user now (concrete question, recommended option first). Only truly deferrable
@@ -63,6 +65,11 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
    Changes by layer, API contract (when it changes), Data and migration, **Test strategy** (one row per AC per
    affected side, using the AC's `**Side:**` line), Risks, Migration Plan, Open Questions, and **Follow-ups last**.
    It is required here for every change that has specs, because the schema blocks `tasks.md` without it.
+   - **ADR candidates.** A decision is architectural when it adds or drops a dependency or pattern, sets an
+     auth, role or ownership model, a data storage or migration approach, a cross-cutting BE ↔ FE contract,
+     or departs from a golden path (full list: `.claude/skills/sdd-adr/SKILL.md`, "Is it an ADR?"). Give its
+     D-block an `**ADR:** ADR-NNNN` line: an existing ADR it follows, or a new one written with `/sdd-adr`
+     (ask the user before writing it). A decision local to this change gets no ADR line.
 
 7. **Write `tasks.md`** from the template.
    - Groups by side (BE, FE, Infra), in dependency order, then a final **Verification** group (§5.6 gates).
@@ -88,9 +95,12 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
      verification group cites §5.6, `design.md` ends with Follow-ups).
    Warnings are for you to judge, not to silence.
 
-10. **Stop and report.** Give: change id, the layers touched, number of tasks per group, the decisions, the
-    open questions, and anything you found out of scope. Next step: a human reviews `design.md` and
-    `tasks.md` and sets `**Plan:** Approved`; then `/sdd-implement <change-id>`. Do not start implementing.
+   If `design.md` links an ADR, also run `bash .claude/skills/sdd-adr/scripts/check-adr.sh`.
+
+10. **Stop and report.** Give: change id, the layers touched, number of tasks per group, the decisions and the
+    ADRs they link (new ones are `Proposed`), the open questions, and anything you found out of scope. Next
+    step: a human reviews `design.md`, `tasks.md` and any new ADR, sets `**Plan:** Approved` and the ADR to
+    `Accepted`; then `/sdd-implement <change-id>`. Do not start implementing.
 
 ## Updating an existing plan
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Self-test of the SDD check scripts (check-spec, check-plan, check-impl) against fixtures built from the worked examples.
-# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|spec|skills]
+# Self-test of the SDD check scripts (check-spec, check-plan, check-impl, check-adr, check-skills) against fixtures built from the worked examples.
+# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|spec|adr|skills]
 # With no argument every section runs (about 5 minutes on Windows); with one, only that section.
 # Exit 0 = every case behaved as expected.
 set -u
@@ -118,6 +118,74 @@ if section spec && [ -f "$skills/sdd-spec/scripts/check-spec.sh" ]; then
                expect "spec: duplicate AC numbers" 1 "duplicate AC numbers" $spec
   new_change;  sed -i '0,/^\*\*Side:\*\* BE$/{//d}' "$(c)/specs/configuration-management/spec.md"
                expect "spec: scenario without Side" 1 "has no **Side:** line" $spec
+fi
+
+if section adr; then
+echo "== check-adr"
+a() { echo "$work/adr/openspec/adr"; }
+mk_adr() { # <nnnn> <slug> <status> <area> [supersedes]
+  { printf '# ADR-%s: %s\n\n**Status:** %s\n**Date:** 2026-10-26\n**Area:** %s\n**Change:** none\n' "$1" "$2" "$3" "$4"
+    [ -n "${5:-}" ] && printf '**Supersedes:** %s\n' "$5"
+    printf '\n## Context\n\nx\n\n## Decision\n\nx\n\n## Alternatives\n\n- x\n\n## Consequences\n\n- x\n'; } > "$(a)/$1-$2.md"
+}
+row() { printf '| [ADR-%s](%s-%s.md) | %s | %s | %s |\n' "$1" "$1" "$2" "$2" "$3" "${4:-—}" >> "$(a)/README.md"; }
+new_adr_root() {
+  rm -rf "$work/adr"
+  mkdir -p "$work/adr/openspec/adr" "$work/adr/openspec/changes/$id"
+  printf '# ADRs\n\n## Index\n\n### process\n\n| ADR | Title | Status | Superseded by |\n|---|---|---|---|\n' > "$(a)/README.md"
+  mk_adr 0001 use-openspec Proposed process
+  row 0001 use-openspec Proposed
+  cd "$work/adr" || exit 1
+}
+adrc="bash $skills/sdd-adr/scripts/check-adr.sh"
+supersede_0001() { # ADR-0002 <status> supersedes ADR-0001; the old one marked superseded when $2 = done
+  mk_adr 0002 use-other "$1" process ADR-0001; row 0002 use-other "$1"
+  if [ "${2:-}" = done ]; then
+    sed -i 's/^\*\*Status:\*\* Proposed/**Status:** Superseded by ADR-0002/' "$(a)/0001-use-openspec.md"
+    sed -i 's/| use-openspec | Proposed | — |/| use-openspec | Superseded | ADR-0002 |/' "$(a)/README.md"
+  fi
+}
+
+new_adr_root; expect "adr: valid folder passes" 0 "Result: 0 error(s)" $adrc
+new_adr_root; cp "$(a)/0001-use-openspec.md" "$(a)/0001-use-other.md"
+              expect "adr: number used twice" 1 "number used twice" $adrc
+new_adr_root; mk_adr 0003 skipped Proposed process; row 0003 skipped Proposed
+              expect "adr: numbering gap" 1 "expected ADR-0002, found ADR-0003" $adrc
+new_adr_root; mk_adr 0002 Bad_Name Proposed process
+              expect "adr: bad file name" 1 "file name must be" $adrc
+new_adr_root; sed -i '/^## Consequences$/d' "$(a)/0001-use-openspec.md"
+              expect "adr: missing section" 1 "no '## Consequences'" $adrc
+new_adr_root; sed -i 's/^\*\*Status:\*\* Proposed/**Status:** Done/' "$(a)/0001-use-openspec.md"
+              expect "adr: bad status" 1 "Status 'Done'" $adrc
+new_adr_root; sed -i 's/^\*\*Area:\*\* process/**Area:** process, mobile/' "$(a)/0001-use-openspec.md"
+              expect "adr: bad area" 1 "Area 'mobile'" $adrc
+new_adr_root; sed -i '/ADR-0001/d' "$(a)/README.md"
+              expect "adr: ADR missing from the index" 1 "ADR-0001 has no row" $adrc
+new_adr_root; row 0002 ghost Proposed
+              expect "adr: index row without a file" 1 "row for ADR-0002, which has no file" $adrc
+new_adr_root; sed -i 's/^\*\*Status:\*\* Proposed/**Status:** Accepted/' "$(a)/0001-use-openspec.md"
+              expect "adr: index status out of sync" 1 "shows status 'Proposed', the file says 'Accepted'" $adrc
+new_adr_root; mk_adr 0002 backend-thing Proposed backend; row 0002 backend-thing Proposed
+              expect "adr: row under the wrong area" 1 "expected '### backend'" $adrc
+new_adr_root; supersede_0001 Accepted
+              expect "adr: one-way supersede" 1 "ADR-0001 is not 'Superseded by ADR-0002'" $adrc
+new_adr_root; supersede_0001 Accepted done
+              expect "adr: two-way supersede passes" 0 "Result: 0 error(s)" $adrc
+new_adr_root; supersede_0001 Proposed
+              expect "adr: proposed superseder leaves the old one alone" 0 "Result: 0 error(s)" $adrc
+new_adr_root; supersede_0001 Proposed done
+              expect "adr: superseded by an ADR not yet Accepted" 1 "which is not Accepted" $adrc
+new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/design.md"
+              expect "adr: --change with a Proposed ADR" 1 "must be Accepted" $adrc --change $id
+new_adr_root; printf '### D1. x\n**ADR:** ADR-0009\n' > "openspec/changes/$id/design.md"
+              expect "adr: --change with a missing ADR" 1 "ADR-0009, which does not exist" $adrc --change $id
+new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/design.md"
+              sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"
+              expect "adr: --change with an Accepted ADR passes" 0 "Result: 0 error(s)" $adrc --change $id
+new_adr_root; sed -i 's/$/\r/' "$(a)/0001-use-openspec.md" "$(a)/README.md"
+              expect "adr: CRLF files still pass" 0 "Result: 0 error(s)" $adrc
+cd "$skills/../.." || exit 1
+expect "adr: the real ADRs pass" 0 "Result: 0 error(s)" $adrc
 fi
 
 if section skills; then
