@@ -2,86 +2,103 @@
 name: sdd-verify
 description: >
   Spec Driven Development closing step. Use when implementation is finished (and
-  sdd-validate-impl approved or skipped), when the user says "verify the spec", "close the spec",
-  "is this feature done", or wants to audit an existing spec. Verifies every task in
-  tasks.md is [x], every AC-n has a test, the tests pass, and the code does no more and no
-  less than the spec (no drift). Completes the traceability matrix and, only if there are no
-  gaps or drift, sets the status to "Implemented" in the spec's definition of done and in
-  specs/README.md.
+  sdd-validate-impl approved or skipped), when the user says "verify the change", "is this
+  feature done", or wants to audit an existing change. Verifies every task in tasks.md is
+  [x], every AC has exactly one tagged test per affected side, the tests and the AGENTS.md
+  section 5.6 gates pass, and the code does no more and no less than the spec and design.md
+  (no drift). Completes the Traceability table and, only if there are no gaps or drift,
+  recommends archiving. It never archives or commits.
+allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-implement/scripts/check-impl.sh:*)
 ---
 
-# SDD: Verify and Close a Spec
+# SDD: Verify and Close a Change
 
-Proves the feature meets its spec: **every AC-n has a test, the tests pass, and the code does
-no more and no less than specified.** Then completes traceability and closes the spec.
-This is an audit: it reports gaps; it does not quietly fix or reinterpret the spec.
+Proves the feature meets its spec: **every AC has a tagged test, the tests pass, and the code does
+no more and no less than specified.** Then completes traceability and tells the user whether the
+change is ready to archive. This is an audit: it reports gaps; it does not quietly fix or reinterpret
+the spec. The conventions it relies on are in `AGENTS.md` §3.3.
 
-## Spec layout assumed
+## Change layout assumed
 
 ```
-specs/README.md                  # index with status per spec
-specs/<feature>/spec.md          # AC-n, traceability table, definition of done, status
-specs/<feature>/plan.md
-specs/<feature>/tasks.md
+openspec/changes/<change-id>/proposal.md   # **Status:** / **Plan:** lines, ## Validation log
+openspec/changes/<change-id>/specs/<capability>/spec.md   # ACs with "**Side:** BE|FE|BE + FE"
+openspec/changes/<change-id>/design.md     # the plan
+openspec/changes/<change-id>/tasks.md      # numbered tasks and ## Traceability
 ```
+
+AC key: `<change-id>/AC-n`. BE tests carry `[Trait("AC", "<change-id>/AC-n")]`; FE tests start their
+`it()` title with `[<change-id>/AC-n]`.
 
 ## Workflow
 
 ### 1. Locate and read
-Find the spec (named by the user, else current branch / latest in `specs/`). Read `spec.md`,
-`plan.md`, `tasks.md` and the `## Validation log` if present.
+Find the change (named by the user, else current branch, else `openspec list`; ask if several). Read
+`proposal.md` (including `## Validation log` if present), the specs, `design.md` and `tasks.md`.
 
 ### 2. Gate: tasks
-Every task in `tasks.md` must be `[x]` (replaced/removed tasks marked as such are ignored).
-If any is `[ ]`: **stop**, list them, and send the user back to finish them or to
-`sdd-validate-impl`. Don't continue to a verdict.
+Every task in `tasks.md` must be `[x]` (struck-through replaced tasks are ignored). If any is `[ ]`:
+**stop**, list them, and send the user back to finish them with `sdd-implement` or to `sdd-validate-impl`.
+Don't continue to a verdict.
 
-Also check `## Validation log` has either `Approved by ...` or `Skipped: no BE controller or FE change`.
-If neither is present and the work touched a BE controller or the FE, warn and recommend
-`sdd-validate-impl` first; continue only if the user says to (e.g. auditing an old spec).
+Also check `## Validation log` in `proposal.md` has either `Approved by …` or
+`Skipped: no BE controller or FE change`. If neither is present and the work touched a BE controller or
+the FE, warn and recommend `sdd-validate-impl` first; continue only if the user says to (e.g. auditing an
+old change).
 
 ### 3. AC → test mapping
-List every `AC-n` from `spec.md`. For each, find the test(s) that exercise it (search tests and
-the traceability table; tests should reference the AC id in name or comment).
-- Frontend (`ERAS-FE`, Jasmine/Karma): follow `ERAS-FE/.claude/skills/eras-fe-test/SKILL.md`.
-- Backend (`ERAS-BE`, .NET): xUnit/NUnit tests under the test projects.
-- A test counts only if its assertions actually check the criterion, not merely touch the code.
-- An AC with no test is a **gap**. Offer to write the test (don't write it silently), or for a
-  criterion that is genuinely manual-only, require it to be recorded as such with the validation
-  evidence.
+Run `bash .claude/skills/sdd-implement/scripts/check-impl.sh "<change-id>" --final`: it counts the tagged
+tests per AC per side declared by the `**Side:**` lines (exactly 1 each) and flags focused or skipped tests.
+Then read each test: it counts only if its assertions actually check the criterion, not merely touch the code.
+- Frontend (`ERAS-FE`, Jasmine/Karma): `AGENTS.md` §4.3.
+- Backend (`ERAS-BE`, xUnit): `AGENTS.md` §4.2, written at the layer where the behavior is decided.
+- An AC with no test is a **gap**. Offer to write the test (don't write it silently), or for a criterion that is
+  genuinely manual-only, require it to be recorded as such in the validation log.
 
-### 4. Run the tests
-Run the relevant suites (e.g. `ng test --watch=false --browsers=ChromeHeadless` in `ERAS-FE`,
-`dotnet test` in `ERAS-BE`) and capture pass/fail per mapped test. Failing or unrunnable tests
-= gap. Report the real output; never claim a pass you didn't observe.
+### 4. Run the tests and the gates
+Run the gates of `AGENTS.md` §5.6 and capture pass/fail per mapped test:
+- BE (`ERAS-BE/`): `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`,
+  `dotnet test Eras.sln`, coverage ≥ 25%.
+- FE (`ERAS-FE/`): `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage`
+  (≥ 15%), `npm run build`.
+- `openspec validate "<change-id>" --strict`.
+Run only the sides the change touches. A failing or unrunnable gate or test = gap. Report the real
+output; never claim a pass you didn't observe. If a build is blocked by file locks (running `Eras.Api` or
+Visual Studio), ask the user to stop it.
 
 ### 5. Drift check (no more, no less)
-Compare `git diff <base>...HEAD` (base: `develop`) for the feature's code against the spec:
+Compare the feature's code against the spec and `design.md`. The code lives in the submodules, so diff
+each touched one: `git -C ERAS-BE diff develop...HEAD`, `git -C ERAS-FE diff develop...HEAD`.
 - **Less**: an AC or in-scope item with no corresponding code.
-- **More**: behavior, endpoints, UI, config or dependencies not traceable to an AC/task
-  (unrelated refactors, extra features, out-of-scope items implemented).
+- **More**: behavior, endpoints, UI, config or dependencies not traceable to an AC or task (unrelated
+  refactors, extra features, out-of-scope items implemented).
 Each finding cites `file:line` and the AC/task it fails to map to.
 
 ### 6. Complete traceability
-Fill/refresh the table in `spec.md`:
+Fill or refresh `## Traceability` in `tasks.md`, one row per AC per affected side, with the **real** test:
 
-| AC | Task(s) | Test(s) (file › name) | Result | Code (files) |
-|---|---|---|---|---|
+| AC | Scenario | Side | Test |
+|----|----------|------|------|
 
-Only record results you observed in step 4. Update the table even when the verdict is "gaps".
+Test = `file › name` as found in step 3. Only record what you observed. Task numbers, results and code
+files go in the report, not in the table (the table format is fixed by `AGENTS.md` §4.4). Update the table
+even when the verdict is "gaps".
 
 ### 7. Verdict
-Present a short report: tasks gate, AC matrix, test run, drift findings, verdict.
+Present a short report: tasks gate, AC matrix, gates and test run, drift findings, verdict.
 
-- **No gaps and no drift** → set status to `Implemented` in the spec's *Definition of Done*
-  section of `spec.md` (tick its items) **and** the row in `specs/README.md`. Tell the user
-  what was changed.
-- **Any gap or drift** → leave status `In progress`, list each item with a recommended action
-  (add test, fix code, remove extra code, or amend the spec via `sdd-validate-impl`). Do not
-  edit the status.
+- **No gaps and no drift** → add to `## Validation log`: `Verified <date>: no gaps, no drift, gates green`.
+  Tell the user the change is ready: the submodule PRs link `openspec/changes/<change-id>`, and after they
+  merge the pointers are bumped and the change is archived (`/opsx:archive`, or
+  `openspec archive <change-id> --yes`).
+- **Any gap or drift** → list each item with a recommended action (add test, fix code, remove extra code,
+  or amend the spec through `/sdd-spec` and `/sdd-plan`). Do not add the `Verified` line.
 
 ## Don'ts
-- Don't mark `Implemented` with a failing/missing test, an unchecked task, or unexplained drift.
-- Don't edit AC text or tasks to make the verdict pass; changes to scope go through
-  `sdd-validate-impl`.
+- Don't declare the change ready with a failing/missing test, an unchecked task, a red gate or unexplained drift.
+- Don't edit AC text or tasks to make the verdict pass; scope changes go through `sdd-validate-impl`,
+  `/sdd-spec` and `/sdd-plan`.
+- Don't archive: archiving is the developer's step after the submodule PRs merge.
+- There is no `Implemented` status to set: the change is done when it is verified and archived.
+- Don't edit `**Status:**` or `**Plan:**`.
 - Don't commit unless asked.

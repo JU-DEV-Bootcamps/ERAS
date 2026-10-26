@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Self-test of the SDD check scripts (check-spec, check-plan, check-impl) against fixtures built from the worked examples.
-# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh
+# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|spec|skills]
+# With no argument every section runs (about 5 minutes on Windows); with one, only that section.
 # Exit 0 = every case behaved as expected.
 set -u
+
+only="${1:-all}"
+section() { [ "$only" = all ] || [ "$only" = "$1" ]; }
 
 skills="$(cd "$(dirname "$0")/../.." && pwd)"
 id="608-reject-duplicate-configuration-name"
@@ -49,6 +53,7 @@ impl="bash $skills/sdd-implement/scripts/check-impl.sh $id"
 spec="bash $skills/sdd-spec/scripts/check-spec.sh $id"
 c() { echo "$work/repo/openspec/changes/$id"; }
 
+if section plan; then
 echo "== check-plan"
 new_change;  expect "plan: valid example passes" 0 "Result: 0 error(s)" $plan
 new_change;  sed -i '/^| AC-3 /d' "$(c)/tasks.md"
@@ -79,6 +84,9 @@ new_change;  printf 'schema: spec-driven\nskip_specs: true\n' > "$(c)/.openspec.
              printf '# Tasks\n\n## 1. Docs\n\n- [ ] 1.1 Add the page and verify it renders\n\n## 2. Verification\n\n- [ ] 2.1 Verify the link works\n' > "$(c)/tasks.md"
              expect "plan: skip_specs change needs only proposal and tasks" 0 "Result: 0 error(s)" $plan
 
+fi
+
+if section impl; then
 echo "== check-impl"
 new_change;  add_all_tests
              expect "impl: complete change passes --final" 0 "Result: 0 error(s)" $impl --final
@@ -101,13 +109,51 @@ new_change;  add_all_tests; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
 new_change;  add_all_tests; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
              expect "impl: unchecked task is a warning in progress" 0 "still unchecked" $impl
 
-if [ -f "$skills/sdd-spec/scripts/check-spec.sh" ]; then
+fi
+
+if section spec && [ -f "$skills/sdd-spec/scripts/check-spec.sh" ]; then
   echo "== check-spec"
   new_change;  expect "spec: valid example passes" 0 "Result: 0 error(s)" $spec
   new_change;  sed -i 's/AC-2 Name of an inactive/AC-1 Name of an inactive/' "$(c)/specs/configuration-management/spec.md"
                expect "spec: duplicate AC numbers" 1 "duplicate AC numbers" $spec
   new_change;  sed -i '0,/^\*\*Side:\*\* BE$/{//d}' "$(c)/specs/configuration-management/spec.md"
                expect "spec: scenario without Side" 1 "has no **Side:** line" $spec
+fi
+
+if section skills; then
+echo "== check-skills"
+new_skills_root() {
+  rm -rf "$work/sk"
+  mkdir -p "$work/sk/.claude/skills/sdd-a/scripts"
+  printf '#!/bin/sh\n' > "$work/sk/.claude/skills/sdd-a/scripts/x.sh"
+  printf -- '---\nname: sdd-a\ndescription: test skill\nallowed-tools: Bash(bash .claude/skills/sdd-a/scripts/x.sh:*)\n---\nBody cites `.claude/skills/sdd-a/scripts/x.sh`.\n' > "$work/sk/.claude/skills/sdd-a/SKILL.md"
+  printf 'AGENTS\n| `/sdd-a` | test |\n' > "$work/sk/AGENTS.md"
+}
+skill_file() { echo "$work/sk/.claude/skills/sdd-a/SKILL.md"; }
+sk() { bash "$skills/sdd-plan/tests/check-skills.sh" "$work/sk"; }
+
+new_skills_root; expect "skills: aligned skill passes" 0 "Result: 0 error(s)" sk
+new_skills_root; sed -i 's/^name: sdd-a/name: sdd-b/' "$(skill_file)"
+                 expect "skills: name must equal the folder" 1 "frontmatter name" sk
+new_skills_root; printf 'Cites `.claude/skills/sdd-a/templates/missing.md`.\n' >> "$(skill_file)"
+                 expect "skills: dangling path" 1 "does not exist" sk
+new_skills_root; printf 'If `ERAS-FE/.claude/skills/eras-fe-test/SKILL.md` exists, follow it.\n' >> "$(skill_file)"
+                 expect "skills: optional path is allowed" 0 "Result: 0 error(s)" sk
+new_skills_root; printf 'Update the row in specs/README.md.\n' >> "$(skill_file)"
+                 expect "skills: legacy specs/README" 1 "specs/README" sk
+new_skills_root; printf -- '- [ ] T-3 Fix the thing\n' >> "$(skill_file)"
+                 expect "skills: legacy T-n task ids" 1 "T-n task ids" sk
+new_skills_root; printf 'Read `plan.md` first.\n' >> "$(skill_file)"
+                 expect "skills: plan.md as an artifact" 1 "plan.md without design.md" sk
+new_skills_root; printf 'Set the status to "Implemented".\n' >> "$(skill_file)"
+                 expect "skills: Implemented status" 1 "Implemented status" sk
+new_skills_root; printf 'There is no `Implemented` status to set.\n' >> "$(skill_file)"
+                 expect "skills: negated Implemented is allowed" 0 "Result: 0 error(s)" sk
+new_skills_root; printf 'AGENTS\n' > "$work/sk/AGENTS.md"
+                 expect "skills: skill missing from AGENTS.md" 1 "not documented in AGENTS.md" sk
+new_skills_root; rm "$work/sk/.claude/skills/sdd-a/scripts/x.sh"
+                 expect "skills: allowed-tools script missing" 1 "allowed-tools names" sk
+expect "skills: the real skills pass" 0 "Result: 0 error(s)" bash "$skills/sdd-plan/tests/check-skills.sh"
 fi
 
 echo

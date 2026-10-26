@@ -7,7 +7,7 @@ allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-plan/scripts/check-
 Turn an **Approved spec** into a plan a developer (or `/sdd-implement`) can follow without guessing.
 In this repo the OpenSpec artifacts of the plan are **`design.md`** (the plan: how) and **`tasks.md`**
 (the ordered checklist). `openspec status` needs `design.md` before it unlocks `tasks.md`, which is why the
-plan is not a separate `plan.md`. Rules: `AGENTS.md` §2–§5 and `openspec/config.yaml`.
+plan is `design.md` and not a separate `plan.md`. Rules: `AGENTS.md` §2–§5 and `openspec/config.yaml`.
 
 **Boundary.** Write only `design.md` and `tasks.md` of the change, and the `**Plan:**` line of `proposal.md`.
 Do NOT write code or tests, do NOT touch `ERAS-BE/` or `ERAS-FE/`, do NOT edit the spec (a problem in the
