@@ -92,10 +92,10 @@ Never read or print secrets (`.env`, `deploy/.env.prod`, `environment.developmen
    the open markers, and whether `design.md` will be required later (it is when the change spans BE and FE,
    adds a migration, touches auth, or changes an API contract; AGENTS.md §3.1). Then the next step:
    - markers or assumptions exist → run `/sdd-clarify <change-id>`;
-   - none → a human reviews the spec; afterwards `/opsx:propose` on this same change id
-     creates the missing `design.md` and `tasks.md` (it continues the existing change).
+   - none → a human reviews the spec and sets `**Status:** Approved`; afterwards `/sdd-plan <change-id>`
+     writes `design.md` and `tasks.md` (`/opsx:propose` on the same change id is the generic alternative).
    Do not start those steps yourself. Implementation still waits for the human approval of the
-   **complete** change (AGENTS.md §3.2); approving the spec early does not replace it.
+   **complete** change (AGENTS.md §3.2), recorded as `**Plan:** Approved`; approving the spec early does not replace it.
 
 ## Updating an existing change
 

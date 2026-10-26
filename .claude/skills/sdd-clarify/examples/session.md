@@ -52,4 +52,4 @@
 
 ## Report
 Questions 2/5 · direct fixes 2 · ACs added: `608-reject-duplicate-configuration-name/AC-2` · deferred 0 · `openspec validate --strict` passes · `check-spec.sh` 0 errors.
-Next: a human reviews the spec, then `/opsx:propose` on this change adds `design.md` and `tasks.md`.
+Next: a human reviews the spec and sets `Status: Approved`, then `/sdd-plan` on this change writes `design.md` and `tasks.md`.

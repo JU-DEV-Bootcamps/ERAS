@@ -11,7 +11,7 @@ mapping and commands — live in **AGENTS.md** and apply in full:
   with the `/opsx:propose` workflow (or `openspec new change <change-id>`), run
   `openspec validate <change-id> --strict`, and **stop for human approval**. Do not edit `ERAS-BE/` or `ERAS-FE/` until the change is approved.
   Then implement with `/opsx:apply`.
-- For a new feature or behavior change, prefer the spec-first path: `/sdd-spec` writes the Draft spec, `/sdd-clarify` closes its gaps, a human reviews it, then `/opsx:propose` on the same change adds `design.md` and `tasks.md`. Both skills only write `proposal.md` and the delta spec, never code.
+- For a new feature or behavior change, prefer the spec-first path: `/sdd-spec` writes the Draft spec, `/sdd-clarify` closes its gaps, a human sets `Status: Approved`, `/sdd-plan` writes `design.md` (the plan) and `tasks.md`, a human sets `Plan: Approved`, then `/sdd-implement` codes the tasks test first, `/sdd-validate-impl` is the manual gate (BE controller or FE changes) and `/sdd-verify` audits and recommends archiving. Conventions: AGENTS.md §3.3. `/opsx:propose` and `/opsx:apply` remain the generic alternative. Only `/sdd-implement` writes code; no skill commits.
 - Use `openspec instructions <artifact> --change <change-id>` to get schema guidance for
   `proposal`, `specs`, `design` and `tasks` before you write them.
 - Implement `tasks.md` in order. For each AC, write the tagged test first (AGENTS.md §4), see it fail, then implement. Tick a task only after its tests pass.

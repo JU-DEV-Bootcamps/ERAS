@@ -218,6 +218,20 @@ openspec/changes/<change-id>/
 - If implementation shows the spec is wrong or incomplete, **update the spec first**: edit the delta, re-validate, and flag it to the reviewer. Then continue.
 - Never mark a task `[x]` until its tests pass. Never archive a change with open tasks.
 
+### 3.3 SDD skill conventions
+
+The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` (§5.1) share these conventions. This section is their single source. Only `/sdd-implement` writes code; no skill commits.
+
+| Item | Convention |
+|---|---|
+| Files | `proposal.md` (why, what, status lines, logs), `specs/<capability>/spec.md` (ACs), `design.md` (**the plan**: layers, API contract, test strategy), `tasks.md` (checklist and Traceability) |
+| Status lines | In `proposal.md`: `**Status:** Draft \| Clarified \| Approved` for the spec and `**Plan:** Draft \| Approved` for `design.md` + `tasks.md`. **Only a human sets `Approved`.** Code waits for `Plan: Approved` |
+| AC | `#### Scenario: AC-<n> <title>` plus a line `**Side:** BE \| FE \| BE + FE`. Key: `<change-id>/AC-<n>` |
+| Tasks | `- [ ] <group>.<n> <description>`. A test task starts with "Write" and cites `(AC-<n>)`, and comes before its implementation task. Replaced tasks are struck through, never renumbered |
+| Logs | `## Clarifications` and `## Validation log` live in `proposal.md`. **Never in `spec.md`**: it is a delta that is merged into `openspec/specs/` on archive |
+| Done | Every task ticked, Traceability filled with real tests (exactly 1 per AC per side), §5.6 gates green, `openspec validate --strict`; then the submodule PRs merge and the change is archived. There is no separate `Implemented` status |
+| Checks | `.claude/skills/sdd-spec/scripts/check-spec.sh`, `sdd-plan/scripts/check-plan.sh`, `sdd-implement/scripts/check-impl.sh`, and `sdd-plan/tests/check-skills.sh` for the skills themselves. Self-test: `bash .claude/skills/sdd-plan/tests/run-tests.sh` |
+
 ---
 
 ## 4. Acceptance Criteria ↔ test mapping (1:1)
@@ -318,12 +332,16 @@ Project rules for OpenSpec artifacts (AC format, traceability table, design trig
 | `/opsx:sync` | 6 | Syncs the delta specs into `openspec/specs/` |
 | `/opsx:archive` | 6. Archive | Archives a completed change |
 
-**Project skills** (in `.claude/skills/`, optional spec-first path for step 1; they write only `proposal.md` and the delta spec, never code):
+**Project skills** (in `.claude/skills/`, optional spec-first path; conventions in §3.3. Only `/sdd-implement` writes code and none of them commits):
 
 | Command | Step (§3.2) | What it does |
 |---|---|---|
 | `/sdd-spec "<idea>"` | 1. Propose | Creates or updates the Draft spec (AC scenarios) of a change from an idea, with templates |
-| `/sdd-clarify <change-id>` | 1. Propose | Finds gaps in a Draft spec, asks at most 5 questions and records the answers. Then a human reviews, and `/opsx:propose` adds `design.md` and `tasks.md` |
+| `/sdd-clarify <change-id>` | 1. Propose | Finds gaps in a Draft spec, asks at most 5 questions and records the answers. Then a human reviews and sets `Status: Approved` |
+| `/sdd-plan <change-id>` | 1. Propose | For an Approved spec, writes `design.md` (the plan: layers, API contract, test strategy) and `tasks.md` with the traceability table. Then a human sets `Plan: Approved` (step 2) |
+| `/sdd-implement <change-id>` | 3. Implement | Works through `tasks.md` in order, test first, one tagged test per AC per side, then runs the §5.6 gates and reports. Needs `Plan: Approved`; never commits |
+| `/sdd-validate-impl <change-id>` | 4. Verify | Manual validation gate, only when a BE controller or the FE changed: hands you a checklist per AC, logs the result in `proposal.md` and sends problems back to `/sdd-implement` |
+| `/sdd-verify <change-id>` | 4. Verify | Audit: tasks ticked, one tagged test per AC per side, §5.6 gates, no drift from the spec and `design.md`. Fills the Traceability table and recommends archiving; never archives |
 
 ### 5.2 Backend (`ERAS-BE/`)
 
