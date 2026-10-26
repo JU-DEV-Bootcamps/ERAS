@@ -1,9 +1,10 @@
 name: Automatic deploy process
 
+# Manual-only: this workflow runs on a GitHub-hosted runner that cannot reach the private dev host,
+# so it never deployed anything and failed on every push to develop. The real deploy is
+# 'Deploy process on runner' (stage_deploy_runner.yml). See ERAS#571.
 on:
-  push:
-    branches:
-      - develop
+  workflow_dispatch:
 
 jobs:
   submodule-commits:
