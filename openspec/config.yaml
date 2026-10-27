@@ -30,7 +30,7 @@ rules:
   tasks:
     - Group tasks by side (BE, FE, Infra); for each AC put the test task before the implementation task
     - "End with a ## Traceability table: | AC | Scenario | Side | Test | with one row per AC per affected side"
-    - Finish with a verification group that runs the AGENTS.md section 5.6 gates
+    - Finish with a verification group that runs the AGENTS.md section 8.7 gates
 
 operations:
   apply:
@@ -41,3 +41,4 @@ operations:
   archive:
     guidance:
       - Archive only after the submodule PRs are merged and every traceability row points to a passing test
+      - Archive as the last commit of the approved parent-repo ship PR, before it merges (/sdd-archive); never in a separate PR after the merge

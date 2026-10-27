@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Checks the ADRs in openspec/adr/: file names, numbering, required fields and sections, supersede links and the index.
-# With --change, also checks that every ADR-NNNN cited by that change's design.md exists and is Accepted.
+# With --change, also checks that every ADR-NNNN cited by that change's design.md exists and is Accepted, and warns
+# when an ADR the change links or created (or one it supersedes, or the index) is not committed yet.
 # Usage (from the repository root): bash .claude/skills/sdd-adr/scripts/check-adr.sh [--change <change-id>]
 # Exit 0 = no errors (warnings may exist). Exit 1 = at least one error.
 set -u
@@ -26,7 +27,7 @@ err() { echo "ERROR: $*"; errors=$((errors + 1)); }
 warn() { echo "WARN:  $*"; warnings=$((warnings + 1)); }
 
 areas=" backend frontend auth data infra process "
-declare -A file status primary supersedes
+declare -A file status primary supersedes changeof
 
 field() { sed -n "s/^\*\*$1:\*\* *//p" <<< "$2" | head -1; }
 
@@ -67,6 +68,7 @@ for f in "$adr"/*.md; do
   done
 
   ch=$(field Change "$text")
+  changeof[$n]=$ch
   if [ -z "$ch" ]; then
     err "$base: has no '**Change:**' line (a change id or none)"
   elif [ "$ch" != none ] && [ ! -d "openspec/changes/$ch" ] && ! compgen -G "openspec/changes/archive/*-$ch" > /dev/null; then
@@ -151,17 +153,35 @@ else
   done
 fi
 
-# --change: every ADR the design links exists and is Accepted.
+# --change: every ADR the design links exists and is Accepted, and the change's ADR files are committed with it.
 if [ -n "$change" ]; then
   design="openspec/changes/$change/design.md"
+  linked=""
   if [ -f "$design" ]; then
-    for n in $(tr -d '\r' < "$design" | grep -oE 'ADR-[0-9]{4}' | sed 's/ADR-//' | sort -u); do
+    linked=$(tr -d '\r' < "$design" | grep -oE 'ADR-[0-9]{4}' | sed 's/ADR-//' | sort -u)
+    for n in $linked; do
       if [ -z "${file[$n]:-}" ]; then
         err "$change: design.md links ADR-$n, which does not exist"
       elif [ "${status[$n]}" != Accepted ]; then
         err "$change: design.md links ADR-$n, whose status is '${status[$n]}' (must be Accepted)"
       fi
     done
+  fi
+  if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    ship=""
+    for n in "${!file[@]}"; do
+      if [ "${changeof[$n]}" = "$change" ] || [[ " $(echo $linked) " == *" $n "* ]]; then
+        ship="$ship $adr/${file[$n]}"
+        for x in ${supersedes[$n]}; do [ -n "${file[$x]:-}" ] && ship="$ship $adr/${file[$x]}"; done
+      fi
+    done
+    if [ -n "$ship" ]; then
+      for p in $ship $index; do
+        [ -e "$p" ] || continue
+        [ -n "$(git status --porcelain -- "$p")" ] &&
+          warn "$change: $p is untracked or has uncommitted changes; commit it with the change (AGENTS.md section 8.3, step 5)"
+      done
+    fi
   fi
 fi
 

@@ -17,7 +17,7 @@ Delete this comment.
 | AC-1 | BE | `<Class> › <Method>` | <assertion that was missing> | yes |
 | AC-2 | BE | `<Class> › <Method>` | guard test: passed at once; fails when <condition> is removed (checked) | yes |
 
-### Gates (AGENTS.md section 5.6)
+### Gates (AGENTS.md section 8.7)
 | Gate | Command | Result |
 |---|---|---|
 | BE build | `dotnet build Eras.sln -warnaserror` | <pass / fail: output> |

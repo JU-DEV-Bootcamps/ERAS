@@ -24,7 +24,7 @@ sdd-spec > sdd-clarify > sdd-plan > sdd-implement > [sdd-validate-impl] > sdd-ve
 
 Only invoke this skill as the step after `sdd-implement` and before `sdd-verify`. Do not use
 it standalone or at any other point of the workflow. The conventions it relies on are in
-`AGENTS.md` §3.3.
+`AGENTS.md` §8.4.
 
 ## Change layout assumed
 
@@ -74,7 +74,7 @@ to `proposal.md` under `## Validation log`, in a block `### <date> – Round <n>
 3. **Errors** – invalid input, failing backend, empty/loading states, expired session.
 4. **Different views** – other roles, viewport sizes, languages, entry points where relevant.
 
-State how to run the app if useful (the `run` skill, or the local stack of `AGENTS.md` §5.5). Then
+State how to run the app if useful (the `run` skill, or the local stack of `AGENTS.md` §3.4). Then
 **stop and wait** for the developer's response. Do not proceed on assumptions.
 
 ### 4. Route on the developer's response

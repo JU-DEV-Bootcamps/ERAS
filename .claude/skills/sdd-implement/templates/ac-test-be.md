@@ -1,5 +1,5 @@
 <!--
-TEMPLATE for one backend AC test (xUnit, AGENTS.md section 4.2). Copy the skeleton, rename, fill.
+TEMPLATE for one backend AC test (xUnit, AGENTS.md section 6.3). Copy the skeleton, rename, fill.
 Rules:
 - ONE test per AC for the BE side, tagged with exactly ONE AC key. Helper/edge tests carry NO AC tag.
 - Put it where the AC's behavior is decided: business rule -> test/Eras.Application.Tests/Features/<Feature>/ (handler) or

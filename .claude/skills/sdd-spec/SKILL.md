@@ -5,7 +5,7 @@ allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-spec/scripts/check-
 ---
 
 Turn an idea into a **Draft spec** that a human can review: the Acceptance Criteria (ACs) of an
-OpenSpec change. The rules for specs live in `AGENTS.md` §3–§4 and `openspec/config.yaml`; this skill
+OpenSpec change. The rules for specs live in `AGENTS.md` §5 and §8 and `openspec/config.yaml`; this skill
 applies them. Read-only on code, write-only inside `openspec/changes/<change-id>/`.
 
 **Boundary.** Produce `proposal.md` and `specs/<capability>/spec.md` only. Do NOT write `design.md`,
@@ -35,7 +35,7 @@ Never read or print secrets (`.env`, `deploy/.env.prod`, `environment.developmen
 
    **No observable behavior change** (pure refactor, tooling, docs, CI)? Do not invent requirements.
    Tell the user this needs a change with `skip_specs: true` and only `proposal.md` + `tasks.md`
-   (AGENTS.md §3) and point to `/opsx:propose`; stop there.
+   (AGENTS.md §8.1) and point to `/opsx:propose`; stop there.
 
 2. **Check the project and find the change.**
    - `openspec list --json` (the `root` must not be null; if it is, stop and tell the user).
@@ -90,12 +90,12 @@ Never read or print secrets (`.env`, `deploy/.env.prod`, `environment.developmen
 
 9. **Stop and report.** Give: change id and paths, the capabilities and number of ACs, the assumptions,
    the open markers, and whether `design.md` will be required later (it is when the change spans BE and FE,
-   adds a migration, touches auth, or changes an API contract; AGENTS.md §3.1). Then the next step:
+   adds a migration, touches auth, or changes an API contract; AGENTS.md §8.2). Then the next step:
    - markers or assumptions exist → run `/sdd-clarify <change-id>`;
    - none → a human reviews the spec and sets `**Status:** Approved`; afterwards `/sdd-plan <change-id>`
      writes `design.md` and `tasks.md` (`/opsx:propose` on the same change id is the generic alternative).
    Do not start those steps yourself. Implementation still waits for the human approval of the
-   **complete** change (AGENTS.md §3.2), recorded as `**Plan:** Approved`; approving the spec early does not replace it.
+   **complete** change (AGENTS.md §8.3), recorded as `**Plan:** Approved`; approving the spec early does not replace it.
 
 ## Updating an existing change
 

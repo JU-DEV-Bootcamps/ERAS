@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Consistency check of the sdd-* skills in .claude/skills/ against the OpenSpec layout of AGENTS.md section 3.3.
+# Consistency check of the sdd-* skills in .claude/skills/ against the OpenSpec layout of AGENTS.md section 8.4.
 # Usage: bash .claude/skills/sdd-plan/tests/check-skills.sh [repo-root]   (default: the repository containing this script)
 # Exit 0 = no errors. Exit 1 = at least one error.
 set -u
@@ -11,6 +11,7 @@ errors=0
 err() { echo "ERROR: $*"; errors=$((errors + 1)); }
 
 [ -d "$skills" ] || { echo "no .claude/skills under $root" >&2; exit 2; }
+sections=$( [ -f "$agents" ] && tr -d '\r' < "$agents" | grep -oE '^#{2,3} [0-9]+(\.[0-9]+)?' | grep -oE '[0-9]+(\.[0-9]+)?')
 
 count=0
 for dir in "$skills"/sdd-*/; do
@@ -40,7 +41,13 @@ for dir in "$skills"/sdd-*/; do
   echo "$text" | grep -E '["`]Implemented["`]' | grep -vqE '[Nn]o [^.]*Implemented' && err "$name: uses an Implemented status (done = ticked, traced, gates green, archived)"
 
   if [ -f "$agents" ]; then
-    grep -qF "/$name" "$agents" || err "$name: is not documented in AGENTS.md (section 5.1 table)"
+    grep -qF "/$name" "$agents" || err "$name: is not documented in AGENTS.md (section 8.5 table)"
+    # Every AGENTS.md section the skill, its templates or its examples cite must be a heading of AGENTS.md.
+    cited=$(cat "$file" $(find "${dir}templates" "${dir}examples" -name '*.md' 2>/dev/null) | tr -d '\r' |
+      grep -oE '(§ ?|[Ss]ections? )[0-9]+(\.[0-9]+)?( and [0-9]+(\.[0-9]+)?)?' | grep -oE '[0-9]+(\.[0-9]+)?' | sort -u)
+    for s in $cited; do
+      echo "$sections" | grep -qx "$s" || err "$name: cites AGENTS.md section $s, which is not a heading of AGENTS.md"
+    done
   fi
 done
 

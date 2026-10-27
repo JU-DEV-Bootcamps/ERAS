@@ -6,8 +6,8 @@ allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-implement/scripts/c
 
 Write the code of an approved change by following `tasks.md` in order and `design.md` as the plan, one tagged
 test per Acceptance Criterion (AC) per side, **test first**. This skill is the ERAS-specific version of
-`/opsx:apply`: same task loop, plus the approval gates, the AC test tags and the §5.6 gates.
-Rules: `AGENTS.md` (§1 principles, §2 golden paths, §4 AC↔test, §5 commands) and `openspec/config.yaml`.
+`/opsx:apply`: same task loop, plus the approval gates, the AC test tags and the §8.7 gates.
+Rules: `AGENTS.md` (§1.1 principles, §6–§7 golden paths, rules and tests, §5.2 AC↔test, §3 commands) and `openspec/config.yaml`.
 
 **Boundary.** Edit code and tests in `ERAS-BE/` and `ERAS-FE/`, tick `tasks.md`, and fill its Traceability table.
 Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your own, do NOT set `**Status:**` or
@@ -50,7 +50,7 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
    - **Test tasks** (they start with "Write"): write the tagged test from the template, run it **alone**, and confirm it fails
      **for the right reason** (the behavior is missing: an assertion or a missing member, not a typo, wrong setup or selector).
      Keep the failure message for the report. Then tick the task.
-   - **Implementation tasks:** implement following the golden path of `AGENTS.md` §2 and the plan in `design.md`; run the test
+   - **Implementation tasks:** implement following the golden path of `AGENTS.md` §6.1 (BE) or §7.1 (FE) and the plan in `design.md`; run the test
      from the previous task until it passes, then run the neighbouring tests of the area you touched.
    - **Guard tests:** an AC test that passes before any implementation (it protects behavior the code could break) is allowed
      only when the task says so. Prove it can fail by temporarily breaking the code, restore it, and note this in the report.
@@ -61,7 +61,7 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
      `xdescribe` or a skipped `[Fact(Skip=…)]`. If `ERAS-FE/.claude/skills/eras-fe-test/SKILL.md` exists, follow it for FE tests.
 
 5. **Code rules while writing** (AGENTS.md; do not relax them to make a task fit):
-   - Target style only; never copy the legacy patterns listed in §2.1/§2.2. Do not refactor legacy code outside the change's scope.
+   - Target style only; never copy the legacy patterns listed in §6.2/§7.2. Do not refactor legacy code outside the change's scope.
    - BE: `CancellationToken` from controller to EF, `Async` suffix, handlers throw `Eras.Error` exceptions, thin controllers with
      `[Authorize(Policy = ErasPolicies.…)]`, ownership rules in the handler, correct `ILogger<T>`, no secrets, no stack traces to clients.
      Schema changes get a **new** migration (`dotnet ef migrations add …`); never edit an applied one or hand-edit the model snapshot.
@@ -86,18 +86,18 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
 
 8. **When every task is ticked, close the change** (this is the verification group of `tasks.md`):
    - Fill the Traceability table with the **real** test names and paths (file › name), one row per AC per side.
-   - Run the full gates of `AGENTS.md` §5.6 and keep the real output: BE `dotnet build Eras.sln -warnaserror`,
+   - Run the full gates of `AGENTS.md` §8.7 and keep the real output: BE `dotnet build Eras.sln -warnaserror`,
      `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage (`--collect:"XPlat Code Coverage" … --settings coverlet.runsettings`, ≥ 25%);
      FE `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (≥ 15%), `npm run build`.
-   - `bash .claude/skills/sdd-implement/scripts/check-impl.sh "<change-id>" --final` and the §5.4 traceability check: exactly 1 test per AC per affected side.
+   - `bash .claude/skills/sdd-implement/scripts/check-impl.sh "<change-id>" --final` and the §8.6 traceability check: exactly 1 test per AC per affected side.
    - `openspec validate "<change-id>" --strict`.
    - A gate that fails or cannot run stays failed in the report with its output; never claim a pass you did not observe,
      and never tick a verification task whose gate is red.
 
 9. **Report and hand off** using the report template: results of every gate, what was not verified, the follow-ups, and the
    proposed commits per repo (submodule branches and messages in Conventional Commits, `git add` lists, parent commit for `tasks.md`).
-   Do not commit. Next: `/sdd-validate-impl` when a BE controller or the FE changed, then `/sdd-verify`; archive only after the
-   submodule PRs merge (`/opsx:archive`).
+   Do not commit. Next: `/sdd-validate-impl` when a BE controller or the FE changed, then `/sdd-verify`; then, once the ship PR
+   is approved and the submodule PRs are merged, `/sdd-archive` as the ship PR's last commit.
 
 ## Guardrails
 

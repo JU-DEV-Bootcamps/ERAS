@@ -1,5 +1,5 @@
 <!--
-TEMPLATE for one frontend AC test (Jasmine/Karma, AGENTS.md section 4.3). Copy the skeleton, rename, fill.
+TEMPLATE for one frontend AC test (Jasmine/Karma, AGENTS.md section 7.3). Copy the skeleton, rename, fill.
 Rules:
 - ONE it() per AC for the FE side. The AC key goes FIRST in the title, in square brackets, exactly: [<change-id>/AC-<n>].
 - The spec file sits next to the unit as <unit>.spec.ts. Helper/edge it()s carry NO AC key.

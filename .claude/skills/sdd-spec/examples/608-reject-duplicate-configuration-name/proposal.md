@@ -1,6 +1,6 @@
 # Proposal
 
-<!-- ILLUSTRATIVE EXAMPLE of a filled-in proposal. The change is fictional (it reuses the 608 example of AGENTS.md section 3.1). Do not copy its content. -->
+<!-- ILLUSTRATIVE EXAMPLE of a filled-in proposal. The change is fictional (it reuses the 608 example of AGENTS.md section 8.2). Do not copy its content. -->
 
 **Status:** Draft
 

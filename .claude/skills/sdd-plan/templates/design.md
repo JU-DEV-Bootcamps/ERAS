@@ -34,7 +34,7 @@ Delete every HTML comment and every section that truly does not apply to this ch
 ## Changes by layer
 
 <!-- Only the sides and layers this change touches. Cite ACs per item. Follow the golden paths of
-     AGENTS.md section 2; do not copy the legacy patterns listed there. -->
+     AGENTS.md sections 6.1 and 7.1; do not copy the legacy patterns listed in 6.2 and 7.2. -->
 
 ### Backend (`ERAS-BE/`)
 
@@ -74,7 +74,7 @@ Delete every HTML comment and every section that truly does not apply to this ch
 ## Test strategy
 
 <!-- One row per AC per affected side (the Side line of the AC). Layer = where the behavior is decided
-     (AGENTS.md section 4.2): business rule -> handler/domain test; status code or authorization -> Api test;
+     (AGENTS.md section 6.3): business rule -> handler/domain test; status code or authorization -> Api test;
      FE -> Jasmine spec next to the unit. The test names here are the ones tasks.md will carry. -->
 
 | AC | Side | Layer / project | Planned test (file › name) |
@@ -82,7 +82,7 @@ Delete every HTML comment and every section that truly does not apply to this ch
 | AC-1 | BE | Application: `test/Eras.Application.Tests/Features/<Feature>/` | `<Handler>Tests.cs` › `HandleAsync_<Condition>_<Expected>Async` |
 | AC-1 | FE | `src/app/modules/<feature>/.../<unit>.spec.ts` | `[<change-id>/AC-1] <behavior the user sees>` |
 
-Extra edge-case tests carry no AC tag. Coverage gates: BE >= 25%, FE >= 15% (AGENTS.md section 5.6).
+Extra edge-case tests carry no AC tag. Coverage gates: BE >= 25%, FE >= 15% (AGENTS.md section 8.7).
 
 ## Risks / Trade-offs
 

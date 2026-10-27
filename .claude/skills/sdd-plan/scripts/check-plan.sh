@@ -92,11 +92,11 @@ echo "$groups" | grep -qE 'BE|FE|Infra' || warn "no task group is named by side 
 last_group=$(echo "$groups" | tail -1)
 echo "$last_group" | grep -qi 'verif' || err "the last task group must be the verification group (it is '$last_group')"
 verif_text=$(tr -d '\r' < "$tasks" | awk '/^## [0-9]+\./ { g = $0 } g ~ /[Vv]erif/ { print }')
-if ! echo "$verif_text" | grep -q '5\.6'; then
+if ! echo "$verif_text" | grep -q '8\.7'; then
   if [ "$skip_specs" -eq 1 ]; then
-    warn "the verification group does not cite the AGENTS.md section 5.6 gates (fine when no BE/FE code changes)"
+    warn "the verification group does not cite the AGENTS.md section 8.7 gates (fine when no BE/FE code changes)"
   else
-    err "the verification group must run the AGENTS.md section 5.6 gates (cite 5.6)"
+    err "the verification group must run the AGENTS.md section 8.7 gates (cite 8.7)"
   fi
 fi
 
