@@ -23,6 +23,20 @@
 - [x] 4.2 `bash .claude/skills/sdd-plan/tests/check-skills.sh` and `bash .claude/skills/sdd-adr/scripts/check-adr.sh` report no errors
 - [x] 4.3 `bash .claude/skills/sdd-plan/tests/run-tests.sh` passes with every case ok
 
+## 5. Archive inside the ship PR
+
+- [x] 5.1 Add `.claude/skills/sdd-archive/` with `SKILL.md` (gate, archive with or without `--skip-specs`, validate all, list files, never commits) and `scripts/check-archive.sh`, and verify `check-skills.sh` passes on it
+- [x] 5.2 Write the `check-archive.sh` cases in `run-tests.sh` (complete change passes; unticked task, missing `Verified` line and a linked ADR not Accepted fail), and verify they pass
+- [x] 5.3 Update `AGENTS.md` §8.3 step 6, §8.4 (chain and Done), §8.5 (`/sdd-archive` row) and §8.7, and verify they say "last commit of the ship PR, before it merges"
+- [x] 5.4 Update `.claude/skills/sdd-verify/SKILL.md` to recommend `/sdd-archive`, the archive guidance in `openspec/config.yaml` and the chain in `CLAUDE.md`, and verify no doc still says to archive after the merge (outside `openspec/changes/archive/`)
+
+## 6. Verification
+
+- [x] 6.1 `openspec validate --changes --strict` passes
+- [x] 6.2 `check-skills.sh` and `check-adr.sh` report no errors
+- [x] 6.3 `bash .claude/skills/sdd-plan/tests/run-tests.sh` passes with every case ok
+
 ## Follow-ups
 
-- None.
+- A CI check that fails a parent-repo ship PR when a change with every task ticked is not archived. A CI change with its own spec.
+- `check-archive.sh` has no fixture for the submodule-pointer check (it needs nested git repos); it is exercised on real changes.

@@ -100,8 +100,9 @@ Present a short report: tasks gate, AC matrix, gates and test run, linked ADRs, 
   §8.3 step 5): `openspec/changes/<change-id>/`, every linked or created ADR in `openspec/adr/` that is
   untracked or modified, `openspec/adr/README.md` when it changed, and any ADR whose Status this change
   superseded (`git status --short openspec/` shows them). The submodule PRs link
-  `openspec/changes/<change-id>`, and after they merge the pointers are bumped and the change is archived
-  (`/opsx:archive`, or `openspec archive <change-id> --yes`).
+  `openspec/changes/<change-id>` and merge, the ship PR bumps the pointers to the merged commits, and once
+  the ship PR is approved `/sdd-archive <change-id>` archives the change as its last commit, before it merges
+  (`AGENTS.md` §8.3 step 6).
 - **Any gap or drift** → list each item with a recommended action (add test, fix code, remove extra code,
   or amend the spec through `/sdd-spec` and `/sdd-plan`). Do not add the `Verified` line.
 
@@ -110,7 +111,7 @@ Present a short report: tasks gate, AC matrix, gates and test run, linked ADRs, 
   not Accepted, or unexplained drift.
 - Don't edit AC text or tasks to make the verdict pass; scope changes go through `sdd-validate-impl`,
   `/sdd-spec` and `/sdd-plan`.
-- Don't archive: archiving is the developer's step after the submodule PRs merge.
+- Don't archive: that is `/sdd-archive`, after the ship PR is approved.
 - There is no `Implemented` status to set: the change is done when it is verified and archived.
 - Don't edit `**Status:**` or `**Plan:**`.
 - Don't commit unless asked.

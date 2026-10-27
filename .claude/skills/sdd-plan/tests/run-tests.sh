@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Self-test of the SDD check scripts (check-spec, check-plan, check-impl, check-adr, check-skills) against fixtures built from the worked examples.
-# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|spec|adr|skills]
+# Self-test of the SDD check scripts (check-spec, check-plan, check-impl, check-adr, check-archive, check-skills) against fixtures built from the worked examples.
+# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|spec|adr|archive|skills]
 # With no argument every section runs (about 5 minutes on Windows); with one, only that section.
 # Exit 0 = every case behaved as expected.
 set -u
@@ -193,6 +193,30 @@ new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/de
               expect "adr: --change with everything committed has no warning" 0 "Result: 0 error(s), 0 warning(s)" $adrc --change $id
 cd "$skills/../.." || exit 1
 expect "adr: the real ADRs pass" 0 "Result: 0 error(s)" $adrc
+fi
+
+if section archive; then
+echo "== check-archive"
+archc="bash $skills/sdd-archive/scripts/check-archive.sh $id"
+ready_change() {
+  new_change
+  sed -i 's/^- \[ \]/- [x]/' "$(c)/tasks.md"
+  printf '\n## Validation log\n\n- Verified 2026-10-27: no gaps, no drift, gates green\n' >> "$(c)/proposal.md"
+}
+ready_change; expect "archive: verified change passes" 0 "Result: 0 error(s)" $archc
+ready_change; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
+              expect "archive: unchecked task" 1 "unchecked task" $archc
+ready_change; printf -- '- [ ] ~~9.9~~ (replaced by 1.1)\n' >> "$(c)/tasks.md"
+              expect "archive: struck-through task is ignored" 0 "Result: 0 error(s)" $archc
+ready_change; sed -i '/^- Verified /d' "$(c)/proposal.md"
+              expect "archive: no Verified line" 1 "no 'Verified <date>' line" $archc
+ready_change; printf '\n## Clarifications\n\n- Verified 2026-10-27 is not here\n' >> "$(c)/proposal.md"; sed -i '/^- Verified 2026-10-27: /d' "$(c)/proposal.md"
+              expect "archive: Verified outside the Validation log" 1 "no 'Verified <date>' line" $archc
+ready_change; mkdir -p openspec/adr
+              printf '# ADR-0001: x\n\n**Status:** Proposed\n**Date:** 2026-10-27\n**Area:** process\n**Change:** none\n\n## Context\n\n## Decision\n\n## Alternatives\n\n## Consequences\n' > openspec/adr/0001-x.md
+              printf '# ADRs\n\n### process\n\n| [ADR-0001](0001-x.md) | x | Proposed | — |\n' > openspec/adr/README.md
+              printf '\n**ADR:** ADR-0001\n' >> "$(c)/design.md"
+              expect "archive: linked ADR not Accepted" 1 "must be Accepted" $archc
 fi
 
 if section skills; then

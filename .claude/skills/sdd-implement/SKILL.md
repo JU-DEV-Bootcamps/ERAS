@@ -96,8 +96,8 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
 
 9. **Report and hand off** using the report template: results of every gate, what was not verified, the follow-ups, and the
    proposed commits per repo (submodule branches and messages in Conventional Commits, `git add` lists, parent commit for `tasks.md`).
-   Do not commit. Next: `/sdd-validate-impl` when a BE controller or the FE changed, then `/sdd-verify`; archive only after the
-   submodule PRs merge (`/opsx:archive`).
+   Do not commit. Next: `/sdd-validate-impl` when a BE controller or the FE changed, then `/sdd-verify`; then, once the ship PR
+   is approved and the submodule PRs are merged, `/sdd-archive` as the ship PR's last commit.
 
 ## Guardrails
 

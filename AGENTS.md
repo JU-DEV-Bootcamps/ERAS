@@ -382,7 +382,7 @@ openspec/changes/<change-id>/
 | 3. Implement | dev / agent | Work through `tasks.md` in order. AC tests first, then code. Tick tasks as they finish | Tests green |
 | 4. Verify | dev / agent | Run all gates (§8.7) and the traceability check (§8.6) | All green, every AC traced |
 | 5. Ship | dev | The parent-repo commit/PR carries `openspec/changes/<id>/` **and the change's ADR files**: every ADR it creates or links that is not yet committed, the `openspec/adr/README.md` index, and the Status line of any ADR it supersedes. Submodule PRs (BE and/or FE) link `openspec/changes/<id>`, then bump the parent pointer | CI green, PR approved, `check-adr.sh --change <id>` shows no uncommitted ADR |
-| 6. Archive | dev | `openspec archive <id> --yes` merges the deltas into `openspec/specs/` | Done after merge |
+| 6. Archive | dev / agent | After the ship PR is approved and the submodule PRs are merged, `/sdd-archive <id>` runs `openspec archive <id> --yes` (`--skip-specs` for a `skip_specs` change), which merges the deltas into `openspec/specs/`. The archive is the **last commit of the ship PR, before it merges**; there is no separate archive PR. For a `skip_specs` change with no submodule work, the ship PR is the change's own PR | `check-archive.sh <id>` passes, `openspec validate --all --strict` passes, then the ship PR merges |
 
 **Agent obligations**
 - When asked to change code and no matching change exists, **stop**. Draft the OpenSpec change and ask for approval before you touch code.
@@ -391,7 +391,7 @@ openspec/changes/<change-id>/
 
 ### 8.4 SDD skill conventions
 
-The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` (§8.5), plus `/sdd-adr` (called from `/sdd-plan` or on its own), share these conventions. This section is their single source. Only `/sdd-implement` writes code; no skill commits.
+The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` → `/sdd-archive` (§8.5), plus `/sdd-adr` (called from `/sdd-plan` or on its own), share these conventions. This section is their single source. Only `/sdd-implement` writes code; no skill commits.
 
 | Item | Convention |
 |---|---|
@@ -400,10 +400,10 @@ The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` �
 | AC | `#### Scenario: AC-<n> <title>` plus a line `**Side:** BE \| FE \| BE + FE`. Key: `<change-id>/AC-<n>` |
 | Tasks | `- [ ] <group>.<n> <description>`. A test task starts with "Write" and cites `(AC-<n>)`, and comes before its implementation task. Replaced tasks are struck through, never renumbered |
 | Logs | `## Clarifications` and `## Validation log` live in `proposal.md`. **Never in `spec.md`**: it is a delta that is merged into `openspec/specs/` on archive |
-| Done | Every task ticked, Traceability filled with real tests (exactly 1 per AC per side), §8.7 gates green, `openspec validate --strict`; then the parent-repo commit carries the change folder and its ADR files (§8.3 step 5), the submodule PRs merge and the change is archived. There is no separate `Implemented` status |
+| Done | Every task ticked, Traceability filled with real tests (exactly 1 per AC per side), §8.7 gates green, `openspec validate --strict`; then the parent-repo commit carries the change folder and its ADR files (§8.3 step 5), the submodule PRs merge, the change is archived as the last commit of the ship PR (§8.3 step 6) and the ship PR merges. There is no separate `Implemented` status |
 | ADR | One decision per file in `openspec/adr/NNNN-<kebab-title>.md`, numbered from `0001` with no gaps, never reused. Fields `**Status:**` (`Proposed`, `Accepted`, `Rejected`, `Deprecated`, `Superseded by ADR-NNNN`), `**Date:**`, `**Area:**` (`backend`, `frontend`, `auth`, `data`, `infra`, `process`), `**Change:**`, optional `**Supersedes:**`; sections Context, Decision, Alternatives, Consequences. Index: `openspec/adr/README.md`, grouped by Area |
 | ADR use | An ADR is for a decision that outlives its change: a dependency or pattern, an auth/role/ownership model, a data or migration approach, a cross-cutting BE ↔ FE contract, a departure from a golden path (§6.1, §7.1). The `design.md` D-block links it as `**ADR:** ADR-NNNN`. **Only a human sets `Accepted`**, usually with `Plan: Approved`. An Accepted ADR is never rewritten: a new ADR supersedes it, and the old one's Status becomes `Superseded by ADR-MMMM` once the new one is Accepted. `/sdd-verify` requires every linked ADR to be Accepted, and the ADR files ship in the change's commit (§8.3 step 5) |
-| Checks | `.claude/skills/sdd-spec/scripts/check-spec.sh`, `sdd-plan/scripts/check-plan.sh`, `sdd-implement/scripts/check-impl.sh`, `sdd-adr/scripts/check-adr.sh`, and `sdd-plan/tests/check-skills.sh` for the skills themselves. Self-test: `bash .claude/skills/sdd-plan/tests/run-tests.sh` |
+| Checks | `.claude/skills/sdd-spec/scripts/check-spec.sh`, `sdd-plan/scripts/check-plan.sh`, `sdd-implement/scripts/check-impl.sh`, `sdd-adr/scripts/check-adr.sh`, `sdd-archive/scripts/check-archive.sh`, and `sdd-plan/tests/check-skills.sh` for the skills themselves. Self-test: `bash .claude/skills/sdd-plan/tests/run-tests.sh` |
 
 ### 8.5 Slash commands and skills
 
@@ -427,7 +427,8 @@ The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` �
 | `/sdd-plan <change-id>` | 1. Propose | For an Approved spec, writes `design.md` (the plan: layers, API contract, test strategy) and `tasks.md` with the traceability table. Then a human sets `Plan: Approved` (step 2) |
 | `/sdd-implement <change-id>` | 3. Implement | Works through `tasks.md` in order, test first, one tagged test per AC per side, then runs the §8.7 gates and reports. Needs `Plan: Approved`; never commits |
 | `/sdd-validate-impl <change-id>` | 4. Verify | Manual validation gate, only when a BE controller or the FE changed: hands you a checklist per AC, logs the result in `proposal.md` and sends problems back to `/sdd-implement` |
-| `/sdd-verify <change-id>` | 4. Verify | Audit: tasks ticked, one tagged test per AC per side, §8.7 gates, linked ADRs Accepted, no drift from the spec and `design.md`. Fills the Traceability table, lists the files the parent-repo commit must carry (change folder and ADRs) and recommends archiving; never archives |
+| `/sdd-verify <change-id>` | 4. Verify | Audit: tasks ticked, one tagged test per AC per side, §8.7 gates, linked ADRs Accepted, no drift from the spec and `design.md`. Fills the Traceability table, lists the files the parent-repo commit must carry (change folder and ADRs) and recommends `/sdd-archive`; never archives |
+| `/sdd-archive <change-id>` | 6. Archive | After `/sdd-verify` and the ship PR's approval: checks the gate (tasks ticked, `Verified` line, linked ADRs Accepted, submodule pointers merged), archives the change as the last commit of the ship PR, validates the living specs and lists the files to commit; never commits |
 | `/sdd-adr ["<decision>"]` | 1. Propose (or any time) | Writes an ADR in `openspec/adr/` (status `Proposed`) or supersedes one, and updates the index. `/sdd-plan` offers it for architectural decisions; a human sets `Accepted` |
 
 ### 8.6 AC traceability check (Git Bash)
@@ -452,7 +453,8 @@ done
 - [ ] BE: build with `-warnaserror`, `dotnet format --verify-no-changes` and `dotnet test` all green, coverage ≥ 25%
 - [ ] FE: `npm run lint` and the headless `npm test` green, coverage ≥ 15%, `npm run build` OK
 - [ ] Every ADR the change links is `Accepted`, and the parent-repo commit carries the change folder and its ADR files (§8.3 step 5)
-- [ ] Submodule PRs link the change. After merge, the parent pointer is bumped and the change is archived
+- [ ] Submodule PRs link the change and are merged, and the ship PR bumps the parent pointer to the merged commits
+- [ ] The change is archived (`/sdd-archive`) as the last commit of the ship PR, after its approval and before it merges
 
 ---
 

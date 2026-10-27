@@ -26,8 +26,13 @@
   - §8.3 step 5 Ship and §8.4 Done: the parent-repo commit/PR of the change includes `openspec/changes/<id>/`, every ADR the change creates or links in `openspec/adr/` that is not yet committed, the `openspec/adr/README.md` index, and the Status line of any ADR it supersedes.
   - `/sdd-verify` lists those exact files in its ready-to-ship verdict, and `/sdd-adr` names them in its report.
   - `check-adr.sh --change <id>` warns when a linked ADR file, or the index, is untracked or has uncommitted changes in git.
+- **Archive inside the ship PR** (folded in on 2026-10-27, at the user's request, before this change was pushed):
+  - §8.3 step 6, §8.4 Done and §8.7: a change is archived as the **last commit of its parent-repo ship PR**, after that PR is approved and the submodule PRs are merged, and before the ship PR merges. No separate archive PR. For a `skip_specs` change with no submodule work, the ship PR is the change's own PR.
+  - Add the project skill `/sdd-archive`. It checks the gate with `check-archive.sh`: every task ticked, a `Verified` line in `## Validation log`, linked ADRs Accepted (`check-adr.sh --change`), and each bumped submodule pointer reachable from that submodule's `origin/develop`. Then it runs `openspec archive <id> --yes` (with `--skip-specs` when `skip_specs: true`), runs `openspec validate --all --strict`, and lists the files to commit. It never commits.
+  - `/sdd-verify` ends by recommending `/sdd-archive` instead of a manual archive after the merge. `openspec/config.yaml` archive guidance and `CLAUDE.md` follow. `/opsx:archive` stays as the generic alternative.
+  - Once its PR is approved, this change archives itself with `/sdd-archive` as the first use of the flow.
 
-**Out of scope:** rewording or changing any rule beyond the ADR shipping rule, changes to the `/opsx:*` workflows, archived changes, and any change in `ERAS-BE/` or `ERAS-FE/`.
+**Out of scope:** rewording or changing any rule beyond the ADR shipping and archive timing rules, a CI job that archives or enforces archiving (follow-up), changes to the `/opsx:*` workflows, archived changes, and any change in `ERAS-BE/` or `ERAS-FE/`.
 
 ## Capabilities
 
@@ -43,3 +48,9 @@
 - **Data / migration:** none
 
 Builds on `623`, `625` and `627` (archived). No spec-level behavior changes, so this change sets `skip_specs: true` (AGENTS.md, spec-first rule for tooling and docs).
+
+## Validation log
+
+- Skipped: no BE controller or FE change (`/sdd-validate-impl` not applicable; parent repo docs and tooling only).
+- Note: this branch also moves `627-add-sdd-adr-skill` into `openspec/changes/archive/`; that is change 627's own archive step (merged in #647), not 621 scope.
+- Verified 2026-10-27: no gaps, no drift, gates green (`openspec validate --strict`, `check-skills.sh`, `check-adr.sh --change`, `check-impl.sh --final`, `run-tests.sh` 70/70).
