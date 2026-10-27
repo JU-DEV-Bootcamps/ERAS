@@ -32,3 +32,9 @@ The plan lives in `design.md`, not a separate `plan.md`: the spec-driven schema 
 - **Data / migration:** none
 
 Depends on the conventions of change `623-add-sdd-spec-and-clarify-skills` (Status line, Side per AC, `check-spec.sh`). No spec-level behavior changes, so this change sets `skip_specs: true` (AGENTS.md section 3, tooling and docs).
+
+## Validation log
+
+- Skipped: no BE controller or FE change (`/sdd-validate-impl` not applicable; parent repo docs and tooling only).
+- Note: verified after the fact on 2026-10-27, before archiving. The work merged to `develop` earlier; later changes (627, 621) renumbered the `AGENTS.md` sections cited above, which this change keeps as history.
+- Verified 2026-10-27: no gaps, no drift, gates green (`openspec validate --strict`, `check-skills.sh`, `run-tests.sh` 70/70 on 2026-10-27).
