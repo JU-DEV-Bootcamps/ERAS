@@ -18,6 +18,12 @@ Create or supersede an ADR with `/sdd-adr`. Check this folder with
 
 ## Index
 
+### data
+
+| ADR | Title | Status | Superseded by |
+|---|---|---|---|
+| [ADR-0002](0002-match-text-search-ignoring-accents-in-the-application.md) | Match text searches ignoring case and accents in the application, not in SQL | Accepted | — |
+
 ### process
 
 | ADR | Title | Status | Superseded by |
