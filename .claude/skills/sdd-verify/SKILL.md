@@ -8,7 +8,7 @@ description: >
   section 5.6 gates pass, and the code does no more and no less than the spec and design.md
   (no drift). Completes the Traceability table and, only if there are no gaps or drift,
   recommends archiving. It never archives or commits.
-allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-implement/scripts/check-impl.sh:*)
+allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-implement/scripts/check-impl.sh:*) Bash(bash .claude/skills/sdd-adr/scripts/check-adr.sh:*)
 ---
 
 # SDD: Verify and Close a Change
@@ -66,7 +66,14 @@ Run only the sides the change touches. A failing or unrunnable gate or test = ga
 output; never claim a pass you didn't observe. If a build is blocked by file locks (running `Eras.Api` or
 Visual Studio), ask the user to stop it.
 
-### 5. Drift check (no more, no less)
+### 5. Linked ADRs
+Run `bash .claude/skills/sdd-adr/scripts/check-adr.sh --change "<change-id>"`: every `ADR-NNNN` that
+`design.md` links must exist in `openspec/adr/` and be `Accepted`, and the ADR folder must be consistent.
+A linked ADR that is still `Proposed`, or was `Rejected` or superseded, is a **gap**: a human accepts it, or
+the design is amended through `/sdd-plan` (and `/sdd-adr` for a replacement). Also check that the code
+follows each linked ADR's Decision; a departure is drift.
+
+### 6. Drift check (no more, no less)
 Compare the feature's code against the spec and `design.md`. The code lives in the submodules, so diff
 each touched one: `git -C ERAS-BE diff develop...HEAD`, `git -C ERAS-FE diff develop...HEAD`.
 - **Less**: an AC or in-scope item with no corresponding code.
@@ -74,7 +81,7 @@ each touched one: `git -C ERAS-BE diff develop...HEAD`, `git -C ERAS-FE diff dev
   refactors, extra features, out-of-scope items implemented).
 Each finding cites `file:line` and the AC/task it fails to map to.
 
-### 6. Complete traceability
+### 7. Complete traceability
 Fill or refresh `## Traceability` in `tasks.md`, one row per AC per affected side, with the **real** test:
 
 | AC | Scenario | Side | Test |
@@ -84,8 +91,8 @@ Test = `file › name` as found in step 3. Only record what you observed. Task n
 files go in the report, not in the table (the table format is fixed by `AGENTS.md` §4.4). Update the table
 even when the verdict is "gaps".
 
-### 7. Verdict
-Present a short report: tasks gate, AC matrix, gates and test run, drift findings, verdict.
+### 8. Verdict
+Present a short report: tasks gate, AC matrix, gates and test run, linked ADRs, drift findings, verdict.
 
 - **No gaps and no drift** → add to `## Validation log`: `Verified <date>: no gaps, no drift, gates green`.
   Tell the user the change is ready: the submodule PRs link `openspec/changes/<change-id>`, and after they
@@ -95,7 +102,8 @@ Present a short report: tasks gate, AC matrix, gates and test run, drift finding
   or amend the spec through `/sdd-spec` and `/sdd-plan`). Do not add the `Verified` line.
 
 ## Don'ts
-- Don't declare the change ready with a failing/missing test, an unchecked task, a red gate or unexplained drift.
+- Don't declare the change ready with a failing/missing test, an unchecked task, a red gate, a linked ADR that is
+  not Accepted, or unexplained drift.
 - Don't edit AC text or tasks to make the verdict pass; scope changes go through `sdd-validate-impl`,
   `/sdd-spec` and `/sdd-plan`.
 - Don't archive: archiving is the developer's step after the submodule PRs merge.

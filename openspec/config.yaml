@@ -25,6 +25,7 @@ rules:
   design:
     - Required when the change spans BE and FE, adds a migration, touches auth, or changes an API contract
     - For API changes, give the endpoint, policy, request and response DTOs, and the matching FE model and service
+    - Respect the Accepted ADRs in openspec/adr/; link an architectural decision as "**ADR:** ADR-NNNN" (new ones via /sdd-adr, one decision per file)
     - End with a Follow-ups section for out-of-scope findings
   tasks:
     - Group tasks by side (BE, FE, Infra); for each AC put the test task before the implementation task
