@@ -1,6 +1,6 @@
 # Proposal
 
-**Status:** Draft
+**Status:** Approved
 
 ## Why
 
@@ -31,3 +31,7 @@ The Definition of Done requires `dotnet format Eras.sln --verify-no-changes` to 
 - **Risk:** the diff touches many files, so open backend branches will conflict on those lines. Merge it at a quiet moment and announce it, and have open branches take `develop` after it lands.
 
 No behavior changes, so this change sets `skip_specs: true` (AGENTS.md section 3, tooling and refactors).
+
+## Decisions
+
+Approved by Lucia Becerra (stated in chat), 2026-10-27. The 25 applied migration files may change by whitespace only (no `.editorconfig` exclusion).
