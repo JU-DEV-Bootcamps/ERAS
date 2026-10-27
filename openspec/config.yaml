@@ -30,7 +30,7 @@ rules:
   tasks:
     - Group tasks by side (BE, FE, Infra); for each AC put the test task before the implementation task
     - "End with a ## Traceability table: | AC | Scenario | Side | Test | with one row per AC per affected side"
-    - Finish with a verification group that runs the AGENTS.md section 5.6 gates
+    - Finish with a verification group that runs the AGENTS.md section 8.7 gates
 
 operations:
   apply:

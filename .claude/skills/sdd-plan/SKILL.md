@@ -7,7 +7,7 @@ allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-plan/scripts/check-
 Turn an **Approved spec** into a plan a developer (or `/sdd-implement`) can follow without guessing.
 In this repo the OpenSpec artifacts of the plan are **`design.md`** (the plan: how) and **`tasks.md`**
 (the ordered checklist). `openspec status` needs `design.md` before it unlocks `tasks.md`, which is why the
-plan is `design.md` and not a separate `plan.md`. Rules: `AGENTS.md` §2–§5 and `openspec/config.yaml`.
+plan is `design.md` and not a separate `plan.md`. Rules: `AGENTS.md` §3–§8 and `openspec/config.yaml`.
 
 **Boundary.** Write only `design.md` and `tasks.md` of the change, and the `**Plan:**` line of `proposal.md`.
 Do NOT write code or tests, do NOT touch `ERAS-BE/` or `ERAS-FE/`, do NOT edit the spec (a problem in the
@@ -45,11 +45,11 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
    it is a *new file* and the design says so.
 
 4. **Decide the approach.** For each AC, decide where its behavior is decided and which side proves it:
-   - BE follows the golden path (AGENTS.md §2.1): Domain → contract → request → handler → DTO/mapper →
+   - BE follows the golden path (AGENTS.md §6.1): Domain → contract → request → handler → DTO/mapper →
      persistence (migration if the schema changes) → thin controller with `[Authorize(Policy = ...)]`.
-   - FE follows the golden path (§2.2): lazy route with `canActivateAuthRole` + `ROUTE_METADATA` roles, model
+   - FE follows the golden path (§7.1): lazy route with `canActivateAuthRole` + `ROUTE_METADATA` roles, model
      mirroring the BE DTO, service extending `BaseApiService`, standalone OnPush component, `PermissionsService`.
-   - Use only target-style patterns; never plan the legacy ones listed in §2.1/§2.2. Do not plan refactors
+   - Use only target-style patterns; never plan the legacy ones listed in §6.2/§7.2. Do not plan refactors
      outside the change's scope: write them under Follow-ups.
    - If the API contract changes, BE DTO, FE model and FE service move in the **same** change (principle 9).
    - Ownership and scope rules live in the handler and must already be ACs; if one is missing, that is a
@@ -72,7 +72,7 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
      (ask the user before writing it). A decision local to this change gets no ADR line.
 
 7. **Write `tasks.md`** from the template.
-   - Groups by side (BE, FE, Infra), in dependency order, then a final **Verification** group (§5.6 gates).
+   - Groups by side (BE, FE, Infra), in dependency order, then a final **Verification** group (§8.7 gates).
    - For every AC the **test task comes before its implementation task** in the same group. Every group lands
      its own tests; never collect tests into the last group.
    - Every task is `- [ ] <group>.<n> <description>` and states how to verify it. One session of work each.
@@ -92,7 +92,7 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
    - `openspec validate "<change-id>" --strict`
    - `bash .claude/skills/sdd-plan/scripts/check-plan.sh "<change-id>"` (every AC on every declared side has a
      Traceability row, tasks are well-formed checkboxes, the test task precedes the implementation task, the
-     verification group cites §5.6, `design.md` ends with Follow-ups).
+     verification group cites §8.7, `design.md` ends with Follow-ups).
    Warnings are for you to judge, not to silence.
 
    If `design.md` links an ADR, also run `bash .claude/skills/sdd-adr/scripts/check-adr.sh`.

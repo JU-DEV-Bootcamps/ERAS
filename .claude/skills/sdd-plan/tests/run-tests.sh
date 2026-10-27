@@ -70,8 +70,8 @@ new_change;  sed -i 's/^- \[ \] 1\.1 /- [] 1.1 /' "$(c)/tasks.md"
              expect "plan: malformed checkbox" 1 "malformed task line" $plan
 new_change;  sed -i 's/^- \[ \] 1\.1 Write/- [ ] 1.1 Implement/' "$(c)/tasks.md"
              expect "plan: implementation before its test" 1 "first task for AC-1 is not a test task" $plan
-new_change;  sed -i 's/ (AGENTS.md section 5.6)//' "$(c)/tasks.md"
-             expect "plan: verification must cite 5.6" 1 "5.6" $plan
+new_change;  sed -i 's/ (AGENTS.md section 8.7)//' "$(c)/tasks.md"
+             expect "plan: verification must cite 8.7" 1 "cite 8.7" $plan
 new_change;  sed -i '/^## 3\. Verification/,/^## Traceability/{/^## Traceability/!d}' "$(c)/tasks.md"
              expect "plan: last group must be verification" 1 "verification group" $plan
 new_change;  sed -i '/(AC-5)/d' "$(c)/tasks.md"
@@ -184,6 +184,13 @@ new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/de
               expect "adr: --change with an Accepted ADR passes" 0 "Result: 0 error(s)" $adrc --change $id
 new_adr_root; sed -i 's/$/\r/' "$(a)/0001-use-openspec.md" "$(a)/README.md"
               expect "adr: CRLF files still pass" 0 "Result: 0 error(s)" $adrc
+git_commit_all() { git init -q . && git -c core.autocrlf=false add -A && git -c user.name=t -c user.email=t@t commit -qm fixture; }
+new_adr_root; git_commit_all; mk_adr 0002 new-for-change Proposed process
+              sed -i "s/^\*\*Change:\*\* none/**Change:** $id/" "$(a)/0002-new-for-change.md"; row 0002 new-for-change Proposed
+              expect "adr: --change warns about an uncommitted ADR" 0 "0002-new-for-change.md is untracked or has uncommitted changes" $adrc --change $id
+new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/design.md"
+              sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"; git_commit_all
+              expect "adr: --change with everything committed has no warning" 0 "Result: 0 error(s), 0 warning(s)" $adrc --change $id
 cd "$skills/../.." || exit 1
 expect "adr: the real ADRs pass" 0 "Result: 0 error(s)" $adrc
 fi
@@ -195,7 +202,7 @@ new_skills_root() {
   mkdir -p "$work/sk/.claude/skills/sdd-a/scripts"
   printf '#!/bin/sh\n' > "$work/sk/.claude/skills/sdd-a/scripts/x.sh"
   printf -- '---\nname: sdd-a\ndescription: test skill\nallowed-tools: Bash(bash .claude/skills/sdd-a/scripts/x.sh:*)\n---\nBody cites `.claude/skills/sdd-a/scripts/x.sh`.\n' > "$work/sk/.claude/skills/sdd-a/SKILL.md"
-  printf 'AGENTS\n| `/sdd-a` | test |\n' > "$work/sk/AGENTS.md"
+  printf 'AGENTS\n| `/sdd-a` | test |\n## 8. Workflow\n### 8.7 Done\n' > "$work/sk/AGENTS.md"
 }
 skill_file() { echo "$work/sk/.claude/skills/sdd-a/SKILL.md"; }
 sk() { bash "$skills/sdd-plan/tests/check-skills.sh" "$work/sk"; }
@@ -205,6 +212,12 @@ new_skills_root; sed -i 's/^name: sdd-a/name: sdd-b/' "$(skill_file)"
                  expect "skills: name must equal the folder" 1 "frontmatter name" sk
 new_skills_root; printf 'Cites `.claude/skills/sdd-a/templates/missing.md`.\n' >> "$(skill_file)"
                  expect "skills: dangling path" 1 "does not exist" sk
+new_skills_root; printf 'Run the gates of AGENTS.md §8.7 (see §8 and section 8.7).\n' >> "$(skill_file)"
+                 expect "skills: cited AGENTS.md sections exist" 0 "Result: 0 error(s)" sk
+new_skills_root; printf 'Run the gates of AGENTS.md §5.6.\n' >> "$(skill_file)"
+                 expect "skills: stale AGENTS.md section" 1 "cites AGENTS.md section 5.6" sk
+new_skills_root; mkdir -p "$work/sk/.claude/skills/sdd-a/templates"; printf 'Gates (AGENTS.md section 4.2)\n' > "$work/sk/.claude/skills/sdd-a/templates/t.md"
+                 expect "skills: stale section in a template" 1 "cites AGENTS.md section 4.2" sk
 new_skills_root; printf 'If `ERAS-FE/.claude/skills/eras-fe-test/SKILL.md` exists, follow it.\n' >> "$(skill_file)"
                  expect "skills: optional path is allowed" 0 "Result: 0 error(s)" sk
 new_skills_root; printf 'Update the row in specs/README.md.\n' >> "$(skill_file)"

@@ -24,9 +24,9 @@
 
 ## 3. Verification
 
-- [ ] 3.1 BE gates pass in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25% (AGENTS.md section 5.6)
-- [ ] 3.2 FE gates pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build` (AGENTS.md section 5.6)
-- [ ] 3.3 The AC traceability check (AGENTS.md section 5.4) shows exactly 1 test per AC per affected side, and `openspec validate 608-reject-duplicate-configuration-name --strict` passes
+- [ ] 3.1 BE gates pass in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25% (AGENTS.md section 8.7)
+- [ ] 3.2 FE gates pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build` (AGENTS.md section 8.7)
+- [ ] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate 608-reject-duplicate-configuration-name --strict` passes
 
 ## Traceability
 | AC | Scenario | Side | Test |

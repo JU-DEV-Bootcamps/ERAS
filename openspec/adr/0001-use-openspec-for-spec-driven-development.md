@@ -10,7 +10,7 @@
 ERAS is an existing product: most work is changes and bug fixes to behavior that already exists, not new
 greenfield features. Code lives in two git submodules (`ERAS-BE/`, `ERAS-FE/`) while specs must be shared by
 both, so the specs live in the parent repo. The team wanted a spec-first rule with Acceptance Criteria that
-map one to one to tagged tests (AGENTS.md §4), and a check that can run in CI.
+map one to one to tagged tests (AGENTS.md §5.2), and a check that can run in CI.
 
 ## Decision
 
@@ -29,7 +29,7 @@ specs in `openspec/specs/` after its submodule PRs merge. The rules live in `AGE
 ## Consequences
 
 - Specs stay current: each archived change merges its deltas into `openspec/specs/`.
-- The fixed `#### Scenario: AC-<n>` format makes the AC ↔ test traceability check (AGENTS.md §5.4) a grep.
+- The fixed `#### Scenario: AC-<n>` format makes the AC ↔ test traceability check (AGENTS.md §8.6) a grep.
 - Spec Kit ideas (a clarify step, contracts in the design) are layered onto OpenSpec through the `/sdd-*`
   skills and `openspec/config.yaml`, not by switching tools.
 - Every change, including tooling and docs, needs a change folder (`skip_specs: true` when it has no behavior).

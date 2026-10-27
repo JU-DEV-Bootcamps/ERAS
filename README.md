@@ -57,7 +57,7 @@ The backend follows an Onion Architecture with dependencies pointing inward: `Er
 status transitions) is at the core, then `Eras.Application` (CQRS use cases with MediatR, DTOs, repository interfaces),
 `Eras.Infrastructure` (EF Core and PostgreSQL, Keycloak clients, background jobs) and `Eras.Api` (thin controllers
 and composition root). The Angular frontend talks to the API under `api/v1/` and signs users in through Keycloak.
-The layer rules and the "golden path" for new code are in [AGENTS.md §2](AGENTS.md), and the diagrams are in the wiki:
+The layer rules and the "golden path" for new code are in [AGENTS.md §4, §6 and §7](AGENTS.md), and the diagrams are in the wiki:
 [C4 Model](https://github.com/JU-DEV-Bootcamps/ERAS/wiki/C4-Model).
 
 ## ERAS roles
@@ -183,7 +183,7 @@ ng test --code-coverage --watch=false --browsers=ChromeHeadless
 ```
 
 CI requires at least 25% line coverage on the backend and 15% on the frontend. Each Acceptance Criterion has exactly one
-tagged test per affected side; see [AGENTS.md §4](AGENTS.md) for the tags and how to run a single AC.
+tagged test per affected side; see [AGENTS.md §5.2, §6.3 and §7.3](AGENTS.md) for the tags, and §3 for how to run a single AC.
 
 ## Branches and commits
 

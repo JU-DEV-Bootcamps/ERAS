@@ -6,7 +6,7 @@ allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-adr/scripts/check-a
 
 Record a **durable architectural decision** so later changes can cite and respect it. A change's
 `design.md` → `## Decisions` holds choices local to that change and is archived with it; an ADR holds a
-decision that outlives the change. Conventions: `AGENTS.md` §3.3 and `openspec/adr/README.md`.
+decision that outlives the change. Conventions: `AGENTS.md` §8.4 and `openspec/adr/README.md`.
 
 **Boundary.** Write only in `openspec/adr/`: the new ADR, the index `README.md`, and the Status line of an ADR
 being superseded. When the ADR comes from a change, also add or fix the `**ADR:** ADR-NNNN` line of that
@@ -27,7 +27,7 @@ Write an ADR when the decision constrains future changes, not just this one:
 - an authentication, authorization, role or ownership model;
 - a data storage, schema strategy or migration approach;
 - a cross-cutting BE ↔ FE contract (serialization, errors, pagination, API versioning, feature flags);
-- a deliberate departure from the golden paths of `AGENTS.md` §2, or a new one.
+- a deliberate departure from the golden paths of `AGENTS.md` §6.1 and §7.1, or a new one.
 
 A choice that only matters inside one change (which handler, which component split) stays a D-block in
 `design.md`. If in doubt, ask the user (recommended option first).
@@ -69,7 +69,9 @@ A choice that only matters inside one change (which handler, which component spl
 8. **Validate.** Run `bash .claude/skills/sdd-adr/scripts/check-adr.sh` and fix every error, then run it again.
    From a change, also run `openspec validate "<change-id>" --strict`.
 
-9. **Stop and report.** Give: the ADR number, title, Area, the change it links to, and any ADR it supersedes.
+9. **Stop and report.** Give: the ADR number, title, Area, the change it links to, any ADR it supersedes, and
+   the files to commit together with that change (`AGENTS.md` §8.3 step 5): the new ADR, `openspec/adr/README.md`
+   and any superseded ADR.
    Next step: a human reviews it and sets `**Status:** Accepted` (or `Rejected`), usually together with
    `**Plan:** Approved` of the change. `/sdd-verify` refuses to recommend archiving while a linked ADR is not
    Accepted.

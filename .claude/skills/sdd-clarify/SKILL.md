@@ -78,7 +78,7 @@ whose answers change behavior, and writing those answers back into the spec.
    - Next step: another `/sdd-clarify` run if anything is deferred or outstanding; otherwise a human
      reviews the spec and sets `**Status:** Approved`, then `/sdd-plan <change-id>` writes `design.md` and
      `tasks.md` (`/opsx:propose` on the same change is the generic alternative). Do not start those yourself.
-     Implementation still waits for the human approval of the complete change (AGENTS.md §3.2), recorded as `**Plan:** Approved`.
+     Implementation still waits for the human approval of the complete change (AGENTS.md §8.3), recorded as `**Plan:** Approved`.
 
 ## Guardrails
 

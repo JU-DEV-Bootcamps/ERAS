@@ -11,7 +11,7 @@ Rules (openspec/config.yaml and AGENTS.md):
 - Each task says how to verify it (a test that passes, a command, an observable result).
 - Mention the AC as (AC-n) in the tasks that serve it, so the checker can follow it.
 - Small tasks: one session each. Cite real paths from design.md.
-- Last group = verification (AGENTS.md section 5.6); last section = Traceability.
+- Last group = verification (AGENTS.md section 8.7); last section = Traceability.
 Delete every HTML comment from the output file.
 -->
 
@@ -31,7 +31,7 @@ Delete every HTML comment from the output file.
 
 - [ ] 3.1 BE gates pass in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%
 - [ ] 3.2 FE gates pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build`
-- [ ] 3.3 The AC traceability check (AGENTS.md section 5.4) shows exactly 1 test per AC per affected side, and `openspec validate <change-id> --strict` passes
+- [ ] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate <change-id> --strict` passes
 
 ## Traceability
 <!-- One row per AC per affected side (the Side line of the AC; "BE + FE" = two rows). The Test column carries the
