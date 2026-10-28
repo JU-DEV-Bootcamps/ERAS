@@ -4,7 +4,7 @@
 
 ## Why
 
-The Definition of Done requires `dotnet format Eras.sln --verify-no-changes` to pass (AGENTS.md, BE gates). On a clean export of `develop` it reports 1444 errors, so the gate is red for every backend change before anyone edits a file. It went unnoticed because no active workflow runs it: `ERAS-BE/.github/workflows/format-warning-check.sample` is a sample, and `pr_workflow.yaml` and `push_workflow.yaml` do not call `dotnet format`. It was found while verifying change `642-search-students-by-name`, whose own code adds no error (the same 1444 appear on `develop` and on the branch). Issue: ERAS-BE#578.
+The Definition of Done requires `dotnet format Eras.sln --verify-no-changes` to pass (AGENTS.md, BE gates). On a clean export of `develop` it reports 1444 errors, so the gate is red for every backend change before anyone edits a file. It went unnoticed because no active workflow runs it: `ERAS-BE/.github/workflows/format-warning-check.sample` is a sample, and `pr_workflow.yaml` and `push_workflow.yaml` do not call `dotnet format`. It was found while verifying change `642-search-students-by-name`, whose own code adds no error (the same 1444 appear on `develop` and on the branch). Issue: ERAS-BE#579.
 
 ## What Changes
 
