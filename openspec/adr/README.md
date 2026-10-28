@@ -22,7 +22,8 @@ Create or supersede an ADR with `/sdd-adr`. Check this folder with
 
 | ADR | Title | Status | Superseded by |
 |---|---|---|---|
-| [ADR-0002](0002-match-text-search-ignoring-accents-in-the-application.md) | Match text searches ignoring case and accents in the application, not in SQL | Accepted | — |
+| [ADR-0002](0002-store-short-id-lists-in-array-columns.md) | Store short lists of identifiers in PostgreSQL array columns | Accepted | — |
+| [ADR-0003](0003-match-text-search-ignoring-accents-in-the-application.md) | Match text searches ignoring case and accents in the application, not in SQL | Accepted | — |
 
 ### process
 

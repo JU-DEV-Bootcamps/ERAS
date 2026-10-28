@@ -24,7 +24,7 @@ The repository tests (`ERAS-BE/test/Eras.Infrastructure.Tests/.../Repositories/`
 ### D1. Accent-insensitive matching is done in the application, not in SQL
 **Choice:** The repository normalizes both the search text and each stored name with one helper (trim, Unicode decomposition without combining marks, lowercase) and filters in .NET. It first reads only `Id` and `Name` of all non-deleted students ordered by `Name` (so the order is the one the list already has), filters, pages the ids, then loads the page with `StudentDetail`. A blank search keeps the current pure-SQL paging. Decided with the user.
 **Alternative:** PostgreSQL `unaccent` + `ILIKE` → needs a migration to create the extension (risky after hotfix #638), and the repository tests do not run on PostgreSQL, so AC-1..AC-5 could not be proven by an automated test.
-**ADR:** ADR-0002
+**ADR:** ADR-0003
 
 ### D2. One extra optional query parameter on the existing endpoint
 **Choice:** `GET api/v1/students` gains an optional `Search` query parameter that travels as `GetAllStudentsQuery.Search`. `GetPagedAsyncWithJoins` takes `string? Search` and returns the page together with the total count of matches, so the handler no longer calls `CountAsync()` for this query. The existing repository and handler tests that call it are updated to the new signature (not re-tagged, they carry no AC).
@@ -116,7 +116,7 @@ Coverage gates: BE >= 25%, FE >= 15% (AGENTS.md section 5.6).
 No data migration. Deploy BE first: an old FE keeps working against the new BE, while a new FE against an old BE would send `Search` and see it ignored.
 
 ## Follow-ups
-- Moving the search to SQL (`unaccent` + index) if the student table grows large; needs a migration and a PostgreSQL-backed test setup, which does not exist today. It would supersede ADR-0002.
+- Moving the search to SQL (`unaccent` + index) if the student table grows large; needs a migration and a PostgreSQL-backed test setup, which does not exist today. It would supersede ADR-0003.
 - `dotnet format Eras.sln --verify-no-changes` reports 1444 errors on `develop` itself (none in this change's lines), so task 3.1 cannot go green here. Fixed in its own change, `578-fix-dotnet-format-baseline` (ERAS-BE#578).
 - Other screens that list students (heat map, reports, assessments) have no name search.
 - `GetAllStudentsQueryHandler` swallows exceptions and returns an empty page (legacy pattern); left unchanged.

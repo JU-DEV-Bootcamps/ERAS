@@ -10,6 +10,7 @@ description: >
   developer requests changes or reports problems, forward to sdd-verify if the developer
   approves. Never closes or archives the change.
 allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-implement/scripts/check-impl.sh:*)
+model: haiku
 ---
 
 # SDD: Validate Implementation (manual gate)

@@ -1,4 +1,4 @@
-# ADR-0002: Match text searches ignoring case and accents in the application, not in SQL
+# ADR-0003: Match text searches ignoring case and accents in the application, not in SQL
 
 **Status:** Accepted
 **Date:** 2026-10-27

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Self-test of the SDD check scripts (check-spec, check-plan, check-impl, check-adr, check-archive, check-skills) against fixtures built from the worked examples.
-# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|spec|adr|archive|skills]
+# Self-test of the SDD check scripts (check-spec, check-plan, check-impl, verify-gate, run-gates, check-adr, check-archive, check-skills) against fixtures built from the worked examples.
+# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|verify|gates|spec|adr|archive|skills]
 # With no argument every section runs (about 5 minutes on Windows); with one, only that section.
 # Exit 0 = every case behaved as expected.
 set -u
@@ -109,6 +109,79 @@ new_change;  add_all_tests; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
 new_change;  add_all_tests; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
              expect "impl: unchecked task is a warning in progress" 0 "still unchecked" $impl
 
+fi
+
+if section verify; then
+echo "== verify-gate"
+vg() { bash "$skills/sdd-verify/scripts/verify-gate.sh" "$id"; }
+ready_verify() {
+  new_change
+  sed -i 's/^- \[ \]/- [x]/' "$(c)/tasks.md"
+  sed -i 's/^\*\*Plan:\*\* Draft/**Plan:** Approved/' "$(c)/proposal.md"
+  printf '\n## Validation log\n\n- Skipped: no BE controller or FE change.\n' >> "$(c)/proposal.md"
+}
+ready_verify; expect "verify: ready change passes clean" 0 "Result: 0 error(s), 0 warning(s)" vg
+ready_verify; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
+              expect "verify: unchecked task fails" 1 "still unchecked" vg
+ready_verify; printf -- '- [ ] ~~9.9~~ (replaced by 1.1)\n' >> "$(c)/tasks.md"
+              expect "verify: struck-through task is ignored" 0 "Result: 0 error(s), 0 warning(s)" vg
+ready_verify; rm "$(c)/tasks.md"
+              expect "verify: tasks.md missing" 1 "tasks.md is missing" vg
+ready_verify; sed -i 's/^\*\*Plan:\*\* Approved/**Plan:** Draft/' "$(c)/proposal.md"
+              expect "verify: Plan not approved warns" 0 "expected '**Plan:** Approved'" vg
+ready_verify; sed -i 's/^\*\*Status:\*\* Approved/**Status:** Draft/' "$(c)/proposal.md"
+              expect "verify: Status not approved warns" 0 "expected '**Status:** Approved'" vg
+ready_verify; sed -i '/^## Validation log/,$d' "$(c)/proposal.md"
+              expect "verify: no validation log warns" 0 "no '## Validation log' entries" vg
+ready_verify; sed -i '/^- Skipped:/d' "$(c)/proposal.md"; printf -- '- Round 1: found a problem.\n' >> "$(c)/proposal.md"
+              expect "verify: log without approval or skip warns" 0 "has no 'Approved by" vg
+ready_verify; sed -i 's/^- Skipped:.*/- Approved by the developer, 2026-10-28./' "$(c)/proposal.md"
+              expect "verify: an approval in the log passes clean" 0 "Result: 0 error(s), 0 warning(s)" vg
+ready_verify; printf -- '- Verified 2026-10-28: no gaps, no drift, gates green\n' >> "$(c)/proposal.md"
+              expect "verify: an existing Verified line is noted" 0 "a 'Verified ...' line already exists" vg
+ready_verify; sed -i 's/$/\r/' "$(c)/tasks.md" "$(c)/proposal.md"
+              expect "verify: CRLF files still pass" 0 "Result: 0 error(s), 0 warning(s)" vg
+ready_verify; printf 'schema: spec-driven\nskip_specs: true\n' > "$(c)/.openspec.yaml"; sed -i '/^\*\*Status:\*\*/d; /^\*\*Plan:\*\*/d' "$(c)/proposal.md"
+              expect "verify: skip_specs change needs no Status or Plan" 0 "Result: 0 error(s), 0 warning(s)" vg
+fi
+
+if section gates; then
+echo "== run-gates"
+# Fake dotnet, npm, openspec and reportgenerator on the PATH: GATE_MODE picks the behavior, COV the coverage figure.
+stubs="$work/bin"
+mkdir -p "$stubs"
+printf '#!/bin/sh\nexit 0\n' > "$stubs/openspec"
+printf '#!/bin/sh\nexit 0\n' > "$stubs/npm"
+cat > "$stubs/dotnet" <<'STUB'
+#!/bin/sh
+case "$GATE_MODE:$1" in
+  fail-build:build) echo "src/A.cs(1,1): error CS1002: ; expected"; exit 1 ;;
+  lock:build) echo "error MSB3027: The process cannot access the file because it is being used by another process."; exit 1 ;;
+esac
+exit 0
+STUB
+cat > "$stubs/reportgenerator" <<'STUB'
+#!/bin/sh
+mkdir -p CoverletReport
+printf 'Line coverage: %s%%\n' "${COV:-41.2}" > CoverletReport/Summary.txt
+STUB
+chmod +x "$stubs"/*
+gates_script="$skills/sdd-verify/scripts/run-gates.sh"
+rg() { env PATH="$stubs:$PATH" "$@" bash "$gates_script" "$id"; }
+nonpm="$work/bin-nonpm"
+mkdir -p "$nonpm"
+cp "$stubs/openspec" "$stubs/dotnet" "$stubs/reportgenerator" "$nonpm/"
+rg_noext() { env PATH="$nonpm:$(dirname "$(command -v bash)"):/usr/bin:/bin" "$@" bash "$gates_script" "$id"; }
+
+new_change; expect "gates: every gate passes" 0 "Result: 8 passed, 0 failed, 0 unrunnable" rg
+new_change; expect "gates: a failing gate shows its error and fails" 1 "error CS1002" rg GATE_MODE=fail-build
+new_change; expect "gates: a failing gate is named" 1 "FAIL        BE build" rg GATE_MODE=fail-build
+new_change; expect "gates: a locked file is unrunnable, not failed" 3 "UNRUNNABLE  BE build: a file is locked" rg GATE_MODE=lock
+new_change; expect "gates: coverage below 25 fails" 1 "FAIL        BE coverage" rg COV=12
+new_change; expect "gates: a missing tool is unrunnable" 3 "UNRUNNABLE  FE lint: 'npm' not found" rg_noext
+new_change; expect "gates: --be runs only the backend" 0 "Result: 5 passed, 0 failed, 0 unrunnable" env PATH="$stubs:$PATH" bash "$gates_script" "$id" --be
+new_change; printf 'schema: spec-driven\nskip_specs: true\n' > "$(c)/.openspec.yaml"; rm -r "$(c)/specs"
+            expect "gates: a change with no side runs only openspec validate" 0 "Result: 1 passed, 0 failed, 0 unrunnable" rg
 fi
 
 if section spec && [ -f "$skills/sdd-spec/scripts/check-spec.sh" ]; then
