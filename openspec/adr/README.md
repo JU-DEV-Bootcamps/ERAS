@@ -18,6 +18,12 @@ Create or supersede an ADR with `/sdd-adr`. Check this folder with
 
 ## Index
 
+### data
+
+| ADR | Title | Status | Superseded by |
+|---|---|---|---|
+| [ADR-0002](0002-store-short-id-lists-in-array-columns.md) | Store short lists of identifiers in PostgreSQL array columns | Accepted | — |
+
 ### process
 
 | ADR | Title | Status | Superseded by |
