@@ -5,7 +5,7 @@
 
 ## Why
 
-Internal users have to page through the whole Students list to find one student, which is slow once the list grows past a few pages. They need to search by name directly in the Students view. Issue: ERAS-BE#642 / ERAS-FE#642 ("[Feature] Add Search by Student Name in Students View")
+Internal users have to page through the whole Students list to find one student, which is slow once the list grows past a few pages. They need to search by name directly in the Students view. Issue: ERAS#642 ("[Feature] Add Search by Student Name in Students View")
 
 ## What Changes
 
