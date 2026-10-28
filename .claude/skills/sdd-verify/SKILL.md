@@ -8,7 +8,7 @@ description: >
   section 8.7 gates pass, and the code does no more and no less than the spec and design.md
   (no drift). Completes the Traceability table and, only if there are no gaps or drift,
   recommends archiving. It never archives or commits.
-allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-verify/scripts/verify-gate.sh:*) Bash(bash .claude/skills/sdd-verify/scripts/run-gates.sh:*) Bash(bash .claude/skills/sdd-implement/scripts/check-impl.sh:*) Bash(bash .claude/skills/sdd-adr/scripts/check-adr.sh:*)
+allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-implement/scripts/check-impl.sh:*) Bash(bash .claude/skills/sdd-adr/scripts/check-adr.sh:*)
 ---
 
 # SDD: Verify and Close a Change
@@ -37,8 +37,6 @@ Find the change (named by the user, else current branch, else `openspec list`; a
 `proposal.md` (including `## Validation log` if present), the specs, `design.md` and `tasks.md`.
 
 ### 2. Gate: tasks
-Run `bash .claude/skills/sdd-verify/scripts/verify-gate.sh "<change-id>"`: it lists unchecked tasks (errors) and
-warns when `Status` or `Plan` is not `Approved` or the `## Validation log` has no `Approved by …` or `Skipped: …`.
 Every task in `tasks.md` must be `[x]` (struck-through replaced tasks are ignored). If any is `[ ]`:
 **stop**, list them, and send the user back to finish them with `sdd-implement` or to `sdd-validate-impl`.
 Don't continue to a verdict.
@@ -58,12 +56,7 @@ Then read each test: it counts only if its assertions actually check the criteri
   genuinely manual-only, require it to be recorded as such in the validation log.
 
 ### 4. Run the tests and the gates
-Run `bash .claude/skills/sdd-verify/scripts/run-gates.sh "<change-id>"` in the background (several minutes on
-Windows). It runs the gates below for the sides the specs declare (`--be` / `--fe` override them) and prints one
-line per gate: `PASS`, `FAIL` with its first error lines and a log path, or `UNRUNNABLE` (tool missing or file
-locked). Read a log only for a failing gate. Exit 0 = all passed, 1 = a gate failed, 3 = a gate could not run.
-`FAIL` and `UNRUNNABLE` are gaps; report them as printed. The gates of `AGENTS.md` §8.7, which you can also run by
-hand to capture pass/fail per mapped test:
+Run the gates of `AGENTS.md` §8.7 and capture pass/fail per mapped test:
 - BE (`ERAS-BE/`): `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`,
   `dotnet test Eras.sln`, coverage ≥ 25%.
 - FE (`ERAS-FE/`): `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage`
