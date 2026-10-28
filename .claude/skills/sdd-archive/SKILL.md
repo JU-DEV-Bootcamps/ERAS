@@ -2,6 +2,7 @@
 name: sdd-archive
 description: Archives a verified ERAS OpenSpec change as the last commit of its parent-repo ship PR, before that PR merges. Checks the gate (every task ticked, a Verified line from /sdd-verify, linked ADRs Accepted, bumped submodule pointers merged), runs openspec archive (with --skip-specs for tooling and docs changes), validates the living specs and lists the files to commit. Use after /sdd-verify recommends archiving and the ship PR is approved, or when the user says "archive the change". Never commits.
 allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-archive/scripts/check-archive.sh:*) Bash(bash .claude/skills/sdd-adr/scripts/check-adr.sh:*)
+model: haiku
 ---
 
 Close a change **inside the PR that ships it**, so nothing is left for after the merge. The archive moves
