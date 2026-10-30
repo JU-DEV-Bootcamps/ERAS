@@ -88,7 +88,7 @@ Users have no way inside ERAS to find the user manuals and must ask someone for 
 
 ### 2026-10-29 – Round 2
 
-**How to run:** start the stack of AGENTS.md §3.4 (`docker compose up --build`), which mounts the repository `manuals/` folder read-only into the backend. To run the backend alone, set `UserManuals__Path` to the full path of the `manuals/` folder. Tasks 4.4 and 4.5 (pull-request workflow, compose mounts, deploy copy step) are implemented but not yet verified; rows marked *(4.4/4.5)* verify them.
+**How to run:** start the stack of AGENTS.md §3.4 (`docker compose up --build`), which mounts the repository `manuals/` folder read-only into the backend. To run the backend alone, set `UserManuals__Path` to the full path of the `manuals/` folder. The pull-request workflow, compose mounts and deploy copy step are checked by a human, see *Human-only verification* below.
 
 | Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
 |---|---|---|---|---|
@@ -112,7 +112,18 @@ Users have no way inside ERAS to find the user manuals and must ask someone for 
 | Views | Open the page at phone and tablet width | List and download buttons stay usable | n.a. | This app will not use in phone and tablets|
 
 - **Views row:** skipped (n.a.) by the developer: ERAS has no mobile or tablet version. The developer made an observation about it that is not an error and will be discussed later.
-- **Rows 4.4/4.5 (CI and deploy):** implemented, not verified by the agent; tasks 4.4 and 4.5 stay open until the developer verifies them.
+- **Infra and deploy:** the workflow, compose mounts and deploy copy step are implemented but are not tasks; the developer verifies them as listed below.
+
+### Human-only verification
+
+Not testable by the agent; the developer checks these (the first three before the ship PR merges, the rest after the deploy):
+
+- [ ] "Validate user manuals" is green on the ship PR, and runs the UserManuals tests (not zero) once the `ERAS-BE` pointer is bumped; the pointer-bump commit triggers it. Check that `submodules: recursive` works with the default token.
+- [ ] `docker compose config` shows `./manuals` mounted read-only at `/app/manuals` in the backend (`docker-compose.yml`, `docker-compose.local.yml`); `deploy/compose.prod.yml` mounts `/home/ubuntu/eras-manuals`.
+- [ ] The `@JU-DEV-Bootcamps/eras` team has write access to the repository (CODEOWNERS).
+- [ ] The host folder `/home/ubuntu/eras-manuals` is confirmed with the deploy owners.
+- [ ] After the deploy: `stage_deploy_runner.yml` copied `manuals/` to `~/eras-manuals` on each host.
+- [ ] After the deploy: `~/app/docker-compose.yml` on each host was edited by hand with `/home/ubuntu/eras-manuals:/app/manuals:ro` (the deploy workflow does not deliver the compose file), and the page lists both manuals.
 - Approved by Judith Paco, 2026-10-29
 
-- Verified 2026-10-29: no gaps, no drift, gates green
+- Verified 2026-10-29: no gaps, no drift, gates green (infra and deploy checks are human-only, see Human-only verification)

@@ -6,6 +6,8 @@ on:
   pull_request:
     paths:
       - "manuals/**"
+      - "ERAS-BE"
+      - "ERAS-FE"
       - ".github/CODEOWNERS"
       - ".github/workflows/manuals-validation.yml"
 
@@ -26,4 +28,9 @@ jobs:
           dotnet-version: "8.0"
 
       - name: Run the user manuals tests
-        run: dotnet test ERAS-BE/Eras.sln --filter "FullyQualifiedName~UserManuals"
+        run: |
+          dotnet test ERAS-BE/Eras.sln --filter "FullyQualifiedName~UserManuals" --logger "trx;LogFileName=manuals.trx"
+          if ! find ERAS-BE -name manuals.trx -print0 | xargs -0 -r grep -q 'outcome="Passed"'; then
+            echo "No user manuals tests ran: the ERAS-BE pointer does not include them" >&2
+            exit 1
+          fi
