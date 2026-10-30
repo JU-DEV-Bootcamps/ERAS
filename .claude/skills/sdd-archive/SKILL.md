@@ -7,7 +7,7 @@ model: haiku
 
 Close a change **inside the PR that ships it**, so nothing is left for after the merge. The archive moves
 `openspec/changes/<change-id>/` to `openspec/changes/archive/<date>-<change-id>/` and merges its deltas into
-`openspec/specs/`. Rules: `AGENTS.md` §8.3 (step 6), §8.4 and §8.7.
+`openspec/specs/`. Rules: `AGENTS.md` §8.3 (step 6), §8.4 (conventions in `openspec/sdd-conventions.md`) and §8.7.
 
 **Boundary.** Run `openspec archive` and nothing else that writes. Do NOT edit tasks, specs, ADRs or code to get
 past the gate; send the user back to the skill that owns the problem. Do NOT commit or push. Never read or print

@@ -16,7 +16,7 @@ allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-verify/scripts/veri
 Proves the feature meets its spec: **every AC has a tagged test, the tests pass, and the code does
 no more and no less than specified.** Then completes traceability and tells the user whether the
 change is ready to archive. This is an audit: it reports gaps; it does not quietly fix or reinterpret
-the spec. The conventions it relies on are in `AGENTS.md` §8.4.
+the spec. The conventions it relies on are in `openspec/sdd-conventions.md` (summary in `AGENTS.md` §8.4).
 
 ## Change layout assumed
 

@@ -10,6 +10,9 @@ An Accepted ADR is never rewritten: a new decision supersedes it (only its Statu
 **Date:** YYYY-MM-DD
 **Area:** <backend | frontend | auth | data | infra | process; several comma-separated, the first is where the index lists it>
 **Change:** <change-id that made the decision, or none>
+<!-- Leave both lines below EMPTY: only a human fills them (README.md, "Review and sign-off"), as `<GitHub handle> (YYYY-MM-DD)`, before or when setting Accepted. -->
+**Reviewed by:**
+**Signed by:**
 <!-- Only when this ADR replaces earlier ones; otherwise delete the line. -->
 **Supersedes:** ADR-NNNN
 

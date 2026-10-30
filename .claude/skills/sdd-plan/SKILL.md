@@ -54,7 +54,7 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
    - If the API contract changes, BE DTO, FE model and FE service move in the **same** change (principle 9).
    - Ownership and scope rules live in the handler and must already be ACs; if one is missing, that is a
      spec gap, not a task.
-   - Respect the Accepted ADRs in `openspec/adr/` (read the index `openspec/adr/README.md`). A decision that
+   - Respect the Accepted ADRs in `openspec/adr/` (read the summary `openspec/adr/SUMMARY.md`; the index is `openspec/adr/README.md`). A decision that
      contradicts one needs a superseding ADR, not a silent deviation.
 
 5. **Resolve open questions before tasks.** If an unknown would change the specs, the approach or the task

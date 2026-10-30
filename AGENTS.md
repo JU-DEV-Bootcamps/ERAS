@@ -62,13 +62,15 @@ No code changes without an approved spec (see §8).
 
 | Document | Source of truth for |
 |---|---|
-| `AGENTS.md` (this file) | Every rule: principles, architecture, conventions, workflow, limits |
+| `AGENTS.md` (this file) | The shared rules: principles, conventions, workflow, limits. Backend and frontend rules are in `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md` (ADR-0005) |
 | `CLAUDE.md` | Claude Code specifics only; it imports this file |
 | `README.md` | Onboarding: what ERAS is, how to set up and run it |
 | `openspec/config.yaml` | The rules OpenSpec injects into its artifacts (AC format, traceability table, design triggers) |
 | `openspec/specs/` | Current behavior of the system (principle 2) |
 | `openspec/changes/<change-id>/` | What a change adds or modifies, and its plan and tasks (§8.2) |
-| `openspec/adr/` | Durable architectural decisions that later changes must respect (§8.4) |
+| `openspec/adr/` | Durable architectural decisions that later changes must respect (§8.4); `SUMMARY.md` lists the rules in force |
+| `openspec/sdd-conventions.md` | The conventions shared by the `/sdd-*` skills and the full command and skill table (§8.4, §8.5) |
+| `openspec/roadmap.md` | Options and criteria for changing tools (CI/CD, hosting, identity, secrets) and how confidential data is protected; it adopts no tool |
 | `.claude/skills/` | The `/sdd-*` and `/opsx:*` workflows (§8.5) |
 
 ---
@@ -98,31 +100,11 @@ skills are listed in §8.5.
 
 ### 3.2 Backend (`ERAS-BE/`)
 
-```bash
-cd ERAS-BE
-dotnet restore Eras.sln
-dotnet build Eras.sln -warnaserror                                  # build gate
-dotnet format Eras.sln --verify-no-changes                          # format gate
-dotnet test Eras.sln                                                # all tests
-dotnet test Eras.sln --filter "Change=<change-id>"                  # every AC test of a change
-dotnet test Eras.sln --filter "AC=<change-id>/AC-1"                 # one AC
-dotnet test Eras.sln --filter "FullyQualifiedName~CreateRemission"  # by name
-dotnet test Eras.sln --collect:"XPlat Code Coverage" --results-directory ./TestResults --settings coverlet.runsettings
-                                                                    # coverage (CI gate ≥ 25% lines)
-dotnet ef migrations add <Name> -p src/Eras.Infrastructure -s src/Eras.Api -o Persistence/PostgreSQL/Migrations
-```
+The backend commands live in `ERAS-BE/AGENTS.md` §3.2. Read that file before working in `ERAS-BE/`.
 
 ### 3.3 Frontend (`ERAS-FE/`)
 
-```bash
-cd ERAS-FE
-npm ci
-npm run lint                                                        # ESLint + Prettier
-npm test -- --watch=false --browsers=ChromeHeadless                 # all specs
-npm test -- --watch=false --browsers=ChromeHeadless --code-coverage # coverage (CI gate ≥ 15%)
-npm test -- --watch=false --browsers=ChromeHeadless --include="src/app/modules/<feature>/**/*.spec.ts"
-npm run build                                                       # production build
-```
+The frontend commands live in `ERAS-FE/AGENTS.md` §3.3. Read that file before working in `ERAS-FE/`.
 
 ### 3.4 Local stack
 
@@ -139,42 +121,11 @@ git submodule update --init --recursive  # after cloning
 
 ### 4.1 Backend — .NET 8 Onion Architecture (`ERAS-BE/`)
 
-```
-            ┌───────────────────────── Eras.Api ─────────────────────────┐
-            │   ┌──────────────── Eras.Infrastructure ────────────────┐  │
-            │   │   ┌────────────── Eras.Application ─────────────┐   │  │
-            │   │   │   ┌─────────── Eras.Domain ────────────┐    │   │  │
-            │   │   │   │  Entities, enums, validators,      │    │   │  │
-            │   │   │   │  status transitions                │    │   │  │
-            │   │   │   └────────────────────────────────────┘    │   │  │
-            │   │   │  Features (CQRS), Contracts, DTOs, Mappers   │   │  │
-            │   │   └──────────────────────────────────────────────┘   │  │
-            │   │  EF Core/PostgreSQL, repositories, Keycloak, jobs    │  │
-            │   └──────────────────────────────────────────────────────┘  │
-            │  Controllers, middleware, filters, Program.cs              │
-            └────────────────────────────────────────────────────────────┘
-            Eras.Error: cross-cutting exception types (referenced by Application and Api)
-```
-
-| Layer | Project | Owns | May reference |
-|---|---|---|---|
-| Domain | `src/Eras.Domain` | Entities (`Entities/`, `Entities/AssessmentManagement/`, `UserManagement/`, `FeatureFlagManagement/`), enums, FluentValidation validators, status transitions (`StatusManagement/`) | nothing |
-| Application | `src/Eras.Application` | Use cases (`Features/<Feature>/`), repository and service **interfaces** (`Contracts/`), DTOs (`DTOs/<Area>/`), mappers (`Mappers/`), application validation (`Validation/`), events (`Events/`) | Domain, Eras.Error |
-| Infrastructure | `src/Eras.Infrastructure` | `AppDbContext`, EF configurations, persistence entities and joins, repositories, migrations, SQL views, Keycloak/Cosmic Latte clients, file storage, background jobs, authorization policies (`Authorization/ErasPolicies.cs`) | Application, Domain |
-| Presentation | `src/Eras.Api` | Controllers, middleware, filters, Swagger, composition root (`Program.cs`) | Application, Infrastructure (only for DI and policies), Eras.Error |
-| Errors | `Eras.Error` (repo root) | `ErasException`, `BussinessException`, `NotFoundException`, `CriticalException`, `DatabaseCustomException` | nothing |
+The backend architecture (Onion layers and their rules) live in `ERAS-BE/AGENTS.md` §4.1. Read that file before working in `ERAS-BE/`.
 
 ### 4.2 Frontend — Angular 19 (`ERAS-FE/`)
 
-| Layer | Path | Owns |
-|---|---|---|
-| Bootstrap | `src/main.ts`, `src/app/app.config.ts`, `src/app/app.routes.ts` | Providers, Keycloak init, feature-flag loading, top-level lazy routes under the `LayoutComponent` shell |
-| Core | `src/app/core/` | Singletons: API services (`services/api/`), auth (`services/access/`, `auth/guards/`), permissions (`services/permissions/`), interceptors, models (`models/<entity>.model.ts`), constants, route metadata (`utils/routing/route-metadata.ts`), layout |
-| Feature modules | `src/app/modules/<feature>/` | Feature pages and components (assessments, students, reports, lists, imports, profile, settings, home-v2, …), plus feature-local `models/` and `<feature>.routes.ts` |
-| Shared | `src/app/shared/` | Reusable presentational components (`eras-button`, `eras-modal`, `eras-select`, list/table, cards), directives (`*appHasERASRoles`), pipes |
-| Styles | `src/styles/utils/` | Material 3 theme, tokens (`--primary-*`, `--color-neutral-*`, `--font-size-*`), partials |
-
-Path aliases: `@core/*`, `@shared/*`, `@modules/*`.
+The frontend architecture (layers and paths) live in `ERAS-FE/AGENTS.md` §4.2. Read that file before working in `ERAS-FE/`.
 
 ### 4.3 Cross-cutting contracts
 
@@ -226,61 +177,15 @@ A change is **not done** until every AC row exists, points to a real test, and t
 
 ### 6.1 Golden path for a new backend use case
 
-The reference implementation is `Features/RemissionManagement/` together with `Controllers/AssessmentManagement/AssessmentsController.cs`.
-
-1. **Domain.** Add or adjust the entity in `Eras.Domain/Entities/<Area>/`. Put invariants in an `AbstractValidator<T>` under `Validators/` and state changes in `StatusManagement/`.
-2. **Contract.** Declare the repository interface in `Eras.Application/Contracts/Persistence/<Area>/I<Name>Repository.cs`.
-3. **Request.** Add a `sealed record` to `Features/<Feature>/Commands.cs` or `Queries.cs` that implements `IRequest<TResponse>`.
-4. **Handler.** One class per request in `Features/<Feature>/Handlers/<Request>Handler.cs`.
-   - Inject `IMapper<TSrc,TDst>`, `IValidator<T>` and the repositories.
-   - Return DTOs.
-   - Report failures by **throwing** `Eras.Error` exceptions (`NotFoundException`, `BussinessException(msg, statusCode)`).
-5. **DTO and mapper.** Put the DTO in `DTOs/<Area>/<Name>Dto.cs` and the mapper in `Mappers/<Area>/` implementing `IMapper<,>`. Register mappers in `ApplicationServiceRegistration`.
-6. **Persistence.** Write the repository in `Infrastructure/Persistence/PostgreSQL/Repositories/<Area>/` and the EF configuration in `Configurations/`. Register it in `PersistenceServiceRegistration.cs`. Schema changes require a new migration (§3.2).
-7. **Controller.** Keep it thin. Route `api/v1/<kebab-case-resource>`. Use `[Authorize(Policy = ErasPolicies.…)]` on the class or the action. Call `_mediator.Send(request, cancellationToken)` and return `Ok`, `CreatedAtAction` or `NoContent`. Put no business logic here.
+The golden path for a new backend use case live in `ERAS-BE/AGENTS.md` §6.1. Read that file before working in `ERAS-BE/`.
 
 ### 6.2 Backend rules
 
-- `CancellationToken` flows from the controller action to EF calls. Async methods end in `Async`.
-- Use file-scoped namespaces, camelCase parameters and `_camelCase` private fields, Allman braces and 4-space indent. Follow `ERAS-BE/.editorconfig`.
-- Inject `ILogger<T>` with the **correct** `T`. Never log tokens, API keys or personal data.
-- Authorization uses the role policies in `ErasPolicies` (`RequireErasAdmin`, `RequireErasAdminOrOfficer`, `RequireAnyErasRole`). Ownership and scope rules (for example "a Professional only sees interventions assigned to them") belong in the handler and must be spelled out as ACs.
-- Never edit a migration that has been applied. Never hand-edit `AppDbContextModelSnapshot.cs`. SQL views go in `Views/Ups` and `Views/Drops`.
-- Secrets come from environment variables or user-secrets, never from committed `appsettings*.json`.
-- **Do not copy these legacy patterns into new code:**
-  - `BaseResponse` / `CreateCommandResponse<T>` / `Success=false` return values.
-  - Static `ToDomain()` / `ToDto()` mappers.
-  - DataAnnotations-only validation.
-  - Folder-per-use-case `Command/<UseCase>/` layout.
-  - Controllers calling application services directly instead of going through MediatR.
-  - PascalCase parameters.
-  - `try/catch` blocks in controllers.
+The backend rules live in `ERAS-BE/AGENTS.md` §6.2. Read that file before working in `ERAS-BE/`.
 
 ### 6.3 Backend tests — xUnit (`ERAS-BE/test/`)
 
-| Code under test | Test project |
-|---|---|
-| Domain validators, transitions | `test/Eras.Domain.Tests/` |
-| Handlers, mappers, application services | `test/Eras.Application.Tests/Features/<Feature>/…` |
-| Repositories, external clients, jobs | `test/Eras.Infrastructure.Tests/…` |
-| Controllers, policies, middleware, filters | `test/Eras.Api.Tests/…` |
-
-Write the test at the layer where the AC's behavior is decided. A business rule is tested in a handler or domain test. A status code or authorization rule is tested in an Api test. Stack: xUnit, Moq, FluentAssertions, EF InMemory/MockQueryable.
-
-```csharp
-public class CreateConfigurationCommandHandlerTests
-{
-    [Fact]
-    [Trait("Change", "608-reject-duplicate-configuration-name")]
-    [Trait("AC", "608-reject-duplicate-configuration-name/AC-1")]
-    public async Task HandleAsync_DuplicateActiveName_Throws409AndDoesNotPersistAsync()
-    {
-        // Arrange (GIVEN) … Act (WHEN) … Assert (THEN / AND)
-    }
-}
-```
-
-The method name is `<Unit>_<Condition>_<Expected>`. Use Arrange/Act/Assert, mirroring GIVEN/WHEN/THEN.
+The backend test conventions live in `ERAS-BE/AGENTS.md` §6.3. Read that file before working in `ERAS-BE/`.
 
 ---
 
@@ -288,51 +193,15 @@ The method name is `<Unit>_<Condition>_<Expected>`. Use Arrange/Act/Assert, mirr
 
 ### 7.1 Golden path for a new frontend feature
 
-1. **Route.** Add a lazy route (`loadComponent` or `loadChildren` to `<feature>.routes.ts`).
-   - Guard it with `canActivateAuthRole`.
-   - Add an entry in `ROUTE_METADATA` with `roles`, `breadcrumb` and `headerTitle`.
-   - Put `roles` on the **same** route the guard runs on. Use `canActivateChild` when the roles live on child routes.
-   - For v1/v2 rollouts, also add `featureFlagGuard(FEATURE_FLAGS.<flag>)`.
-2. **Model.** Add `src/app/core/models/<entity>.model.ts`, one entity per file, mirroring the BE DTO exactly, including enums as string unions.
-3. **Service.** Add `src/app/core/services/api/<resource>.service.ts` that `extends BaseApiService` with `protected resource = '<api-resource>'`.
-   - Use the base `get/post/put/delete`.
-   - Endpoints have no leading slash.
-   - Use `@Cacheable()` only for read-mostly lookups.
-4. **Component.** Build a standalone component with `ChangeDetectionStrategy.OnPush`.
-   - Use `inject()`, signal `input()` / `output()` / `computed()`, and the `@if` / `@for` control flow.
-   - Tear down subscriptions with `takeUntilDestroyed()` or `toSignal()`.
-   - Use Reactive Forms.
-5. **Permissions in the UI.** Use `PermissionsService.can(...)` / `permission.policies.ts` or `*appHasERASRoles`. Never compare raw role strings.
-6. **UI.** Use Angular Material and the `eras-*` wrappers. Use SCSS with theme tokens; no hard-coded colors. User-facing text goes in `core/constants/messages.ts`.
+The golden path for a new frontend feature live in `ERAS-FE/AGENTS.md` §7.1. Read that file before working in `ERAS-FE/`.
 
 ### 7.2 Frontend rules
 
-- File names are kebab-case with Angular suffixes (`.component.ts`, `.service.ts`, `.model.ts`, `.guard.ts`, `.routes.ts`). Component selectors use the `app-` prefix.
-- `strict` TypeScript and `strictTemplates`. No `any` without a written justification.
-- Environment values come from `src/environments/*`. Never hard-code URLs, realms or role names.
-- **Do not copy these legacy patterns into new code:**
-  - `@Input()` / `@Output()` decorators.
-  - Constructor injection.
-  - `*ngIf` / `*ngFor`.
-  - Manual `.subscribe` without teardown.
-  - `HttpClientModule` in tests.
-  - Building URLs outside `BaseApiService`.
-  - New files in `_unused/`.
-  - Non-kebab-case file names.
+The frontend rules live in `ERAS-FE/AGENTS.md` §7.2. Read that file before working in `ERAS-FE/`.
 
 ### 7.3 Frontend tests — Jasmine/Karma (`ERAS-FE/src/app/`)
 
-The spec file sits next to the unit as `*.spec.ts`. Use TestBed, `provideHttpClient()` + `provideHttpClientTesting()` / `HttpTestingController`, and `jasmine.createSpyObj`.
-
-```ts
-describe('ConfigurationsComponent', () => {
-  it('[608-reject-duplicate-configuration-name/AC-1] shows the conflict message when the name already exists', () => {
-    // GIVEN … WHEN … THEN
-  });
-});
-```
-
-The AC key goes **first in the `it()` title, in square brackets**. Write one `it()` per AC; never `fit` or `xit` in commits.
+The frontend test conventions live in `ERAS-FE/AGENTS.md` §7.3. Read that file before working in `ERAS-FE/`.
 
 ---
 
@@ -375,14 +244,16 @@ openspec/changes/<change-id>/
 
 ### 8.3 Workflow
 
+**Who is in charge:** 🟦 human · 🟩 AI agent · 🟨 shared (the agent drafts or runs, a human decides). Only a human approves.
+
 | Step | Who | Action | Gate |
 |---|---|---|---|
-| 1. Propose | dev / agent | `openspec new change <id>`, then write the proposal, deltas, design and tasks. Architectural decisions in `design.md` get an ADR in `openspec/adr/` (`/sdd-adr`, status `Proposed`) | `openspec validate <id> --strict` passes |
-| 2. Approve | human reviewer | Reviews the change and its new ADRs, ideally in a parent-repo PR, and sets the ADRs to `Accepted` | Explicit approval |
-| 3. Implement | dev / agent | Work through `tasks.md` in order. AC tests first, then code. Tick tasks as they finish | Tests green |
-| 4. Verify | dev / agent | Run all gates (§8.7) and the traceability check (§8.6) | All green, every AC traced |
-| 5. Ship | dev | The parent-repo commit/PR carries `openspec/changes/<id>/` **and the change's ADR files**: every ADR it creates or links that is not yet committed, the `openspec/adr/README.md` index, and the Status line of any ADR it supersedes. Submodule PRs (BE and/or FE) link `openspec/changes/<id>`, then bump the parent pointer | CI green, PR approved, `check-adr.sh --change <id>` shows no uncommitted ADR |
-| 6. Archive | dev / agent | After the ship PR is approved and the submodule PRs are merged, `/sdd-archive <id>` runs `openspec archive <id> --yes` (`--skip-specs` for a `skip_specs` change), which merges the deltas into `openspec/specs/`. The archive is the **last commit of the ship PR, before it merges**; there is no separate archive PR. For a `skip_specs` change with no submodule work, the ship PR is the change's own PR | `check-archive.sh <id>` passes, `openspec validate --all --strict` passes, then the ship PR merges |
+| 1. Propose | 🟨 dev + agent | `openspec new change <id>`, then write the proposal, deltas, design and tasks. Architectural decisions in `design.md` get an ADR in `openspec/adr/` (`/sdd-adr`, status `Proposed`) | `openspec validate <id> --strict` passes |
+| 2. Approve | 🟦 human reviewer | Reviews the change and its new ADRs, ideally in a parent-repo PR, and sets the ADRs to `Accepted` | Explicit approval |
+| 3. Implement | 🟩 agent (dev reviews) | Work through `tasks.md` in order. AC tests first, then code. Tick tasks as they finish | Tests green |
+| 4. Verify | 🟩 agent (🟦 dev for the manual validation) | Run all gates (§8.7) and the traceability check (§8.6) | All green, every AC traced |
+| 5. Ship | 🟦 dev | The parent-repo commit/PR carries `openspec/changes/<id>/` **and the change's ADR files**: every ADR it creates or links that is not yet committed, the `openspec/adr/README.md` index, and the Status line of any ADR it supersedes. Submodule PRs (BE and/or FE) link `openspec/changes/<id>`, then bump the parent pointer | CI green, PR approved, `check-adr.sh --change <id>` shows no uncommitted ADR |
+| 6. Archive | 🟨 dev + agent | After the ship PR is approved and the submodule PRs are merged, `/sdd-archive <id>` runs `openspec archive <id> --yes` (`--skip-specs` for a `skip_specs` change), which merges the deltas into `openspec/specs/`. The archive is the **last commit of the ship PR, before it merges**; there is no separate archive PR. For a `skip_specs` change with no submodule work, the ship PR is the change's own PR | `check-archive.sh <id>` passes, `openspec validate --all --strict` passes, then the ship PR merges |
 
 **Agent obligations**
 - When asked to change code and no matching change exists, **stop**. Draft the OpenSpec change and ask for approval before you touch code.
@@ -391,46 +262,32 @@ openspec/changes/<change-id>/
 
 ### 8.4 SDD skill conventions
 
-The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` → `/sdd-archive` (§8.5), plus `/sdd-adr` (called from `/sdd-plan` or on its own), share these conventions. This section is their single source. Only `/sdd-implement` writes code; no skill commits.
+The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` → `/sdd-archive` (§8.5), plus `/sdd-adr`, share the conventions in [`openspec/sdd-conventions.md`](openspec/sdd-conventions.md): files, status lines, AC and task formats, logs, definition of done, ADR fields and use, checks and skill model. Read it when you run or change a skill. Three rules apply to everyone:
 
-| Item | Convention |
-|---|---|
-| Files | `proposal.md` (why, what, status lines, logs), `specs/<capability>/spec.md` (ACs), `design.md` (**the plan**: layers, API contract, test strategy), `tasks.md` (checklist and Traceability) |
-| Status lines | In `proposal.md`: `**Status:** Draft \| Clarified \| Approved` for the spec and `**Plan:** Draft \| Approved` for `design.md` + `tasks.md`. **Only a human sets `Approved`.** Code waits for `Plan: Approved` |
-| AC | `#### Scenario: AC-<n> <title>` plus a line `**Side:** BE \| FE \| BE + FE`. Key: `<change-id>/AC-<n>` |
-| Tasks | `- [ ] <group>.<n> <description>`. A test task starts with "Write" and cites `(AC-<n>)`, and comes before its implementation task. Replaced tasks are struck through, never renumbered |
-| Logs | `## Clarifications` and `## Validation log` live in `proposal.md`. **Never in `spec.md`**: it is a delta that is merged into `openspec/specs/` on archive |
-| Done | Every task ticked, Traceability filled with real tests (exactly 1 per AC per side), §8.7 gates green, `openspec validate --strict`; then the parent-repo commit carries the change folder and its ADR files (§8.3 step 5), the submodule PRs merge, the change is archived as the last commit of the ship PR (§8.3 step 6) and the ship PR merges. There is no separate `Implemented` status |
-| ADR | One decision per file in `openspec/adr/NNNN-<kebab-title>.md`, numbered from `0001` with no gaps, never reused. Fields `**Status:**` (`Proposed`, `Accepted`, `Rejected`, `Deprecated`, `Superseded by ADR-NNNN`), `**Date:**`, `**Area:**` (`backend`, `frontend`, `auth`, `data`, `infra`, `process`), `**Change:**`, optional `**Supersedes:**`; sections Context, Decision, Alternatives, Consequences. Index: `openspec/adr/README.md`, grouped by Area |
-| ADR use | An ADR is for a decision that outlives its change: a dependency or pattern, an auth/role/ownership model, a data or migration approach, a cross-cutting BE ↔ FE contract, a departure from a golden path (§6.1, §7.1). The `design.md` D-block links it as `**ADR:** ADR-NNNN`. **Only a human sets `Accepted`**, usually with `Plan: Approved`. An Accepted ADR is never rewritten: a new ADR supersedes it, and the old one's Status becomes `Superseded by ADR-MMMM` once the new one is Accepted. `/sdd-verify` requires every linked ADR to be Accepted, and the ADR files ship in the change's commit (§8.3 step 5) |
-| Checks | `.claude/skills/sdd-spec/scripts/check-spec.sh`, `sdd-plan/scripts/check-plan.sh`, `sdd-implement/scripts/check-impl.sh`, `sdd-verify/scripts/verify-gate.sh` (pre-flight gate), `sdd-verify/scripts/run-gates.sh` (runs the §8.7 gates and prints one line per gate), `sdd-adr/scripts/check-adr.sh`, `sdd-archive/scripts/check-archive.sh`, and `sdd-plan/tests/check-skills.sh` for the skills themselves. Self-test: `bash .claude/skills/sdd-plan/tests/run-tests.sh` (from a path without spaces) |
-| Skill model | A skill may pin a model with `model:` in its `SKILL.md` frontmatter. Use an alias (`haiku`, `sonnet`, `opus`), not a full model ID. The pin applies to that skill's turn only and overrides the session model (`/model`) for it; the session model resumes on the next prompt. A value outside the organization's allowed models is ignored. Pinned today: `sdd-validate-impl` and `sdd-archive` (`haiku`, see change `653-adjust-skills-for-token-usage`); every other skill uses the session model |
+- **Only a human sets `Approved`** (`**Status:**` of a spec, `**Plan:**` of the plan) **and `Accepted`** (an ADR, after the review and sign-off in `openspec/adr/README.md`). Code waits for `Plan: Approved`.
+- **Only `/sdd-implement` writes code, and no skill commits.**
+- **Done** means every task ticked, Traceability filled with real tests (exactly 1 per AC per side), §8.7 gates green, `openspec validate --strict`, the change folder and its ADR files in the parent-repo commit (§8.3 step 5), and the change archived as the last commit of the ship PR (§8.3 step 6).
 
 ### 8.5 Slash commands and skills
 
-**Claude Code slash commands** (installed in `.claude/` by `openspec init --tools claude --profile core`):
+Full table with what each one does: [`openspec/sdd-conventions.md`](openspec/sdd-conventions.md). Markers as in §8.3.
 
-| Command | Step (§8.3) | What it does |
+| Command | Who | Step (§8.3) |
 |---|---|---|
-| `/opsx:explore` | before 1 | Think through an idea or investigate code, without writing anything |
-| `/opsx:propose "<idea>"` | 1. Propose | Creates the change with proposal, specs, design and tasks, then stops for approval |
-| `/opsx:update` | 1–3 | Revises the artifacts of an existing change |
-| `/opsx:apply` | 3. Implement | Works through `tasks.md` (only after approval) |
-| `/opsx:sync` | 6 | Syncs the delta specs into `openspec/specs/` |
-| `/opsx:archive` | 6. Archive | Archives a completed change |
-
-**Project skills** (in `.claude/skills/`, optional spec-first path; conventions in §8.4. Only `/sdd-implement` writes code and none of them commits):
-
-| Command | Step (§8.3) | What it does |
-|---|---|---|
-| `/sdd-spec "<idea>"` | 1. Propose | Creates or updates the Draft spec (AC scenarios) of a change from an idea, with templates |
-| `/sdd-clarify <change-id>` | 1. Propose | Finds gaps in a Draft spec, asks at most 5 questions and records the answers. Then a human reviews and sets `Status: Approved` |
-| `/sdd-plan <change-id>` | 1. Propose | For an Approved spec, writes `design.md` (the plan: layers, API contract, test strategy) and `tasks.md` with the traceability table. Then a human sets `Plan: Approved` (step 2) |
-| `/sdd-implement <change-id>` | 3. Implement | Works through `tasks.md` in order, test first, one tagged test per AC per side, then runs the §8.7 gates and reports. Needs `Plan: Approved`; never commits |
-| `/sdd-validate-impl <change-id>` | 4. Verify | Manual validation gate, only when a BE controller or the FE changed: hands you a checklist per AC, logs the result in `proposal.md` and sends problems back to `/sdd-implement` |
-| `/sdd-verify <change-id>` | 4. Verify | Audit: tasks ticked, one tagged test per AC per side, §8.7 gates, linked ADRs Accepted, no drift from the spec and `design.md`. Fills the Traceability table, lists the files the parent-repo commit must carry (change folder and ADRs) and recommends `/sdd-archive`; never archives |
-| `/sdd-archive <change-id>` | 6. Archive | After `/sdd-verify` and the ship PR's approval: checks the gate (tasks ticked, `Verified` line, linked ADRs Accepted, submodule pointers merged), archives the change as the last commit of the ship PR, validates the living specs and lists the files to commit; never commits |
-| `/sdd-adr ["<decision>"]` | 1. Propose (or any time) | Writes an ADR in `openspec/adr/` (status `Proposed`) or supersedes one, and updates the index. `/sdd-plan` offers it for architectural decisions; a human sets `Accepted` |
+| `/opsx:explore` | 🟨 | before 1 |
+| `/opsx:propose "<idea>"` | 🟨 | 1. Propose |
+| `/opsx:update` | 🟨 | 1–3 |
+| `/opsx:apply` | 🟩 | 3. Implement |
+| `/opsx:sync` | 🟩 | 6 |
+| `/opsx:archive` | 🟨 | 6. Archive |
+| `/sdd-spec "<idea>"` | 🟨 | 1. Propose |
+| `/sdd-clarify <change-id>` | 🟨 | 1. Propose |
+| `/sdd-plan <change-id>` | 🟨 | 1. Propose |
+| `/sdd-implement <change-id>` | 🟩 | 3. Implement |
+| `/sdd-validate-impl <change-id>` | 🟨 | 4. Verify |
+| `/sdd-verify <change-id>` | 🟩 | 4. Verify |
+| `/sdd-archive <change-id>` | 🟨 | 6. Archive |
+| `/sdd-adr ["<decision>"]` | 🟨 | 1. Propose (or any time) |
 
 ### 8.6 AC traceability check (Git Bash)
 
