@@ -202,10 +202,13 @@ mk_adr() { # <nnnn> <slug> <status> <area> [supersedes]
     printf '\n## Context\n\nx\n\n## Decision\n\nx\n\n## Alternatives\n\n- x\n\n## Consequences\n\n- x\n'; } > "$(a)/$1-$2.md"
 }
 row() { printf '| [ADR-%s](%s-%s.md) | %s | %s | %s |\n' "$1" "$1" "$2" "$2" "$3" "${4:-—}" >> "$(a)/README.md"; }
+summ() { printf '### [ADR-%s](%s-%s.md): %s\nRule: x\n\n' "$1" "$1" "$2" "$2" >> "$(a)/SUMMARY.md"; }
+sign() { sed -i "s/^\*\*Change:\*\* none/**Change:** none\n**Reviewed by:** r (2026-10-30)\n**Signed by:** s (2026-10-30)/" "$(a)/$1"; }
 new_adr_root() {
   rm -rf "$work/adr"
   mkdir -p "$work/adr/openspec/adr" "$work/adr/openspec/changes/$id"
   printf '# ADRs\n\n## Index\n\n### process\n\n| ADR | Title | Status | Superseded by |\n|---|---|---|---|\n' > "$(a)/README.md"
+  printf '# Summary\n\n## process\n\n' > "$(a)/SUMMARY.md"
   mk_adr 0001 use-openspec Proposed process
   row 0001 use-openspec Proposed
   cd "$work/adr" || exit 1
@@ -213,6 +216,7 @@ new_adr_root() {
 adrc="bash $skills/sdd-adr/scripts/check-adr.sh"
 supersede_0001() { # ADR-0002 <status> supersedes ADR-0001; the old one marked superseded when $2 = done
   mk_adr 0002 use-other "$1" process ADR-0001; row 0002 use-other "$1"
+  [ "$1" = Accepted ] && summ 0002 use-other
   if [ "${2:-}" = done ]; then
     sed -i 's/^\*\*Status:\*\* Proposed/**Status:** Superseded by ADR-0002/' "$(a)/0001-use-openspec.md"
     sed -i 's/| use-openspec | Proposed | — |/| use-openspec | Superseded | ADR-0002 |/' "$(a)/README.md"
@@ -253,7 +257,7 @@ new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/de
 new_adr_root; printf '### D1. x\n**ADR:** ADR-0009\n' > "openspec/changes/$id/design.md"
               expect "adr: --change with a missing ADR" 1 "ADR-0009, which does not exist" $adrc --change $id
 new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/design.md"
-              sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"
+              sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"; summ 0001 use-openspec
               expect "adr: --change with an Accepted ADR passes" 0 "Result: 0 error(s)" $adrc --change $id
 new_adr_root; sed -i 's/$/\r/' "$(a)/0001-use-openspec.md" "$(a)/README.md"
               expect "adr: CRLF files still pass" 0 "Result: 0 error(s)" $adrc
@@ -262,8 +266,27 @@ new_adr_root; git_commit_all; mk_adr 0002 new-for-change Proposed process
               sed -i "s/^\*\*Change:\*\* none/**Change:** $id/" "$(a)/0002-new-for-change.md"; row 0002 new-for-change Proposed
               expect "adr: --change warns about an uncommitted ADR" 0 "0002-new-for-change.md is untracked or has uncommitted changes" $adrc --change $id
 new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/design.md"
-              sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"; git_commit_all
+              sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"; summ 0001 use-openspec; sign 0001-use-openspec.md; git_commit_all
               expect "adr: --change with everything committed has no warning" 0 "Result: 0 error(s), 0 warning(s)" $adrc --change $id
+# ADR-0006: review and sign-off, and SUMMARY.md
+accept_0001() { sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"; }
+new_adr_root; rm "$(a)/SUMMARY.md"
+              expect "adr: SUMMARY.md is missing" 1 "SUMMARY.md is missing" $adrc
+new_adr_root; expect "adr: SUMMARY.md next to the ADRs is not parsed as an ADR" 0 "Result: 0 error(s)" $adrc
+new_adr_root; accept_0001
+              expect "adr: Accepted ADR missing from SUMMARY.md" 1 "SUMMARY.md: ADR-0001 has no entry" $adrc
+new_adr_root; summ 0001 use-openspec
+              expect "adr: SUMMARY.md entry for a Proposed ADR" 1 "SUMMARY.md: ADR-0001 is not Accepted" $adrc
+new_adr_root; accept_0001; summ 0001 use-openspec; summ 0009 ghost
+              expect "adr: SUMMARY.md entry without a file" 1 "SUMMARY.md: entry for ADR-0009, which has no file" $adrc
+new_adr_root; accept_0001; summ 0001 use-openspec; sed -i 's/^## process/## backend/' "$(a)/SUMMARY.md"
+              expect "adr: SUMMARY.md entry under the wrong area" 1 "SUMMARY.md: ADR-0001 is under '## backend'" $adrc
+new_adr_root; accept_0001; summ 0001 use-openspec; sed -i 's/^\*\*Date:\*\* 2026-10-26/**Date:** 2026-10-30/' "$(a)/0001-use-openspec.md"
+              expect "adr: new Accepted ADR without sign-off fails" 1 "no '**Signed by:**' value" $adrc
+new_adr_root; accept_0001; summ 0001 use-openspec
+              expect "adr: older Accepted ADR without sign-off only warns" 0 "no '**Signed by:**' value" $adrc
+new_adr_root; accept_0001; summ 0001 use-openspec; sed -i 's/^\*\*Date:\*\* 2026-10-26/**Date:** 2026-10-30/' "$(a)/0001-use-openspec.md"; sign 0001-use-openspec.md
+              expect "adr: new Accepted ADR with sign-off passes" 0 "Result: 0 error(s)" $adrc
 cd "$skills/../.." || exit 1
 expect "adr: the real ADRs pass" 0 "Result: 0 error(s)" $adrc
 fi

@@ -27,6 +27,7 @@ err() { echo "ERROR: $*"; errors=$((errors + 1)); }
 warn() { echo "WARN:  $*"; warnings=$((warnings + 1)); }
 
 areas=" backend frontend auth data infra process "
+signoff_from="2026-10-30"  # date of ADR-0006; an Accepted ADR dated on or after it must carry Reviewed by and Signed by
 declare -A file status primary supersedes changeof
 
 field() { sed -n "s/^\*\*$1:\*\* *//p" <<< "$2" | head -1; }
@@ -34,7 +35,7 @@ field() { sed -n "s/^\*\*$1:\*\* *//p" <<< "$2" | head -1; }
 for f in "$adr"/*.md; do
   [ -e "$f" ] || continue
   base=$(basename "$f")
-  [ "$base" = README.md ] && continue
+  [ "$base" = README.md ] || [ "$base" = SUMMARY.md ] && continue
   if ! [[ $base =~ ^([0-9]{4})-[a-z0-9]+(-[a-z0-9]+)*\.md$ ]]; then
     err "$base: file name must be NNNN-<kebab-title>.md"
     continue
@@ -56,6 +57,20 @@ for f in "$adr"/*.md; do
 
   d=$(field Date "$text")
   [[ $d =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || err "$base: Date '$d' must be YYYY-MM-DD"
+
+  # Review and sign-off (ADR-0006): an Accepted ADR records who reviewed and who signed it. Only a human fills these
+  # fields, so ADRs accepted before the rule (dated before $signoff_from) only get a warning.
+  if [ "$s" = Accepted ]; then
+    for who in "Reviewed by" "Signed by"; do
+      if [ -z "$(field "$who" "$text")" ]; then
+        if [[ $d =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && [[ ! $d < $signoff_from ]]; then
+          err "$base: is Accepted and dated $d but has no '**$who:**' value (a human reviews and signs it first)"
+        else
+          warn "$base: is Accepted but has no '**$who:**' value (a human adds it)"
+        fi
+      fi
+    done
+  fi
 
   a=$(field Area "$text")
   [ -n "$a" ] || err "$base: has no '**Area:**' line"
@@ -150,6 +165,39 @@ else
       0) err "README.md: ADR-$n has no row in the index" ;;
       *) err "README.md: ADR-$n has ${rows[$n]} rows in the index" ;;
     esac
+  done
+fi
+
+# Summary (ADR-0006): SUMMARY.md has exactly one entry per Accepted ADR, under its first Area, and no other.
+summary="$adr/SUMMARY.md"
+declare -A entries
+if [ ! -f "$summary" ]; then
+  err "SUMMARY.md is missing"
+else
+  heading=""
+  while IFS= read -r line; do
+    if [[ $line =~ ^##\ +([a-z]+)$ ]]; then
+      heading=${BASH_REMATCH[1]}
+      continue
+    fi
+    [[ $line =~ ^###\ +\[ADR-([0-9]{4})\]\(([^\)]+)\) ]] || continue
+    n=${BASH_REMATCH[1]}
+    target=${BASH_REMATCH[2]}
+    entries[$n]=$(( ${entries[$n]:-0} + 1 ))
+    if [ -z "${file[$n]:-}" ]; then
+      err "SUMMARY.md: entry for ADR-$n, which has no file"
+      continue
+    fi
+    [ "$target" = "${file[$n]}" ] || err "SUMMARY.md: ADR-$n links '$target', expected '${file[$n]}'"
+    [ "${status[$n]}" = Accepted ] || err "SUMMARY.md: ADR-$n is not Accepted (status '${status[$n]}'), only Accepted ADRs are summarized"
+    [ "$heading" = "${primary[$n]}" ] || err "SUMMARY.md: ADR-$n is under '## $heading', expected '## ${primary[$n]}'"
+  done < <(tr -d '\r' < "$summary")
+  for n in "${!file[@]}"; do
+    if [ "${entries[$n]:-0}" -gt 1 ]; then
+      err "SUMMARY.md: ADR-$n has ${entries[$n]} entries"
+    elif [ "${status[$n]}" = Accepted ] && [ "${entries[$n]:-0}" -eq 0 ]; then
+      err "SUMMARY.md: ADR-$n has no entry (it is Accepted)"
+    fi
   done
 fi
 

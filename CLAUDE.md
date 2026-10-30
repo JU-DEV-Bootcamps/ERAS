@@ -5,6 +5,10 @@ mapping and commands — live in **AGENTS.md** and apply in full:
 
 @AGENTS.md
 
+Backend and frontend rules live in `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md` (each imported by its own
+`CLAUDE.md`). They load when you work in that submodule; the root `AGENTS.md` keeps a pointer under each
+moved heading (ADR-0005).
+
 ## Claude Code specifics
 
 - **Before writing any code**, find the matching change: `openspec list`. If none exists, create one

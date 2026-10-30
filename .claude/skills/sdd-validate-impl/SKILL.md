@@ -25,7 +25,7 @@ sdd-spec > sdd-clarify > sdd-plan > sdd-implement > [sdd-validate-impl] > sdd-ve
 
 Only invoke this skill as the step after `sdd-implement` and before `sdd-verify`. Do not use
 it standalone or at any other point of the workflow. The conventions it relies on are in
-`AGENTS.md` §8.4.
+`openspec/sdd-conventions.md` (summary in `AGENTS.md` §8.4).
 
 ## Change layout assumed
 
