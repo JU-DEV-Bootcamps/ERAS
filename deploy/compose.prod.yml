@@ -18,6 +18,7 @@ services:
       - /home/ubuntu/ssl-certificates/eras-backend.pfx:/https/aspnetapp.pfx:ro
       - /home/ubuntu/backend-logs:/app/Logs
       - /home/ubuntu/eras-uploads:/app/uploads
+      - /home/ubuntu/eras-manuals:/app/manuals:ro
     restart: unless-stopped
     depends_on:
       database:

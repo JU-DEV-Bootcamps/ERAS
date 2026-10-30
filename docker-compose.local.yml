@@ -56,6 +56,7 @@ services:
       - Keycloak__Audience=api-client
     volumes:
       - ./backend-logs:/app/Logs
+      - ./manuals:/app/manuals:ro
     depends_on:
       database:
         condition: service_healthy

@@ -1,0 +1,29 @@
+name: Validate user manuals
+
+# Runs the backend tests about the manuals folder (manifest, files, types by content, size limit and the review rule
+# in CODEOWNERS) on every pull request that touches them. See openspec/changes/640-add-user-manuals-page.
+on:
+  pull_request:
+    paths:
+      - "manuals/**"
+      - ".github/CODEOWNERS"
+      - ".github/workflows/manuals-validation.yml"
+
+jobs:
+  validate-manuals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0"
+
+      - name: Run the user manuals tests
+        run: dotnet test ERAS-BE/Eras.sln --filter "FullyQualifiedName~UserManuals"

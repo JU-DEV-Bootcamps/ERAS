@@ -1,0 +1,20 @@
+{
+  "manuals": [
+    {
+      "id": "manual-de-usuario-eras-v2-pdf",
+      "title": "Manual de usuario ERAS v2",
+      "language": "es",
+      "version": "1.0",
+      "fileName": "manual-de-usuario-eras-v2.pdf",
+      "format": "pdf"
+    },
+    {
+      "id": "manual-de-usuario-eras-v2-odt",
+      "title": "Manual de usuario ERAS v2",
+      "language": "es",
+      "version": "1.0",
+      "fileName": "manual-de-usuario-eras-v2.odt",
+      "format": "odt"
+    }
+  ]
+}
