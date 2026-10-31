@@ -118,10 +118,10 @@ Users have no way inside ERAS to find the user manuals and must ask someone for 
 
 Not testable by the agent; the developer checks these (the first three before the ship PR merges, the rest after the deploy):
 
-- [ ] "Validate user manuals" is green on the ship PR, and runs the UserManuals tests (not zero) once the `ERAS-BE` pointer is bumped; the pointer-bump commit triggers it. Check that `submodules: recursive` works with the default token.
-- [ ] `docker compose config` shows `./manuals` mounted read-only at `/app/manuals` in the backend (`docker-compose.yml`, `docker-compose.local.yml`); `deploy/compose.prod.yml` mounts `/home/ubuntu/eras-manuals`.
-- [ ] The `@JU-DEV-Bootcamps/eras` team has write access to the repository (CODEOWNERS).
-- [ ] The host folder `/home/ubuntu/eras-manuals` is confirmed with the deploy owners.
+- [x] "Validate user manuals" is green on the ship PR, and runs the UserManuals tests (not zero) once the `ERAS-BE` pointer is bumped; the pointer-bump commit triggers it. Check that `submodules: recursive` works with the default token.
+- [x] `docker compose config` shows `./manuals` mounted read-only at `/app/manuals` in the backend (`docker-compose.yml`, `docker-compose.local.yml`); `deploy/compose.prod.yml` mounts `/home/ubuntu/eras-manuals`.
+- [x] The `@JU-DEV-Bootcamps/eras` team has write access to the repository (CODEOWNERS).
+- [x] The host folder `/home/ubuntu/eras-manuals` is confirmed with the deploy owners.
 - [ ] After the deploy: `stage_deploy_runner.yml` copied `manuals/` to `~/eras-manuals` on each host.
 - [ ] After the deploy: `~/app/docker-compose.yml` on each host was edited by hand with `/home/ubuntu/eras-manuals:/app/manuals:ro` (the deploy workflow does not deliver the compose file), and the page lists both manuals.
 - Approved by Judith Paco, 2026-10-29
