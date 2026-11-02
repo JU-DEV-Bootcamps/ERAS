@@ -24,6 +24,12 @@ Create or supersede an ADR with `/sdd-adr`. Check this folder with
 |---|---|---|---|
 | [ADR-0004](0004-read-user-manuals-from-repository-files.md) | Read user manuals from files managed in the repository | Accepted | — |
 
+### auth
+
+| ADR | Title | Status | Superseded by |
+|---|---|---|---|
+| [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md) | Limit a professional's access to students of their assigned assessments | Accepted | — |
+
 ### data
 
 | ADR | Title | Status | Superseded by |
