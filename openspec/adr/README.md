@@ -18,6 +18,12 @@ Create or supersede an ADR with `/sdd-adr`. Check this folder with
 
 ## Index
 
+### backend
+
+| ADR | Title | Status | Superseded by |
+|---|---|---|---|
+| [ADR-0004](0004-read-user-manuals-from-repository-files.md) | Read user manuals from files managed in the repository | Accepted | — |
+
 ### data
 
 | ADR | Title | Status | Superseded by |
