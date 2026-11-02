@@ -29,7 +29,7 @@ What exists today, from the files:
 ### D1. Keep every root heading; replace the body of moved sections with a pointer
 **Choice:** Backend sections (§3.2, §4.1, §6.1–6.3) and frontend sections (§3.3, §4.2, §7.1–7.3) keep their heading in the root `AGENTS.md`; the body becomes one or two lines: "Backend rules live in `ERAS-BE/AGENTS.md` §<same number>; read it before working in `ERAS-BE/`." The submodule files reuse the **same section numbers** (`ERAS-BE/AGENTS.md` has §3.2, §4.1, §6.x; `ERAS-FE/AGENTS.md` has §3.3, §4.2, §7.x), so "AGENTS.md §6.1" has one home and `check-skills.sh` keeps passing unchanged for these.
 **Alternative:** Remove the sections and rewrite the citations in about 20 skill files → large diff, breaks the open changes' text, and `check-skills.sh` would need new logic.
-**ADR:** ADR-0005
+**ADR:** ADR-0006
 
 ### D2. Submodule files name the parent file in plain text, never by relative link
 **Choice:** `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md` start with "Shared rules (principles, workflow, limits) are in the root `AGENTS.md` of the ERAS parent repository" and use no `../` links. Each submodule `CLAUDE.md` contains `@AGENTS.md` only (the import resolves relative to the file that holds it).
@@ -46,7 +46,7 @@ What exists today, from the files:
 ### D5. ADR review and sign-off are recorded in the ADR file and checked by `check-adr.sh`
 **Choice:** New fields in the ADR template, after `**Change:**`: `**Reviewed by:**` and `**Signed by:**`, each `<GitHub handle> (YYYY-MM-DD)`, left empty while `Proposed`. `openspec/adr/README.md` gains a "Review and sign-off" section: the ADR travels in a PR, anyone with write access reviews it with the checklist below and one person signs, then a human sets `Accepted`. Checklist: one decision per file; Context states facts, not the answer; Alternatives are real; Consequences name the new rule; consistent with the Accepted ADRs; Area correct; no secret, host or personal data; index and `SUMMARY.md` rows updated. `check-adr.sh`: **error** if an ADR is `Accepted`, dated on or after this change's date (2026-10-30) and has no `Signed by` value; **warning** for older Accepted ADRs without one, so ADR-0002 and ADR-0003 stay green until a human signs them.
 **Alternative:** Error for every Accepted ADR → red on day one for ADR-0002/0003, and a skill must not invent signatures.
-**ADR:** ADR-0006
+**ADR:** ADR-0007
 
 ### D6. `SUMMARY.md` is a checked mirror of the Accepted ADRs, maintained by the skill
 **Choice:** `openspec/adr/SUMMARY.md`: grouped by Area (same grouping as the README index), one `### ADR-NNNN <title>` entry per **Accepted** ADR with a "Rule:" sentence of at most 2 lines and a link to the file. `check-adr.sh` skips `SUMMARY.md` as a file, and errors when an Accepted ADR has no entry or an entry points to a non-Accepted or missing ADR. `/sdd-adr` updates it with the README index. `/sdd-plan` reads it instead of every ADR of the same Area when it checks for overlap.
@@ -103,7 +103,7 @@ No ACs, so no tagged tests. Behavior of the scripts is covered by untagged cases
 
 ## Open Questions
 
-- None. ADR-0005 and ADR-0006 are `Accepted`; a human still has to add their `Reviewed by` and `Signed by` values.
+- None. ADR-0006 and ADR-0007 are `Accepted`; a human still has to add their `Reviewed by` and `Signed by` values.
 
 ## Follow-ups
 

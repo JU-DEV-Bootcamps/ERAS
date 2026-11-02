@@ -19,7 +19,7 @@ Create or supersede an ADR with `/sdd-adr`. Check this folder with
 
 ## Review and sign-off
 
-An ADR is reviewed like a PR before it becomes `Accepted` ([ADR-0006](0006-review-and-sign-adrs-before-accepting.md)):
+An ADR is reviewed like a PR before it becomes `Accepted` ([ADR-0007](0007-review-and-sign-adrs-before-accepting.md)):
 
 1. The ADR travels in a pull request (normally the parent-repo PR of the change that links it).
 2. Anyone with write access to the repository reviews it with the checklist below.
@@ -64,5 +64,5 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 | ADR | Title | Status | Superseded by |
 |---|---|---|---|
 | [ADR-0001](0001-use-openspec-for-spec-driven-development.md) | Use OpenSpec for spec-driven development | Proposed | — |
-| [ADR-0005](0005-split-agent-rules-per-sub-project.md) | Split agent rules per sub-project, one rule one home | Accepted | — |
-| [ADR-0006](0006-review-and-sign-adrs-before-accepting.md) | Review and sign an ADR before it is accepted | Accepted | — |
+| [ADR-0006](0006-split-agent-rules-per-sub-project.md) | Split agent rules per sub-project, one rule one home | Accepted | — |
+| [ADR-0007](0007-review-and-sign-adrs-before-accepting.md) | Review and sign an ADR before it is accepted | Accepted | — |

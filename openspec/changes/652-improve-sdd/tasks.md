@@ -31,7 +31,7 @@
 - [ ] 5.1 Run `bash .claude/skills/sdd-plan/tests/run-tests.sh` (all sections) and `bash .claude/skills/sdd-plan/tests/check-skills.sh` and verify 0 failures
 - [ ] 5.2 Run `bash .claude/skills/sdd-adr/scripts/check-adr.sh --change 652-improve-sdd` and `openspec validate "652-improve-sdd" --strict` and verify both pass
 - [x] 5.3 Verify the pre-existing gates are unaffected (AGENTS.md section 8.7): the submodule PRs add only the four new files; run `npm run lint` in `ERAS-FE/` and `dotnet build Eras.sln -warnaserror` in `ERAS-BE/` as a sanity check and report the results
-- [ ] 5.4 Open the `ERAS-BE` and `ERAS-FE` PRs with only the new files, linking `openspec/changes/652-improve-sdd`; after they merge, bump the parent pointers; the parent PR carries the change folder, `openspec/` files and skill edits; archive as the last commit of the ship PR (`/sdd-archive`, `--skip-specs`); verify both PRs list only the new files and the parent diff holds the change folder
+- [ ] 5.4 List what the submodule PRs and the parent commit will contain (`git status` and `git diff --stat` in each repo) and verify: `ERAS-BE` and `ERAS-FE` carry only `AGENTS.md` and `CLAUDE.md`; the parent carries the change folder, the ADR files, `openspec/` documents and the skill edits, with no submodule pointer, dump or environment file. Opening the PRs, the pointer bump and `/sdd-archive` follow after `/sdd-verify` (AGENTS.md §8.3 steps 5 and 6)
 
 ## Traceability
 No ACs: this change sets `skip_specs: true`. The self-test cases of task 3.1 and the checks of 5.1–5.2 are the evidence.
