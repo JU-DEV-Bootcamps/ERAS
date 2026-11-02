@@ -234,6 +234,13 @@ jobs:
             done
           done
 
+      - name: Copy the user manuals to the target machine
+        run: |
+          set -euo pipefail
+          SSH_OPTS="-i $HOME/.ssh/id_rsa -o ConnectTimeout=20 -o ServerAliveInterval=30 -o ServerAliveCountMax=6"
+          ssh $SSH_OPTS ubuntu@${{ env.SSH_HOST }} 'mkdir -p ~/eras-manuals'
+          scp -r $SSH_OPTS manuals/. ubuntu@${{ env.SSH_HOST }}:~/eras-manuals/
+
       - name: Connect and Run Commands
         run: |
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=20 -o ServerAliveInterval=30 -o ServerAliveCountMax=6 ubuntu@${{ env.SSH_HOST }} << 'EOF'
