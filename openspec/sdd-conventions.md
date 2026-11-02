@@ -1,7 +1,7 @@
 # SDD conventions and skills
 
 Single source of the conventions shared by the `/sdd-*` skills, and the full list of slash commands and skills.
-The root `AGENTS.md` §8.4 and §8.5 keep the headings and a short summary and point here (ADR-0006 explains why
+The root `AGENTS.md` §8.4 and §8.5 keep the headings and a short summary and point here (ADR-0007 explains why
 detail is kept in one place). The workflow itself (steps, gates, agent obligations) stays in `AGENTS.md` §8.3.
 
 **Who is in charge (markers).** 🟦 human · 🟩 AI agent · 🟨 shared: the agent drafts or runs, a human decides.

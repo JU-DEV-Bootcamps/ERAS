@@ -54,3 +54,8 @@ No application behavior changes, so this change sets `skip_specs: true` (AGENTS.
 
 - **Q1.** Who reviews ADRs and how many sign-offs? **Answer (2026-10-30):** anyone with write access to the repository (developer, lead, manager or QA) can review, sign off and accept; one sign-off is enough before `Accepted`. The ticket's "leads/managers review, devs/QAs sign" is therefore a checklist for the reviewer to follow, not a restriction on who may sign.
 - **Q2.** Where do the submodule `AGENTS.md` files land? **Answer (2026-10-30):** created in this change, in `ERAS-BE` and `ERAS-FE` (own PRs, then the parent pointer bump).
+
+## Validation log
+
+- Skipped: no BE controller or FE change (docs, skills and agent files only).
+- Verified 2026-11-02: no gaps, no drift, gates green (self-test 99/0, check-skills 0 errors, check-adr 0 errors, openspec validate --strict; no BE/FE code gates apply).

@@ -1,4 +1,4 @@
-# ADR-0007: Review and sign an ADR before it is accepted
+# ADR-0008: Review and sign an ADR before it is accepted
 
 **Status:** Accepted
 **Date:** 2026-10-30

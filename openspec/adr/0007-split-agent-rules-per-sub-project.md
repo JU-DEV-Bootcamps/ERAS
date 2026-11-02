@@ -1,4 +1,4 @@
-# ADR-0006: Split agent rules per sub-project, one rule one home
+# ADR-0007: Split agent rules per sub-project, one rule one home
 
 **Status:** Accepted
 **Date:** 2026-10-30

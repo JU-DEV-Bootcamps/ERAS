@@ -62,7 +62,7 @@ No code changes without an approved spec (see §8).
 
 | Document | Source of truth for |
 |---|---|
-| `AGENTS.md` (this file) | The shared rules: principles, conventions, workflow, limits. Backend and frontend rules are in `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md` (ADR-0006) |
+| `AGENTS.md` (this file) | The shared rules: principles, conventions, workflow, limits. Backend and frontend rules are in `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md` (ADR-0007) |
 | `CLAUDE.md` | Claude Code specifics only; it imports this file |
 | `README.md` | Onboarding: what ERAS is, how to set up and run it |
 | `openspec/config.yaml` | The rules OpenSpec injects into its artifacts (AC format, traceability table, design triggers) |

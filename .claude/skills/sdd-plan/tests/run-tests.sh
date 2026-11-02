@@ -268,7 +268,7 @@ new_adr_root; git_commit_all; mk_adr 0002 new-for-change Proposed process
 new_adr_root; printf '### D1. x\n**ADR:** ADR-0001\n' > "openspec/changes/$id/design.md"
               sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"; summ 0001 use-openspec; sign 0001-use-openspec.md; git_commit_all
               expect "adr: --change with everything committed has no warning" 0 "Result: 0 error(s), 0 warning(s)" $adrc --change $id
-# ADR-0007: review and sign-off, and SUMMARY.md
+# ADR-0008: review and sign-off, and SUMMARY.md
 accept_0001() { sed -i 's/Proposed/Accepted/' "$(a)/0001-use-openspec.md" "$(a)/README.md"; }
 new_adr_root; rm "$(a)/SUMMARY.md"
               expect "adr: SUMMARY.md is missing" 1 "SUMMARY.md is missing" $adrc

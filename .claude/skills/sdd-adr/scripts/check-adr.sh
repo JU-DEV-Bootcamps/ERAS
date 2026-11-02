@@ -27,7 +27,7 @@ err() { echo "ERROR: $*"; errors=$((errors + 1)); }
 warn() { echo "WARN:  $*"; warnings=$((warnings + 1)); }
 
 areas=" backend frontend auth data infra process "
-signoff_from="2026-10-30"  # date of ADR-0007; an Accepted ADR dated on or after it must carry Reviewed by and Signed by
+signoff_from="2026-10-30"  # date of ADR-0008; an Accepted ADR dated on or after it must carry Reviewed by and Signed by
 declare -A file status primary supersedes changeof
 
 field() { sed -n "s/^\*\*$1:\*\* *//p" <<< "$2" | head -1; }
@@ -58,7 +58,7 @@ for f in "$adr"/*.md; do
   d=$(field Date "$text")
   [[ $d =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || err "$base: Date '$d' must be YYYY-MM-DD"
 
-  # Review and sign-off (ADR-0007): an Accepted ADR records who reviewed and who signed it. Only a human fills these
+  # Review and sign-off (ADR-0008): an Accepted ADR records who reviewed and who signed it. Only a human fills these
   # fields, so ADRs accepted before the rule (dated before $signoff_from) only get a warning.
   if [ "$s" = Accepted ]; then
     for who in "Reviewed by" "Signed by"; do
@@ -168,7 +168,7 @@ else
   done
 fi
 
-# Summary (ADR-0007): SUMMARY.md has exactly one entry per Accepted ADR, under its first Area, and no other.
+# Summary (ADR-0008): SUMMARY.md has exactly one entry per Accepted ADR, under its first Area, and no other.
 summary="$adr/SUMMARY.md"
 declare -A entries
 if [ ! -f "$summary" ]; then
