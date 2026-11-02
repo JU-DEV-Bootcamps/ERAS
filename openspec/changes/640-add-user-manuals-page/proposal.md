@@ -126,4 +126,4 @@ Not testable by the agent; the developer checks these (the first three before th
 - [ ] After the deploy: `~/app/docker-compose.yml` on each host was edited by hand with `/home/ubuntu/eras-manuals:/app/manuals:ro` (the deploy workflow does not deliver the compose file), and the page lists both manuals.
 - Approved by Judith Paco, 2026-10-29
 
-- Verified 2026-10-29: no gaps, no drift, gates green (infra and deploy checks are human-only, see Human-only verification)
+- Verified 2026-11-02: no gaps, no drift, gates green (infra and deploy checks are human-only, see Human-only verification)
