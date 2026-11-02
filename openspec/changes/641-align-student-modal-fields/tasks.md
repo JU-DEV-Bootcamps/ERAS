@@ -1,0 +1,54 @@
+# Tasks
+
+## 1. Backend (BE)
+
+- [x] 1.1 Write the AC test `GetStudentProfileSisIdTests.Handle_ImportedStudent_ReturnsTheImportedIdentifierAsSisIdAsync` for (AC-6) in `ERAS-BE/test/Eras.Application.Tests/Features/Students/ManualRegistration/GetStudentProfileSisIdTests.cs` (new), tagged `Change` and `AC`, covering an imported student without a profile and one whose profile has its own SIS ID, and verify it fails for the right reason
+- [x] 1.2 Write the AC test `GetStudentProfileSisIdTests.Handle_ManualStudent_ReturnsTheProfileSisIdOrNoneAsync` for (AC-19) in the same file, tagged `Change` and `AC`, asserting the generated identifier is never returned, and verify it fails or, if the current mapper already satisfies it, that it passes for the right reason
+- [x] 1.3 Implement the SIS ID helper in `ERAS-BE/src/Eras.Application/Mappers/StudentRegistrationMapper.cs`, use it in `ToDto` and in the no-profile branch of `GetStudentProfileQueryHandler`, and document the source on `StudentRegistrationDto.SisId`, for (AC-6) (AC-19); verify the tests from 1.1 and 1.2 pass
+- [x] 1.4 Write the AC test `UpdateStudentProfileCommandHandlerTests.Handle_RequestWithoutProfileViewValues_KeepsTheStoredOnesAsync` for (AC-15) in `ERAS-BE/test/Eras.Application.Tests/Features/Students/ManualRegistration/UpdateStudentProfileCommandHandlerTests.cs`, tagged `Change` and `AC`, with a stored profile holding a SIS ID, CGPA, courses and free-text lists, and verify it fails
+- [x] 1.5 Add `ApplyUpdateTo` to `StudentRegistrationMapper` and call it from `UpdateStudentProfileCommandHandler` for an existing profile (the create paths keep `ApplyTo`) for (AC-15); verify the test from 1.4 passes and the existing mapper and handler tests still pass
+
+## 2. Frontend (FE)
+
+- [x] 2.1 Write the specs `[641-align-student-modal-fields/AC-3]`, `[…/AC-4]` and `[…/AC-5]` for (AC-3) (AC-4) (AC-5) in `ERAS-FE/src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts` (new), one `it()` each, and verify they fail
+- [x] 2.2 Write the specs `[641-align-student-modal-fields/AC-7]`, `[…/AC-8]`, `[…/AC-9]` and `[…/AC-10]` for (AC-7) (AC-8) (AC-9) (AC-10) in the same spec file, one `it()` each, and verify they fail
+- [x] 2.3 Write the spec `[641-align-student-modal-fields/AC-11]` for (AC-11) in the same spec file (read mode, two lists with empty-state messages) and verify it fails
+- [x] 2.4 Implement the shared view in `ERAS-FE/src/app/modules/students/students-list/student-profile-view/` (component ts, html, scss, `student-profile-sections.ts` with the field definition, the display helper, the cohort-name helper and the data-source notes for the third-attempt flag and the interventions) and the new labels in `ERAS-FE/src/app/core/constants/messages.ts` (`STUDENT_PROFILE_MESSAGES`) for (AC-3) (AC-4) (AC-5) (AC-7) (AC-8) (AC-9) (AC-10) (AC-11); verify the specs from 2.1 to 2.3 pass
+- [x] 2.5 Write the specs `[641-align-student-modal-fields/AC-1]`, `[…/AC-12]` and `[…/AC-16]` for (AC-1) (AC-12) (AC-16) in `ERAS-FE/src/app/modules/students/students-list/student-profile-summary-modal/student-profile-summary-modal.component.spec.ts`, one `it()` each, and verify they fail
+- [x] 2.6 Render the shared view in `student-profile-summary-modal.component.{ts,html,scss}` (read mode; keep the profile and cohort loading and the close button; remove the aside, the tiles and the entries logic) for (AC-1) (AC-12) (AC-16); adapt the existing summary specs and verify them and the specs from 2.5 pass, including the 643 specs AC-24, AC-25, AC-26 and AC-34
+- [x] 2.7 Write the spec `[641-align-student-modal-fields/AC-17]` for (AC-17) in `ERAS-FE/src/app/modules/students/students-list/students-list.component.spec.ts` and verify it fails
+- [x] 2.8 In `students-list.component.ts` load the profile with `getStudentProfileSummary` plus the cohort lookups and pass both to the record modal, and type `NewStudentModalData.student` as `StudentProfileSummaryModel`, for (AC-17); adapt the existing list specs and verify the spec from 2.7 passes
+- [x] 2.9 Write the specs `[641-align-student-modal-fields/AC-2]`, `[…/AC-13]`, `[…/AC-14]` and `[…/AC-15]` for (AC-2) (AC-13) (AC-14) (AC-15) in `ERAS-FE/src/app/modules/students/students-list/new-student-modal/new-student-modal.component.spec.ts`, one `it()` each, and verify they fail
+- [x] 2.10 Switch `new-student-modal.component.{ts,html}` between the shared view (viewing, manage mode) and the form (edit and new) per design D4, re-applying locked fields, state options and the pristine form when the form is created, for (AC-2) (AC-13) (AC-14) (AC-15); adapt the existing editing and cannot-manage-students specs and verify them and the specs from 2.9 pass
+- [x] 2.11 Write the spec `[641-align-student-modal-fields/AC-18]` for (AC-18) in `ERAS-FE/src/app/modules/students/students-list/student-profile-modals.consistency.spec.ts` (new), rendering both modals for the same student, and verify it fails or, if the shared view already makes both identical, that it passes for the right reason
+- [x] 2.12 Confirm both modals consume the shared section definition with no copy of labels or order (AC-18) and verify the spec from 2.11 passes
+
+## 3. Verification
+
+- [x] 3.1 BE gates (AGENTS.md section 8.7) pass in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%
+- [x] 3.2 FE gates (AGENTS.md section 8.7) pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build`
+- [x] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate 641-align-student-modal-fields --strict` passes
+
+## Traceability
+| AC | Scenario | Side | Test |
+|----|----------|------|------|
+| AC-1 | Profile summary shows the three sections in order | FE | src/app/modules/students/students-list/student-profile-summary-modal/student-profile-summary-modal.component.spec.ts › [641-align-student-modal-fields/AC-1] shows the three sections in order and no other |
+| AC-2 | Student record in view mode shows the three sections in order | FE | src/app/modules/students/students-list/new-student-modal/new-student-modal.component.spec.ts › [641-align-student-modal-fields/AC-2] shows the three sections in order when opened for viewing |
+| AC-3 | Personal information fields and their order | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-3] lists the personal fields in order with the full name as first names |
+| AC-4 | Missing personal values show a dash | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-4] shows a dash for a missing personal value |
+| AC-5 | STU ID is replaced by SIS ID | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-5] shows SIS ID and never STU ID |
+| AC-6 | SIS ID of an imported student is the one the import stored | BE | test/Eras.Application.Tests/Features/Students/ManualRegistration/GetStudentProfileSisIdTests.cs › Handle_ImportedStudent_ReturnsTheImportedIdentifierAsSisIdAsync |
+| AC-7 | Current academic information fields and their order | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-7] lists the academic fields in order |
+| AC-8 | Third-attempt field appears when it applies | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-8] shows the third-attempt field when it applies |
+| AC-9 | Third-attempt field is hidden when it does not apply | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-9] hides the third-attempt field when it does not apply or is unknown |
+| AC-10 | Current courses show their group and section | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-10] lists each current course with group and section |
+| AC-11 | Interventions shows two separate lists | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-11] shows risks and support as two lists with empty-state messages |
+| AC-12 | Profile summary no longer shows other fields | FE | src/app/modules/students/students-list/student-profile-summary-modal/student-profile-summary-modal.component.spec.ts › [641-align-student-modal-fields/AC-12] does not show the fields outside the agreed list |
+| AC-13 | Student record in view mode no longer shows other fields | FE | src/app/modules/students/students-list/new-student-modal/new-student-modal.component.spec.ts › [641-align-student-modal-fields/AC-13] does not show the fields outside the agreed list when viewing |
+| AC-14 | Edit and creation forms keep their fields | FE | src/app/modules/students/students-list/new-student-modal/new-student-modal.component.spec.ts › [641-align-student-modal-fields/AC-14] keeps the fields of the edit and new student forms |
+| AC-15 | Saving a student does not alter the hidden data | BE | test/Eras.Application.Tests/Features/Students/ManualRegistration/UpdateStudentProfileCommandHandlerTests.cs › Handle_RequestWithoutProfileViewValues_KeepsTheStoredOnesAsync |
+| AC-15 | Saving a student does not alter the hidden data | FE | src/app/modules/students/students-list/new-student-modal/new-student-modal.component.spec.ts › [641-align-student-modal-fields/AC-15] saves the edited value and sends the unchanged form values |
+| AC-16 | Profile summary loads the selected student | FE | src/app/modules/students/students-list/student-profile-summary-modal/student-profile-summary-modal.component.spec.ts › [641-align-student-modal-fields/AC-16] requests the profile of the selected student only |
+| AC-17 | Student record loads the selected student | FE | src/app/modules/students/students-list/students-list.component.spec.ts › [641-align-student-modal-fields/AC-17] opens the record with the profile of the selected student only |
+| AC-18 | Both modals show the same labels for the same student | FE | src/app/modules/students/students-list/student-profile-modals.consistency.spec.ts › [641-align-student-modal-fields/AC-18] both modals show the same labels, values and order for the same student |
+| AC-19 | SIS ID of a manually registered student is the one of its profile | BE | test/Eras.Application.Tests/Features/Students/ManualRegistration/GetStudentProfileSisIdTests.cs › Handle_ManualStudent_ReturnsTheProfileSisIdOrNoneAsync |
