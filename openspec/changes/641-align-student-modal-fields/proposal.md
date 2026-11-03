@@ -10,8 +10,8 @@ The two student modals of the Students section (the student record and the read-
 ## What Changes
 
 - Both modals show the same attributes, in the same order, in three sections:
-  1. **Personal information**: first names, institutional email, SIS ID, mobile number, country, cohort.
-  2. **Current academic information**: current CGPA, SAP status, current course as third attempt (only when it applies), current courses with group and section, passed courses count, failed courses count.
+  1. **Personal information**: first names, institutional email, SIS ID, ID/Passport number, mobile number, country, cohort.
+  2. **Current academic information**: current CGPA, SAP status, current course as third attempt (only when it applies), passed courses count, failed courses count, current courses with group and section (last). Each field of this section carries an icon.
   3. **Interventions**: risks identified and support received, as two separate lists with an empty-state message.
 - "STU ID" is replaced by "SIS ID", read from the SIS ID the student already has (the one stored by the import; for a student registered by hand, the SIS ID of its profile); no new identifier is introduced.
 - "First names" shows the student's full name as one value.
@@ -41,11 +41,12 @@ The two student modals of the Students section (the student record and the read-
 - A1: "Institutional email" is the student's primary email, the one the Student record already holds. The secondary email is not shown.
 - A2: Missing values keep today's behavior in the profile summary: a dash ("-") is shown instead of an empty space.
 - A3: The third-attempt field is shown as a label only when the student's current course is a third attempt; when it is not or is unknown, nothing is shown and no space is left for it.
-- A4: Both modals use the same section titles and field labels, in English: "Personal information", "Current academic information", "Interventions", "First names", "Institutional email", "SIS ID", "Mobile number", "Country", "Cohort", "Current CGPA", "SAP status", "Third attempt", "Current courses", "Passed courses", "Failed courses".
-- A5: Courses keep today's presentation: one row per course with name, group and section, and the existing message when the student has no current courses.
+- A4: Both modals use the same section titles and field labels, in English: "Personal information", "Current academic information", "Interventions", "First names", "Institutional email", "SIS ID", "ID/Passport number", "Mobile number", "Country", "Cohort", "Current CGPA", "SAP status", "Third attempt", "Current courses", "Passed courses", "Failed courses".
+- A5: Courses keep today's presentation, as the last field of Current academic information: one row per course with name, group and section, and the existing message when the student has no current courses.
 - A6: In the student record, Interventions keeps the add, edit and delete behavior of change 643. This change only fixes its position as the third section; the profile summary keeps showing the lists read-only.
 - A7: The two modals still open from the same actions as today (the student profile summary and the student record of the Students list); this change does not add or move any entry point.
 - A8: Every scenario that opens the student record in "view" mode covers its read-only presentation; the Edit Student and New Student modes keep their forms (AC-14).
+- A10: The ID/Passport number goes right after the SIS ID in Personal information; the stakeholders confirmed it is shown but gave no position, so this is the default to challenge.
 - A9: A student with no SIS ID at all (not imported and with no SIS ID in its profile) shows "-" as its SIS ID.
 
 ## Clarifications
@@ -82,3 +83,14 @@ Setup: run the local stack (AGENTS.md §3.4) and open Students. Use three studen
 
 Approved by Lucia Becerra, 2026-11-02.
 Verified 2026-11-02: no gaps, no drift, gates green
+
+### Session 2026-11-03
+
+- Reopened by the user after the review of the frontend PR: the plan of the profile summary lost the icons of the former design, and the user asked for "Current courses" to go after "Passed courses" and "Failed courses", with an icon. The ticket's order for the section is therefore changed by the user (to be confirmed with the stakeholders together with the ID/Passport question).
+- Changed: AC-7 (order), AC-8 (position of the third-attempt field), AC-10 (courses are the last field). Added: AC-20 (icons on the academic fields).
+- Status after this session: Draft (to be approved again, then the plan)
+
+### Session 2026-11-03 (stakeholders)
+
+- Q: Must the ID/Passport number be shown in the view of the student and in the profile summary? → A: Yes, the stakeholders confirmed it must be shown (AC-3, AC-4: changed; AC-12, AC-13: it is no longer one of the hidden fields)
+- Status after this session: Draft (to be approved again, then the plan)

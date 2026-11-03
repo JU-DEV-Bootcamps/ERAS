@@ -22,12 +22,18 @@
 - [x] 2.10 Switch `new-student-modal.component.{ts,html}` between the shared view (viewing, manage mode) and the form (edit and new) per design D4, re-applying locked fields, state options and the pristine form when the form is created, for (AC-2) (AC-13) (AC-14) (AC-15); adapt the existing editing and cannot-manage-students specs and verify them and the specs from 2.9 pass
 - [x] 2.11 Write the spec `[641-align-student-modal-fields/AC-18]` for (AC-18) in `ERAS-FE/src/app/modules/students/students-list/student-profile-modals.consistency.spec.ts` (new), rendering both modals for the same student, and verify it fails or, if the shared view already makes both identical, that it passes for the right reason
 - [x] 2.12 Confirm both modals consume the shared section definition with no copy of labels or order (AC-18) and verify the spec from 2.11 passes
+- [x] 2.13 Update the specs `[641-align-student-modal-fields/AC-7]`, `[…/AC-8]`, `[…/AC-9]` and `[…/AC-10]` in `ERAS-FE/src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts` to the new order (current courses last, after "Failed courses") for (AC-7) (AC-8) (AC-9) (AC-10), and verify they fail for the right reason
+- [x] 2.14 Write the spec `[641-align-student-modal-fields/AC-20]` for (AC-20) in the same spec file, replacing the untagged icons spec (it also covers the "Current courses" icon with `menu_book`), and verify it fails
+- [x] 2.15 Implement the new order and the icons in `ERAS-FE/src/app/modules/students/students-list/student-profile-view/` (`student-profile-sections.ts`, template, scss; the current courses become the last field with its icon) for (AC-7) (AC-8) (AC-9) (AC-10) (AC-20); verify the specs from 2.13 and 2.14, the summary and record specs and the consistency spec (AC-18) pass
+- [x] 2.16 Update the specs `[641-align-student-modal-fields/AC-3]` and `[…/AC-4]` in `ERAS-FE/src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts`, `[…/AC-12]` in `student-profile-summary-modal.component.spec.ts`, `[…/AC-13]` in `new-student-modal.component.spec.ts` and `[…/AC-18]` in `student-profile-modals.consistency.spec.ts` for (AC-3) (AC-4) (AC-12) (AC-13) (AC-18): the ID/Passport number is listed after "SIS ID", shows a dash when missing, and is not among the hidden fields; verify they fail for the right reason
+- [x] 2.17 Add the "ID/Passport number" field after the SIS ID in `student-profile-sections.ts` and its label in `ERAS-FE/src/app/core/constants/messages.ts` for (AC-3) (AC-4) (AC-12) (AC-13) (AC-18); verify the specs from 2.16 and the whole students-list folder pass
 
 ## 3. Verification
 
 - [x] 3.1 BE gates (AGENTS.md section 8.7) pass in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%
 - [x] 3.2 FE gates (AGENTS.md section 8.7) pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build`
 - [x] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate 641-align-student-modal-fields --strict` passes
+- [ ] 3.4 After the reopening of the spec (AC-3, AC-4, AC-7, AC-8, AC-9, AC-10, AC-12, AC-13, AC-18, AC-20) the BE and FE gates of AGENTS.md section 8.7 and the AC traceability check pass again, and `openspec validate 641-align-student-modal-fields --strict` passes
 
 ## Traceability
 | AC | Scenario | Side | Test |
@@ -52,3 +58,4 @@
 | AC-17 | Student record loads the selected student | FE | src/app/modules/students/students-list/students-list.component.spec.ts › [641-align-student-modal-fields/AC-17] opens the record with the profile of the selected student only |
 | AC-18 | Both modals show the same labels for the same student | FE | src/app/modules/students/students-list/student-profile-modals.consistency.spec.ts › [641-align-student-modal-fields/AC-18] both modals show the same labels, values and order for the same student |
 | AC-19 | SIS ID of a manually registered student is the one of its profile | BE | test/Eras.Application.Tests/Features/Students/ManualRegistration/GetStudentProfileSisIdTests.cs › Handle_ManualStudent_ReturnsTheProfileSisIdOrNoneAsync |
+| AC-20 | Academic fields carry an icon | FE | src/app/modules/students/students-list/student-profile-view/student-profile-view.component.spec.ts › [641-align-student-modal-fields/AC-20] shows an icon with a colour on each academic field and keeps the agreed order |

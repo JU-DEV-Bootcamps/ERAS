@@ -9,7 +9,7 @@ Both modals read the same endpoint, `GET api/v1/students/{id}/profile` (`Student
 ## Goals / Non-Goals
 
 **Goals:**
-- One shared view of the three sections, used by the summary and by the record in view mode (AC-1, AC-2, AC-3, AC-4, AC-5, AC-7 to AC-13, AC-18).
+- One shared view of the three sections, used by the summary and by the record in view mode (AC-1, AC-2, AC-3, AC-4, AC-5, AC-7 to AC-13, AC-18) and the icons of the academic fields (AC-20).
 - The SIS ID comes from the existing Student data (AC-5, AC-6, AC-19).
 - Saving from the record leaves every stored value that is not shown as it was (AC-15), and the create and edit forms keep their fields (AC-14).
 - Each modal still loads the selected student only (AC-16, AC-17).
@@ -26,7 +26,7 @@ Both modals read the same endpoint, `GET api/v1/students/{id}/profile` (`Student
 **ADR:** ADR-0006
 
 ### D2. One shared presentational component with one shared field definition
-**Choice:** new standalone OnPush component `app-student-profile-view` that takes the profile and renders the three sections from a typed definition (`student-profile-sections.ts`: section titles, field labels, order, value getters and a `visible` predicate for the third-attempt field). Both modals render it, so order and labels cannot drift. Its Interventions section has two modes: `read` (the shared view loads the entries with `StudentInterventionService` and shows the two `app-student-intervention-list` read-only, logic moved out of the summary modal) and `manage` (it renders `app-student-interventions`, 643's own heading is the section title). The definition marks the data source of the third-attempt flag (`profile.isCurrentCourseThirdAttempt`) and of the interventions (`student_intervention_entries` through `StudentInterventionService`) so the migration work can plug in without touching the layout.
+**Choice:** new standalone OnPush component `app-student-profile-view` that takes the profile and renders the three sections from a typed definition (`student-profile-sections.ts`: section titles, field labels, order, value getters and a `visible` predicate for the third-attempt field). Both modals render it, so order and labels cannot drift. Its Interventions section has two modes: `read` (the shared view loads the entries with `StudentInterventionService` and shows the two `app-student-intervention-list` read-only, logic moved out of the summary modal) and `manage` (it renders `app-student-interventions`, 643's own heading is the section title). Personal information also lists the ID/Passport number (`profile.idPassportNumber`, already in the profile response) right after the SIS ID; an imported student without a profile has none and shows a dash (AC-3, AC-4). Each field of Current academic information carries an `icon` and a `tone` in that definition (CGPA `school`, SAP status `verified`, third attempt `warning`, passed courses `task_alt`, failed courses `highlight_off`, current courses `menu_book`), drawn with `mat-icon` as a coloured tile like the former summary, and the order puts the current courses last (AC-7, AC-10, AC-20). The definition marks the data source of the third-attempt flag (`profile.isCurrentCourseThirdAttempt`) and of the interventions (`student_intervention_entries` through `StudentInterventionService`) so the migration work can plug in without touching the layout.
 **Alternative:** keep two templates and copy the layout → exactly the drift the ticket complains about.
 
 ### D3. A save keeps the stored profile-view values the request does not carry
@@ -55,7 +55,7 @@ No Domain, Infrastructure or Api change.
 
 | Piece | Change | Files | ACs |
 |---|---|---|---|
-| Shared view | New `app-student-profile-view` (ts, html, scss, spec) and `student-profile-sections.ts` with the shared field definition, the display helper and the cohort-name helper | `src/app/modules/students/students-list/student-profile-view/` (new) | AC-3, AC-4, AC-5, AC-7 to AC-11, AC-18 |
+| Shared view | New `app-student-profile-view` (ts, html, scss, spec) and `student-profile-sections.ts` with the shared field definition, the display helper and the cohort-name helper | `src/app/modules/students/students-list/student-profile-view/` (new) | AC-3, AC-4, AC-5, AC-7 to AC-11, AC-18, AC-20 |
 | Summary modal | Renders the shared view in `read` mode; keeps loading the profile and cohorts; drops the aside, tiles, the entries logic and the "STU ID" label | `.../student-profile-summary-modal/*` | AC-1, AC-12, AC-16 |
 | Record modal | `isViewing` renders the shared view in `manage` mode; Edit and New keep the form; `student` is typed `StudentProfileSummaryModel`; form lifecycle per D4 | `.../new-student-modal/new-student-modal.component.{ts,html}` | AC-2, AC-13, AC-14, AC-15 |
 | Students list | `openStudentProfileModal` loads the profile with `getStudentProfileSummary` and the cohorts (`loadCohortLookups`) and passes both | `.../students-list/students-list.component.ts` | AC-17 |
@@ -88,6 +88,7 @@ No schema change and no migration. `Student.Uuid` and `StudentProfile.SisId` are
 | AC-8 | FE | same | `[641-align-student-modal-fields/AC-8] shows the third-attempt field when it applies` |
 | AC-9 | FE | same | `[641-align-student-modal-fields/AC-9] hides the third-attempt field when it does not apply or is unknown` |
 | AC-10 | FE | same | `[641-align-student-modal-fields/AC-10] lists each current course with group and section` |
+| AC-20 | FE | same | `[641-align-student-modal-fields/AC-20] shows an icon with a colour on each academic field and keeps the agreed order` |
 | AC-11 | FE | same | `[641-align-student-modal-fields/AC-11] shows risks and support as two lists with empty-state messages` |
 | AC-12 | FE | `student-profile-summary-modal.component.spec.ts` | `[641-align-student-modal-fields/AC-12] does not show the fields outside the agreed list` |
 | AC-13 | FE | `new-student-modal.component.spec.ts` | `[641-align-student-modal-fields/AC-13] does not show the fields outside the agreed list when viewing` |
@@ -111,6 +112,7 @@ BE tests carry `[Trait("Change", "641-align-student-modal-fields")]` and `[Trait
 
 ## Follow-ups
 
+- The order of Current academic information (courses last) and the icons come from the review of the frontend PR, not from the ticket; the stakeholders are to confirm them.
 - `StudentService.getStudentProfile` has no caller after this change (the list uses `getStudentProfileSummary`); remove it in a refactor change.
 - The unused tile and aside styles of the profile summary go with this change; nothing else is refactored.
 - Confirm with stakeholders whether the removed fields (date of birth, gender, ID/passport, secondary email, address, level of study, faculty, modality, previous institution) are needed on any other screen (ticket developer note); they are only hidden here.

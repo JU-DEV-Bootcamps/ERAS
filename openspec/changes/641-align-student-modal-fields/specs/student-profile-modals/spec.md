@@ -28,20 +28,20 @@ The system SHALL show, in the student profile summary and in the student record 
 - **AND** both are built from the same shared definition of sections and fields
 
 ### Requirement: Personal information shows the agreed fields in the agreed order
-The system SHALL show in Personal information, in this order: first names, institutional email, SIS ID, mobile number, country and cohort, and nothing else.
+The system SHALL show in Personal information, in this order: first names, institutional email, SIS ID, ID/Passport number, mobile number, country and cohort, and nothing else.
 
 #### Scenario: AC-3 Personal information fields and their order
 **Side:** FE
-- **GIVEN** the student with first name "Ana", last name "Torres", institutional email "ana.torres@jala.university", SIS ID "S-1001", mobile number "+506 8888 0000", country "Costa Rica" and cohort "Cohort 12"
+- **GIVEN** the student with first name "Ana", last name "Torres", institutional email "ana.torres@jala.university", SIS ID "S-1001", ID/Passport number "AB-123456", mobile number "+506 8888 0000", country "Costa Rica" and cohort "Cohort 12"
 - **WHEN** a user with an ERAS role opens the profile summary of "Ana Torres"
-- **THEN** Personal information shows "First names", "Institutional email", "SIS ID", "Mobile number", "Country" and "Cohort", in that order, with those values
+- **THEN** Personal information shows "First names", "Institutional email", "SIS ID", "ID/Passport number", "Mobile number", "Country" and "Cohort", in that order, with those values
 - **AND** "First names" shows the full name as one value, "Ana Torres" (first, middle and last name, when each exists)
 
 #### Scenario: AC-4 Missing personal values show a dash
 **Side:** FE
-- **GIVEN** a student with no mobile number and no country
+- **GIVEN** a student with no ID/Passport number, no mobile number and no country
 - **WHEN** a user with an ERAS role opens the profile summary of that student
-- **THEN** "Mobile number" and "Country" each show "-"
+- **THEN** "ID/Passport number", "Mobile number" and "Country" each show "-"
 - **AND** the fields are still listed in their position
 
 #### Scenario: AC-5 STU ID is replaced by SIS ID
@@ -66,20 +66,20 @@ The system SHALL show in Personal information, in this order: first names, insti
 - **AND** the identifier that ERAS generated for the student is never returned as its SIS ID
 
 ### Requirement: Current academic information shows the agreed fields in the agreed order
-The system SHALL show in Current academic information, in this order: current CGPA, SAP status, current course as a third attempt (only when it applies), current courses with their groups and sections, passed courses count and failed courses count, and nothing else.
+The system SHALL show in Current academic information, in this order: current CGPA, SAP status, current course as a third attempt (only when it applies), passed courses count, failed courses count and current courses with their groups and sections, and nothing else.
 
 #### Scenario: AC-7 Current academic information fields and their order
 **Side:** FE
 - **GIVEN** the student "Ana Torres" with CGPA 3.4, SAP status "Satisfactory", 7 passed courses and 1 failed course
 - **WHEN** a user with an ERAS role opens the profile summary of "Ana Torres"
-- **THEN** Current academic information shows "Current CGPA" 3.4, "SAP status" "Satisfactory", the current courses, "Passed courses" 7 and "Failed courses" 1, in that order
+- **THEN** Current academic information shows "Current CGPA" 3.4, "SAP status" "Satisfactory", "Passed courses" 7, "Failed courses" 1 and the current courses, in that order
 - **AND** no other field is shown in that section
 
 #### Scenario: AC-8 Third-attempt field appears when it applies
 **Side:** FE
 - **GIVEN** a student whose current course is a third attempt
 - **WHEN** a user with an ERAS role opens the profile summary of that student
-- **THEN** the field "Third attempt" is shown between "SAP status" and the current courses
+- **THEN** the field "Third attempt" is shown between "SAP status" and "Passed courses"
 - **AND** it is shown with a value that says the course is a third attempt
 
 #### Scenario: AC-9 Third-attempt field is hidden when it does not apply
@@ -94,7 +94,17 @@ The system SHALL show in Current academic information, in this order: current CG
 - **GIVEN** a student with the current courses "Algorithms" (group "A", section "2") and "Databases" (group "B", section "1")
 - **WHEN** a user with an ERAS role opens the profile summary of that student
 - **THEN** each course is listed with its name, group and section
-- **AND** the courses are listed after "SAP status" and before "Passed courses"
+- **AND** the courses are listed after "Failed courses", as the last field of the section
+
+### Requirement: Academic indicators are marked with an icon
+The system SHALL mark each field of Current academic information, in both modals, with an icon and a colour, so the indicators are easy to scan.
+
+#### Scenario: AC-20 Academic fields carry an icon
+**Side:** FE
+- **GIVEN** a student with academic data, a third-attempt course and current courses
+- **WHEN** a user with an ERAS role opens the profile summary or the student record in view mode
+- **THEN** "Current CGPA", "SAP status", "Third attempt", "Passed courses", "Failed courses" and "Current courses" each show their own icon
+- **AND** the fields keep the agreed order
 
 ### Requirement: Interventions shows risks identified and support received
 The system SHALL show in Interventions the risks identified and the support received as two separate lists, each with an empty-state message when it has no entries, using the entries managed by change 643.
@@ -111,7 +121,7 @@ The system SHALL NOT display, in either modal in its viewing presentation, any a
 
 #### Scenario: AC-12 Profile summary no longer shows other fields
 **Side:** FE
-- **GIVEN** a student whose profile holds a date of birth, gender, nationality, ID/passport number, secondary email, city, street, postal code, level of study, faculty, study modality and previous institution
+- **GIVEN** a student whose profile holds a date of birth, gender, nationality, secondary email, city, street, postal code, level of study, faculty, study modality and previous institution
 - **WHEN** a user with an ERAS role opens the profile summary of that student
 - **THEN** none of those fields or their values is shown
 - **AND** the former free-text lists of identified risks and support received are not shown either
