@@ -33,7 +33,7 @@
 - [x] 3.1 BE gates (AGENTS.md section 8.7) pass in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%
 - [x] 3.2 FE gates (AGENTS.md section 8.7) pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build`
 - [x] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate 641-align-student-modal-fields --strict` passes
-- [ ] 3.4 After the reopening of the spec (AC-3, AC-4, AC-7, AC-8, AC-9, AC-10, AC-12, AC-13, AC-18, AC-20) the BE and FE gates of AGENTS.md section 8.7 and the AC traceability check pass again, and `openspec validate 641-align-student-modal-fields --strict` passes
+- [x] 3.4 After the reopening of the spec (AC-3, AC-4, AC-7, AC-8, AC-9, AC-10, AC-12, AC-13, AC-18, AC-20) the BE and FE gates of AGENTS.md section 8.7 and the AC traceability check pass again, and `openspec validate 641-align-student-modal-fields --strict` passes
 
 ## Traceability
 | AC | Scenario | Side | Test |

@@ -94,3 +94,21 @@ Verified 2026-11-02: no gaps, no drift, gates green
 
 - Q: Must the ID/Passport number be shown in the view of the student and in the profile summary? → A: Yes, the stakeholders confirmed it must be shown (AC-3, AC-4: changed; AC-12, AC-13: it is no longer one of the hidden fields)
 - Status after this session: Draft (to be approved again, then the plan)
+
+### 2026-11-03 – Round 2 (after the reopening: passport number, courses last, icons)
+
+Setup: run the local stack on the three `641-...` branches (ERAS-BE, ERAS-FE). Use "Aaron Ford" after running the sample script `aaron-ford-sample.sql` (all fields filled), plus a student with no data. Open each with "Profile summary" and with "View profile".
+
+| Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
+|---|---|---|---|---|
+| AC-3, AC-4 | Personal information of Aaron Ford, and of a student with no passport, mobile or country | Order: First names, Institutional email, SIS ID, **ID/Passport number**, Mobile number, Country, Cohort; missing values show "-" | | |
+| AC-7, AC-8, AC-9 | Current academic information of Aaron Ford (third attempt on), then of a student where it is off | Order: Current CGPA, SAP status, [Third attempt], Passed courses, Failed courses, **Current courses last**; Third attempt only when it applies | | |
+| AC-10 | The courses of Aaron Ford | Each course with name, group and section, as the last field of the section | | |
+| AC-20 | Look at each academic field | Each one has its own icon and colour (CGPA, SAP status, Third attempt, Passed, Failed, Current courses); the layout stays tidy on a narrow window | | |
+| AC-12, AC-13 | Look for date of birth, gender, secondary email, address, level of study, faculty, modality, previous institution and the free-text risks and support | None of them appears in either modal (the ID/Passport number does) | | |
+| AC-18 | Compare the profile summary and the student record (view) of the same student | Same sections, labels, values, icons and order | | |
+| AC-14 | Press Edit and New Student | Forms keep all their fields; the ID/Passport number is still required | | |
+| Regression | Interventions (add, edit, delete a risk and a support entry), Students list, search, CSV export, Professional role | Everything works as before; no console errors | | |
+
+Approved by Lucia Becerra (Round 2), 2026-11-03.
+Verified 2026-11-03: no gaps, no drift, gates green
