@@ -38,7 +38,7 @@
 ### D3. Endpoints on the users controller, policy `ProfessionalOnly`
 **Choice:** `GET api/v1/users/me/professional-profile` and `PUT api/v1/users/me/professional-profile` in `UsersController`, each with `[Authorize(Policy = ErasPolicies.ProfessionalOnly)]`. The new policy allows only the `ERAS Professional` role, so the Administrator and Officer and Guest are denied (AC-5, AC-6, AC-20). Each `PUT` saves the whole professional profile (position, faculty, office hours, subjects, courses), not only position; position is one of its fields (D4). The handler resolves the caller by sub, then email, the same way `GetMyProfileQueryHandler` does.
 **Why not `AdminOrProfessional`:** it also allows the Administrator, which the spec now forbids.
-**Open point:** the rule that the Administrator passes every check (AGENTS.md §4.3) does not hold for this endpoint. The exception is recorded in ADR-0009 (Proposed); a human must set it to Accepted before the plan is approved.
+**Open point:** the rule that the Administrator passes every check (AGENTS.md §4.3) does not hold for this endpoint. The exception is recorded in ADR-0009 (Accepted).
 **ADR:** ADR-0009
 **Alternative:** a new `ProfessionalProfilesController` → adds a controller for two actions that belong with `me/profile`. Using `ProfessionalsController` → its class-level `AdminOrOfficer` would deny Professionals. Rejected.
 
@@ -127,7 +127,7 @@ Existing tests for `GetMyProfileQueryHandler` cover AC-18 (the count is still re
 | AC-6 | BE | Api | `ProfessionalProfilePolicyTests.cs` › `ProfessionalProfile_GuestIsDenied` |
 | AC-20 | BE | Api | `ProfessionalProfilePolicyTests.cs` › `ProfessionalProfile_AdministratorIsDenied` |
 | AC-21 | BE | Application: `test/Eras.Application.Tests/Features/ErasUsers/Commands/` | `UpdateMyProfessionalProfileCommandHandlerTests.cs` › `HandleAsync_EmptyPositionAndOfficeHours_SavesAsync` |
-| AC-22 | BE | Domain: `test/Eras.Domain.Tests/` | `ProfessionalProfileValidatorTests.cs` › `Validate_OfficeHoursOver200Chars_FailsOnOfficeHoursAsync` |
+| AC-22 | BE | Domain: `test/Eras.Domain.Tests/` | `ProfessionalProfileValidatorTests.cs` › `Validate_OfficeHoursOver200Chars_FailsOnOfficeHours` |
 | AC-23 | BE | Application: `test/Eras.Application.Tests/Features/ErasUsers/Commands/` | `UpdateMyProfessionalProfileCommandHandlerTests.cs` › `HandleAsync_CourseWithEmptyName_ThrowsValidationAndKeepsValuesAsync` |
 | AC-7 | BE | Application | `UpdateMyProfessionalProfileCommandHandlerTests.cs` › `HandleAsync_Position_UpdatesUserPositionAsync` |
 | AC-8 | BE | Application: `test/Eras.Application.Tests/Features/ErasUsers/Commands/` | `UpdateUserProfileCommandHandlerTests.cs` › `HandleAsync_ProfessionalPosition_KeepsStoredPositionAsync` |
@@ -141,6 +141,8 @@ Existing tests for `GetMyProfileQueryHandler` cover AC-18 (the count is still re
 | AC-15 | FE | `.../profile-edit-form/profile-edit-form.component.spec.ts` | `[603-persist-professional-profile/AC-15] has no Position field and sends no position for a professional` |
 | AC-16 | FE | same spec | `[603-persist-professional-profile/AC-16] keeps the Position field for an officer` |
 | AC-19 | FE | `.../professional-info/professional-info.component.spec.ts` | `[603-persist-professional-profile/AC-19] shows active interventions read-only` |
+
+Status codes: AC-1 to AC-4, AC-21, AC-22 and AC-23 state a 200 or 400 response. Their rule is decided in the handler or the domain validator, so the test sits there (AGENTS.md §6.3, where the behavior is decided). For a 400 the handler turns the validation failure into a `BussinessException` with status 400 and the messages that name the fields (AC-4, AC-22, AC-23), and `ErrorFilter` returns that status; the handler tests assert the status and the message. The Api tests cover only what the Api layer decides: the policy of each endpoint (AC-5, AC-6, AC-20).
 
 Extra edge-case tests (validation details of D7, empty courses, ordering) carry no AC tag. Coverage gates: BE >= 25%, FE >= 15% (AGENTS.md section 8.7).
 

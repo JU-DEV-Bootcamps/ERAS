@@ -38,7 +38,7 @@ The professional info section of the account information page shows mock data, a
 
 - A1: Position keeps living on the existing user record, so the profile summary and card keep reading it. The professional endpoint writes it, which makes the professional info section its single editor for professionals.
 - A2: "Position hidden in edit mode" applies to the professional role only. Other roles have no other section that edits Position, so they keep it in the profile edit form.
-- A3: ~~ERAS Administrator passes the role checks of the existing policy.~~ Superseded in session 3: the professional profile is for ERAS Professionals only, and the administrator is denied (AC-20). This departs from AGENTS.md §4.3 and needs an ADR before plan approval (design D3).
+- A3: ~~ERAS Administrator passes the role checks of the existing policy.~~ Superseded in session 3: the professional profile is for ERAS Professionals only, and the administrator is denied (AC-20). This departs from AGENTS.md §4.3 and needs an ADR before plan approval (design D3); written as ADR-0009 (Accepted).
 - A4: The professional profile stores no active evaluations value. The "Active Interventions" figure is the existing read-only count of interventions the user created that are not finalized. Superseded Q2 (see Clarifications, session 2).
 - A5: Faculty is required free text of up to 200 characters; office hours are free text of up to 200 characters that may be empty (session 4). Subjects are a list of text values that may be empty; courses are a list of code and name pairs that may be empty, but each course must have a non-empty code and name (session 5). Not structured (session 1, Q1).
 - A6: A professional who never saved a profile sees empty text values and empty lists, not an error.
@@ -61,7 +61,7 @@ The professional info section of the account information page shows mock data, a
 
 - **Decision (user):** the professional profile is for ERAS Professionals only. The administrator is denied, which overrides the earlier assumption A3. The spec was reopened (`Status: Draft`) and needs a new approval.
 - **Changes:** the "Only ERAS Professionals" requirement now denies every role except ERAS Professional, including ERAS Administrator. Added AC-20 (administrator denied, backend). AC-5 and AC-6 are unchanged.
-- **Follow-up before plan approval:** an ADR for the professional-only rule, because it departs from AGENTS.md §4.3 and adds a role policy. Not written yet; the user will decide.
+- **Follow-up before plan approval:** an ADR for the professional-only rule, because it departs from AGENTS.md §4.3 and adds a role policy. Resolved: ADR-0009 was written and is Accepted.
 
 ### Session 4
 
@@ -69,7 +69,7 @@ The professional info section of the account information page shows mock data, a
 - **Q2 — Length limits** (affects AC-22): answered *Position 100, others 200*. Course code is 20 characters. Added the length-limit requirement and AC-22.
 - **Direct fix:** none.
 - **Deferred:** none.
-- **Plan impact:** the design's D7 still lists position and office hours as required and shows the same limits. It must be updated when the plan is redone.
+- **Plan impact:** the design's D7 still lists position and office hours as required and shows the same limits. Done: D7 now matches the spec (faculty required; position and office hours optional; limits of AC-22).
 
 ### Session 5 (spec reopened by the user's decision)
 

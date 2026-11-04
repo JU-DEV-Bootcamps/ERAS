@@ -4,6 +4,8 @@
 **Date:** 2026-11-03
 **Area:** auth
 **Change:** 603-persist-professional-profile
+**Reviewed by:** judithmarg-dev (2026-11-04)
+**Signed by:** judithmarg-dev (2026-11-04)
 
 ## Context
 
