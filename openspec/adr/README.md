@@ -58,6 +58,7 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 |---|---|---|---|
 | [ADR-0002](0002-store-short-id-lists-in-array-columns.md) | Store short lists of identifiers in PostgreSQL array columns | Accepted | — |
 | [ADR-0003](0003-match-text-search-ignoring-accents-in-the-application.md) | Match text searches ignoring case and accents in the application, not in SQL | Accepted | — |
+| [ADR-0006](0006-show-the-imported-identifier-as-the-student-sis-id.md) | Show the imported identifier as the student's SIS ID | Accepted | — |
 
 ### process
 
