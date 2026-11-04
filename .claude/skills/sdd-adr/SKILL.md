@@ -6,10 +6,10 @@ allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-adr/scripts/check-a
 
 Record a **durable architectural decision** so later changes can cite and respect it. A change's
 `design.md` → `## Decisions` holds choices local to that change and is archived with it; an ADR holds a
-decision that outlives the change. Conventions: `AGENTS.md` §8.4 and `openspec/adr/README.md`.
+decision that outlives the change. Conventions: `openspec/sdd-conventions.md`, `AGENTS.md` §8.4 and `openspec/adr/README.md`.
 
-**Boundary.** Write only in `openspec/adr/`: the new ADR, the index `README.md`, and the Status line of an ADR
-being superseded. When the ADR comes from a change, also add or fix the `**ADR:** ADR-NNNN` line of that
+**Boundary.** Write only in `openspec/adr/`: the new ADR, the index `README.md`, the summary `SUMMARY.md`, and the
+Status line of an ADR being superseded. When the ADR comes from a change, also add or fix the `**ADR:** ADR-NNNN` line of that
 D-block in the change's `design.md`. Do NOT write code, do NOT touch `ERAS-BE/` or `ERAS-FE/`, do NOT edit
 specs, do NOT commit. Never read or print secrets (`.env`, `deploy/.env.prod`, `environment.development.ts`,
 keys in `appsettings*.json`).
@@ -38,7 +38,8 @@ A choice that only matters inside one change (which handler, which component spl
    On its own: ask what was decided, why, and what else was considered. One ADR = one decision; if the request
    holds several, write one ADR each and say so.
 
-2. **Check for overlap.** Read `openspec/adr/README.md` and the ADRs of the same Area. If an existing ADR
+2. **Check for overlap.** Read `openspec/adr/SUMMARY.md` (the rule of every Accepted ADR) and `openspec/adr/README.md`,
+   then open the ADRs of the same Area. If an existing ADR
    already covers the decision, link it instead of writing a new one. If the new decision contradicts an
    `Accepted` ADR, this is a supersede (step 5), never an edit of the old ADR.
 
@@ -47,7 +48,8 @@ A choice that only matters inside one change (which handler, which component spl
 
 4. **Write the ADR** from the template.
    - `**Status:** Proposed`, `**Date:**` today, `**Area:**` from `backend | frontend | auth | data | infra | process`
-     (several comma-separated, the first decides the index group), `**Change:**` the change id or `none`.
+     (several comma-separated, the first decides the index group), `**Change:**` the change id or `none`. Leave `**Reviewed by:**` and `**Signed by:**` empty: only a human fills them
+     (`openspec/adr/README.md`, "Review and sign-off").
    - Context: forces and constraints, with real paths. Decision: the rule a contributor must follow, stated
      actively. Alternatives: each option not chosen, with why not. Consequences: what gets easier, harder,
      and any follow-up.
@@ -62,6 +64,10 @@ A choice that only matters inside one change (which handler, which component spl
 6. **Update the index.** In `openspec/adr/README.md` → `## Index`, add one row under `### <first Area>` (create
    the heading and table if missing, headings in the Area order above):
    `| [ADR-NNNN](NNNN-<kebab-title>.md) | <title> | Proposed | — |`.
+   `openspec/adr/SUMMARY.md` lists **Accepted** ADRs only: do not add a Proposed one. When the user tells you an ADR is
+   now Accepted (a human set it, reviewed and signed it), add its entry under `## <first Area>`:
+   `### [ADR-NNNN](NNNN-<kebab-title>.md): <title>` and a line `Rule: <the rule to follow, 1-2 lines>`; when one becomes
+   Superseded, remove its entry.
 
 7. **Link it from the change.** When the ADR comes from a change, the D-block in `design.md` carries
    `**ADR:** ADR-NNNN` right after its `**Alternative:**` line.
@@ -72,7 +78,8 @@ A choice that only matters inside one change (which handler, which component spl
 9. **Stop and report.** Give: the ADR number, title, Area, the change it links to, any ADR it supersedes, and
    the files to commit together with that change (`AGENTS.md` §8.3 step 5): the new ADR, `openspec/adr/README.md`
    and any superseded ADR.
-   Next step: a human reviews it and sets `**Status:** Accepted` (or `Rejected`), usually together with
+   Next step: a human reviews it with the checklist of `openspec/adr/README.md`, signs it (`Reviewed by`, `Signed by`)
+   and sets `**Status:** Accepted` (or `Rejected`), usually together with
    `**Plan:** Approved` of the change. `/sdd-verify` refuses to recommend archiving while a linked ADR is not
    Accepted.
 
