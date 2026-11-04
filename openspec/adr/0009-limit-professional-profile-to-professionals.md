@@ -1,4 +1,4 @@
-# ADR-0006: Limit the professional profile endpoints to the ERAS Professional role
+# ADR-0009: Limit the professional profile endpoints to the ERAS Professional role
 
 **Status:** Accepted
 **Date:** 2026-11-03

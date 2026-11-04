@@ -51,7 +51,7 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 | ADR | Title | Status | Superseded by |
 |---|---|---|---|
 | [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md) | Limit a professional's access to students of their assigned assessments | Accepted | — |
-| [ADR-0006](0006-limit-professional-profile-to-professionals.md) | Limit the professional profile endpoints to the ERAS Professional role | Accepted | — |
+| [ADR-0009](0009-limit-professional-profile-to-professionals.md) | Limit the professional profile endpoints to the ERAS Professional role | Accepted | — |
 
 ### data
 

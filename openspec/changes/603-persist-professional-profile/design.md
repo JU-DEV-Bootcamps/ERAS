@@ -38,8 +38,8 @@
 ### D3. Endpoints on the users controller, policy `ProfessionalOnly`
 **Choice:** `GET api/v1/users/me/professional-profile` and `PUT api/v1/users/me/professional-profile` in `UsersController`, each with `[Authorize(Policy = ErasPolicies.ProfessionalOnly)]`. The new policy allows only the `ERAS Professional` role, so the Administrator and Officer and Guest are denied (AC-5, AC-6, AC-20). Each `PUT` saves the whole professional profile (position, faculty, office hours, subjects, courses), not only position; position is one of its fields (D4). The handler resolves the caller by sub, then email, the same way `GetMyProfileQueryHandler` does.
 **Why not `AdminOrProfessional`:** it also allows the Administrator, which the spec now forbids.
-**Open point:** the rule that the Administrator passes every check (AGENTS.md §4.3) does not hold for this endpoint. The exception is recorded in ADR-0006 (Proposed); a human must set it to Accepted before the plan is approved.
-**ADR:** ADR-0006
+**Open point:** the rule that the Administrator passes every check (AGENTS.md §4.3) does not hold for this endpoint. The exception is recorded in ADR-0009 (Proposed); a human must set it to Accepted before the plan is approved.
+**ADR:** ADR-0009
 **Alternative:** a new `ProfessionalProfilesController` → adds a controller for two actions that belong with `me/profile`. Using `ProfessionalsController` → its class-level `AdminOrOfficer` would deny Professionals. Rejected.
 
 ### D4. Position written by one endpoint, ignored by the other for professionals
