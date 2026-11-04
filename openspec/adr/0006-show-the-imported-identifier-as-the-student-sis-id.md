@@ -4,6 +4,8 @@
 **Date:** 2026-11-02
 **Area:** data
 **Change:** 641-align-student-modal-fields
+**Reviewed by:** LuFeBeVi (2026-11-04)
+**Signed by:** LuFeBeVi (2026-11-04)
 
 ## Context
 

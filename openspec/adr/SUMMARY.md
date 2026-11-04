@@ -22,6 +22,9 @@ Rule: store a short list of ids that has no attributes of its own in an array co
 ### [ADR-0003](0003-match-text-search-ignoring-accents-in-the-application.md): Match text searches ignoring case and accents in the application, not in SQL
 Rule: compare names in the application with `SearchTextNormalizer` (trim, remove accents, lowercase) on both sides; a blank search keeps the plain SQL paging. Any new accent-insensitive text search uses the same helper.
 
+### [ADR-0006](0006-show-the-imported-identifier-as-the-student-sis-id.md): Show the imported identifier as the student's SIS ID
+Rule: a student's SIS ID is `Student.Uuid` when the student is imported and `StudentProfile.SisId` when registered by hand, otherwise there is none; the identifier ERAS generates is never returned as a SIS ID. The rule lives in the mapper that builds the profile response, and no new identifier column is added.
+
 ## process
 
 ### [ADR-0007](0007-split-agent-rules-per-sub-project.md): Split agent rules per sub-project, one rule one home
