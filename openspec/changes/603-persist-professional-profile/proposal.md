@@ -77,3 +77,40 @@ The professional info section of the account information page shows mock data, a
 - **Changes:** added the requirement "Every course has a code and a name" with AC-23 (BE, a course with an empty name is rejected). No other AC changed. A5 now states the course rule.
 - **Status:** back to `Draft`, so a human reviews and sets `Approved` again.
 - **Deferred:** none.
+
+## Validation log
+
+### 2026-11-03 – Round 1
+
+How to run: the local stack of AGENTS.md §3.4 (`docker compose up --build`, frontend on :4200) or the `run` skill. Sign in with a user of each role (ERAS Professional, ERAS Student Services Officer, ERAS Administrator, and a user without an ERAS role). Changed controller: `UsersController` (`GET`/`PUT api/v1/users/me/professional-profile`). Changed screens: Account & Information page.
+
+| Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
+|---|---|---|---|---|
+| AC-1 | Professional opens the page after saving a profile (faculty, office hours, subjects, courses) | The professional info section shows the saved values | ✅ | |
+| AC-2 | A professional who never saved a profile opens the page | Empty text fields, empty subjects and courses, no error | ✅ | |
+| AC-3 | Professional saves a valid profile, then reloads | The new values are shown after reload; old courses are gone | ✅ | |
+| AC-4 | Professional saves with an empty faculty | Rejected with an error naming faculty; previously saved values stay | ✅ | |
+| AC-5 | Officer calls the professional profile endpoints (or opens the page) | 403 for the endpoints; no professional info section on the page | ✅ | |
+| AC-6 | User without an ERAS role calls the professional profile endpoints | 403 | ✅ | |
+| AC-7 | Professional saves position "Dean" in the professional info section | The position shown on the profile card and summary is "Dean" | ✅ | |
+| AC-8 | Professional changes position through the general profile form (if reachable) | Position does not change; other fields do | ✅ | |
+| AC-9 | Officer saves a new position in the profile edit form | The new position is saved | ✅ | |
+| AC-10 | Professional opens the page | Professional info section shown in the place of the summary panel; summary not shown | ✅ | |
+| AC-11 | Officer opens the page | Summary panel shown; no professional info section | ✅ | |
+| AC-12 | Professional opens the page with saved data | Faculty and office hours shown from the backend, not placeholder values | ✅ | |
+| AC-13 | Professional edits faculty to "Science" and saves | Section returns to view mode showing "Science" | ✅ | |
+| AC-14 | Save fails (e.g. backend stopped) | Error message shown; form stays open with typed values | ✅ | |
+| AC-15 | Professional opens the profile edit form (Edit on the profile card) | No Position field; saving does not change position | ✅ | |
+| AC-16 | Officer opens the profile edit form | Position field shown with current value | ✅ | |
+| AC-18 | Professional saves the professional profile; check the card's active counters | Active interventions count unchanged | ✅ | |
+| AC-19 | Professional opens the page with 7 active interventions | "Active Interventions 7" shown read-only, no input | ✅ | |
+| AC-20 | Administrator calls the professional profile endpoints | 403 (the page shows no professional info section for admins) | ✅ | |
+| AC-21 | Professional saves with empty position and office hours | Saved; no error | ✅ | |
+| AC-22 | Professional enters 201 characters in office hours | Rejected with an error naming office hours | ✅ | |
+| AC-23 | Professional adds a course with an empty name | Rejected with an error; previously saved courses stay | ✅ | |
+
+Side effects to check in addition to the rows above: the summary and profile card of Officers and Administrators still show position and counters as before; the general profile save (`PUT me/profile`) still works for Officers and Administrators; the Students and Assessments screens are unaffected by the changed auth policies.
+
+Approved by the developer, 2026-11-03.
+
+Verified 2026-11-04: no gaps, no drift, gates green
