@@ -71,6 +71,8 @@ No code changes without an approved spec (see §8).
 | `openspec/adr/` | Durable architectural decisions that later changes must respect (§8.4); `SUMMARY.md` lists the rules in force |
 | `openspec/sdd-conventions.md` | The conventions shared by the `/sdd-*` skills and the full command and skill table (§8.4, §8.5) |
 | `openspec/roadmap.md` | Options and criteria for changing tools (CI/CD, hosting, identity, secrets) and how confidential data is protected; it adopts no tool |
+| `openspec/figma-mcp-research.md` | Research on using the Figma MCP in the SDD flow: capabilities, fit, risks and a pilot recommendation; it adopts no tool |
+| `openspec/figma-mcp-guide.md` | How to ask for a design with the Figma MCP: setup, rules, prompt template, steps in the SDD flow |
 | `.claude/skills/` | The `/sdd-*` and `/opsx:*` workflows (§8.5) |
 
 ---
