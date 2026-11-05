@@ -20,9 +20,9 @@
 
 - [x] 4.1 Choose one small FE screen (for example a list with a filter bar and an empty state) and create a scratch Figma file; mock data only
 - [x] 4.2 Ask Claude to draft the screen in the scratch file with the Figma MCP, reusing a library if one exists; one attempt plus follow-up tweaks
-- [x] 4.3 Review the draft with a designer or the FE lead and record what worked, manual fixes and attempts
+- [x] 4.3 Review the draft by the developer who owns the screen and record what worked, manual fixes and attempts
 - [x] 4.4 Use the approved draft as input for `/sdd-spec` and note which visible states became ACs (candidate ACs listed in the research doc; no separate spec, there is no issue for the screen)
-- [x] 4.5 Write `openspec/figma-mcp-guide.md` (prompt template, setup, rules: mock data only, scratch file first, designer reviews, a frame is not the spec) and link it from `AGENTS.md` §2.2
+- [x] 4.5 Write `openspec/figma-mcp-guide.md` (prompt template, setup, rules: mock data only, scratch file first, owner reviews, a frame is not the spec) and link it from `AGENTS.md` §2.2
 - [x] 4.6 Add the PoC result (effort, defects, go or no-go) to `openspec/figma-mcp-research.md`
 
 ## 5. Gates

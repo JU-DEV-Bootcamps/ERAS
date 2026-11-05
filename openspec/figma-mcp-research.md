@@ -61,7 +61,7 @@ Out of scope here: installing the server for the team, Code Connect mapping work
 Screen: Contact support (a Common questions and answers list plus a card to send a question), drafted in a scratch
 file with mock data, styled from the ERAS Style Guide.
 
-- **Effort:** 1 build call and 1 screenshot for the first draft; the designer feedback (green tones, scrollable FAQ)
+- **Effort:** 1 build call and 1 screenshot for the first draft; the review feedback (green tones, scrollable FAQ)
   took 3 calls because the first one used a wrong value and was rolled back. About 5 Figma calls in total.
 - **What worked:** reading tokens from the style guide, building a clean auto-layout page with an expandable list and a
   card in several states, and applying review feedback in a follow-up.
@@ -70,8 +70,8 @@ file with mock data, styled from the ERAS Style Guide.
 - **Candidate ACs from the visible states** (for a future `/sdd-spec`, not written): the FAQ list shows the answer of
   an expanded question; a Professional, Officer or Administrator can send a question; an empty question is rejected
   with a message; a valid question shows the sent confirmation; a sending failure shows an error.
-- **Verdict: go for drafts.** Useful for fast first drafts and for finding visible states before the spec; keep a
-  designer in the loop. Not a replacement for the library: link components before the design is final.
+- **Verdict: go for drafts.** Useful for fast first drafts and for finding visible states before the spec; keep the screen owner in the loop.
+  Not a replacement for the library: link components before the design is final.
 
 How to repeat it: `openspec/figma-mcp-guide.md`.
 
