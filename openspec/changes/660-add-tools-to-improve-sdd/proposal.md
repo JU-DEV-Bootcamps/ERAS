@@ -15,6 +15,8 @@ Issue: ERAS#660 (`JU-DEV-Bootcamps/ERAS`, parent ERAS#619). Two gaps in the Spec
 
 - **Figma PoC ("ask for a design").** Run a small proof of concept: draft one small FE screen in a scratch Figma file through the Figma MCP, with mock data only, have the developer who owns the screen review it, and use it as input for `/sdd-spec`. Write a one-page team guide (`openspec/figma-mcp-guide.md`) with the prompt template, per-developer setup and rules, and add the PoC result to the research document. One screen, one draft attempt, to keep token use low.
 
+- **Manual `/figma-draft` skill and FE guidance.** A small skill that runs the draft steps only when the developer types it (`disable-model-invocation`), and a guide section on what an FE change needs to follow an approved mockup.
+
 **Out of scope:** a project `.mcp.json`, hooks for Figma, Code Connect mapping, any BE or FE code change, changing the gates' thresholds (BE 25%, FE 15%), changing application code in `ERAS-BE/` or `ERAS-FE/`, installing or configuring the Figma MCP for the team, changing any CI pipeline, and the other `/sdd-*` skills unless the review finds a defect that blocks `sdd-verify`.
 
 ## Capabilities
@@ -38,6 +40,7 @@ No application behavior changes, so this change sets `skip_specs: true` (AGENTS.
 - **A1.** "Hooks" means Claude Code hooks (`settings.json`) plus the shell scripts `sdd-verify` calls. If the ticket meant only the scripts, the hook decision in task 2.1 resolves to "none".
 - **A2.** The Figma research is `openspec/figma-mcp-research.md`, linked from `AGENTS.md` §2.2, next to `openspec/roadmap.md`.
 - **A5.** The PoC screen and the Figma file are chosen by the ticket owner before task 4.1 starts; the PoC needs the owner's Figma account signed in.
+- **A6.** The skill is named `figma-draft` (not `sdd-*`): it is a helper, not a step of the SDD workflow, so it is outside `check-skills.sh`.
 - **A3.** "Integrate" in the ticket means evaluate and recommend; any adoption is a follow-up change.
 
 - **A4 (hook decision, 2026-11-05).** No Claude Code hook is added. The full gate run takes about 5 minutes and
@@ -49,4 +52,5 @@ No application behavior changes, so this change sets `skip_specs: true` (AGENTS.
 ## Validation log
 
 - Skipped: no BE controller or FE change (skills, hooks and docs only).
-- Verified 2026-11-05: no gaps, no drift, gates green (tooling and docs only; no ACs; full BE and FE gates also passed on 2026-11-05)
+- Verified 2026-11-05 (before the skill was added; refreshed below): no gaps, no drift, gates green (tooling and docs only; no ACs; full BE and FE gates also passed on 2026-11-05)
+- Verified 2026-11-05 (after adding the figma-draft skill): no gaps, no drift, validate and skill checker green

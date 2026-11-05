@@ -25,7 +25,12 @@
 - [x] 4.5 Write `openspec/figma-mcp-guide.md` (prompt template, setup, rules: mock data only, scratch file first, owner reviews, a frame is not the spec) and link it from `AGENTS.md` §2.2
 - [x] 4.6 Add the PoC result (effort, defects, go or no-go) to `openspec/figma-mcp-research.md`
 
-## 5. Gates
+## 5. Manual Figma skill and FE guidance
 
-- [x] 5.1 `openspec validate 660-add-tools-to-improve-sdd --strict` passes
-- [x] 5.2 Run `bash .claude/skills/sdd-plan/tests/check-skills.sh` and report the real result
+- [x] 5.1 Write `.claude/skills/figma-draft/SKILL.md`, manual only (`disable-model-invocation: true`), short, one build call and one screenshot
+- [x] 5.2 Add guide section 6 with what an FE change needs to follow an approved mockup
+
+## 6. Gates
+
+- [x] 6.1 `openspec validate 660-add-tools-to-improve-sdd --strict` passes
+- [x] 6.2 Run `bash .claude/skills/sdd-plan/tests/check-skills.sh` and report the real result

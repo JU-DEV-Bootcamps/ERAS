@@ -49,3 +49,20 @@ Claude then: creates a session, loads the Figma skills, reads the tokens (`get_v
 - A failed `use_figma` script is rolled back as a whole: rerun the whole fix, do not patch partial state.
 - Scroll only works in prototype or present mode, not on the canvas; the canvas shows clipped content.
 - Frames built without the library use raw values; the owner must relink them to the library components.
+
+## 6. Skill and implementing a mockup in the FE
+
+**Skill.** `/figma-draft <screen>` runs the steps of section 3. It is manual only: Claude never starts it on its own
+(`disable-model-invocation`), so it costs a short description in context and nothing else until you type it.
+
+**Implementing an approved mockup (what the FE change needs):**
+1. **Spec:** the frame link goes in `proposal.md` (Why). Each visible state is an AC (empty, filled, error, success).
+2. **Plan (`/sdd-plan`):** map the frame to the FE. Colors, type and radius to the theme tokens in `src/styles/utils`
+   (`--primary-*`, `--color-neutral-*`, `--font-size-*`), sections to Angular Material and the `eras-*` wrappers,
+   texts to `core/constants/messages.ts` (`ERAS-FE/AGENTS.md` §7).
+3. **Implement (`/sdd-implement`):** read the frame with `get_design_context` and a screenshot as a reference to adapt,
+   never code to paste. No hard-coded colors. One tagged Jasmine test per AC, written first.
+4. **Validate (`/sdd-validate-impl`):** the developer compares the running app with the frame, state by state.
+5. **Needs:** view access to the ERAS Style Guide file, a Figma account connected in Claude Code, and the frame in a
+   file the developer can open. Linked library components need the library enabled in the file (a paid plan);
+   without it, tokens are read as raw values and mapped to the FE tokens by hand.
