@@ -1,0 +1,63 @@
+# Tasks
+
+## 1. Backend (BE)
+
+- [x] 1.1 Add the entity `InterventionActivity` and `InterventionActivityType` in `ERAS-BE/src/Eras.Domain/Entities/AssessmentManagement/`, the `IInterventionActivityRepository` contract, the `DbSet`, `InterventionActivityConfiguration`, the repository with its DI line, and generate the new migration `AddInterventionActivities` (never edit applied migrations or the snapshot by hand); verify `dotnet build Eras.sln -warnaserror` passes and the migration only creates the table and index
+- [x] 1.2 Add `InterventionActivityFactory` in `ERAS-BE/src/Eras.Application/Features/RemissionManagement/` (empty→text and text→other text for comments, any status change), with the user name rule `Name ?? Email ?? Sub` truncated to 200; verify it builds
+- [x] 1.3 Write the AC test `HandleAsync_NewIntervention_RecordsCreatedEventAsync` for (AC-1) in `ERAS-BE/test/Eras.Application.Tests/Features/Assessments/Commands/AddInterventionCommandHandlerTests.cs`, tagged `Change` and `AC`, update the test constructor for `ICurrentUserService` and the activity repository, and verify it fails
+- [x] 1.4 Record "Intervention created" in `AddInterventionCommandHandler` inside its transaction, after the id exists, for (AC-1) and verify the test from 1.3 passes
+- [x] 1.5 Write the AC test `HandleAsync_CommentAdded_RecordsCommentAddedEventAsync` for (AC-3) in `UpdateInterventionCommandHandlerTests.cs` (update its constructor; assert the event has no comment text) and verify it fails
+- [x] 1.6 Write the AC test `HandleAsync_StatusChanged_RecordsPreviousAndNewStatusAsync` for (AC-4) in `UpdateInterventionCommandHandlerTests.cs` and verify it fails
+- [x] 1.7 Write the AC test `HandleAsync_NoTrackedChange_RecordsNoEventAsync` for (AC-5) in `UpdateInterventionCommandHandlerTests.cs` and verify it fails or already holds for the right reason
+- [x] 1.8 Write the AC test `HandleAsync_RejectedStatusTransition_RecordsNoEventAsync` for (AC-6) in `UpdateInterventionCommandHandlerTests.cs` and verify it fails or already holds for the right reason
+- [x] 1.9 Write the AC test `HandleAsync_CommentChangedThenCleared_RecordsOnlyTheChangeAsync` for (AC-19) in `UpdateInterventionCommandHandlerTests.cs` and verify it fails
+- [x] 1.10 Implement the recording in `UpdateInterventionCommandHandler`: read previous status and comments into locals before the mutation, build events with the factory, add them inside the existing transaction, for (AC-3, AC-4, AC-5, AC-6, AC-19) and verify the tests from 1.5 to 1.9 pass
+- [x] 1.11 Write the AC test `HandleAsync_TypeChanged_KeepsTheEventsAsync` for (AC-20) in `ReplaceInterventionCommandHandlerTests.cs` (update its constructor) and verify it fails
+- [x] 1.12 Implement in `ReplaceInterventionCommandHandler`: read the events of the old id before the delete, re-add copies with the new id after the add, and record comment or status changes of that save, for (AC-20) and verify the test from 1.11 passes
+- [x] 1.13 Write the AC test `HandleAsync_UnorderedEvents_ReturnsOldestFirstAsync` for (AC-7) in `ERAS-BE/test/Eras.Application.Tests/Features/Assessments/Queries/GetInterventionActivityQueryHandlerTests.cs` and verify it fails
+- [x] 1.14 Write the AC tests `HandleAsync_OtherInterventionHasEvents_ReturnsOnlyItsOwnAsync` (AC-11), `HandleAsync_UnknownIntervention_ThrowsKeyNotFoundAsync` (AC-12) and `HandleAsync_NoEvents_ReturnsEmptyListAsync` (AC-13), one test per AC, in the same file and verify they fail
+- [x] 1.15 Add `GetInterventionActivityQuery`, its handler (intervention must belong to the assessment, order by time then id), `InterventionActivityDto` and its mapper registered in `ApplicationServiceRegistration`, for (AC-7, AC-11, AC-12, AC-13) and verify the tests from 1.13 and 1.14 pass
+- [x] 1.16 Write the Api tests `GetInterventionActivity_StudentServicesOfficer_IsAuthorizedAsync` (AC-8), `GetInterventionActivity_Professional_IsAuthorizedAsync` (AC-9) and `GetInterventionActivity_Guest_IsForbiddenAsync` (AC-10), one per AC, in `ERAS-BE/test/Eras.Api.Tests/Authorization/InterventionActivityPolicyTests.cs` with `ControllerPolicyEvaluator`, and verify they fail
+- [x] 1.17 Add `GET {id:int}/interventions/{interventionId:int}/history` (`GetInterventionActivity`, `[Authorize(Policy = ErasPolicies.AnyErasRole)]`, `ProducesResponseType` 200/403/404, `CancellationToken`) to `AssessmentsController` for (AC-8, AC-9, AC-10) and verify the tests from 1.16 pass
+
+## 2. Frontend (FE)
+
+- [x] 2.1 Add `ERAS-FE/src/app/core/models/intervention-activity.model.ts` mirroring the DTO, the `getActivity` method in `core/services/api/intervention.service.ts` and `INTERVENTION_ACTIVITY_MESSAGES` in `core/constants/messages.ts`; verify `npm run build` compiles
+- [x] 2.2 Write the spec `[680-add-activity-history-to-intervention-details/AC-14] lists description, YYYY-MM-DD HH:mm time and user name in the order received` for (AC-14) in `intervention-activity-history.component.spec.ts` (path in design.md) and verify it fails
+- [x] 2.3 Write the specs for (AC-15) read only, (AC-16) only the creation entry, (AC-17) empty message and (AC-18) plain text, one `it()` per AC with its tag, in the same file and verify they fail
+- [x] 2.4 Implement the standalone OnPush component `intervention-activity-history` and embed it at the end of `intervention-detail.component.html`, passing `assessmentId` and the intervention id, for (AC-14, AC-15, AC-16, AC-17, AC-18) and verify the specs from 2.2 and 2.3 pass
+
+- [x] 2.5 Write a regression test (no AC tag: the AC-14 test stays the only tagged one) in `ERAS-FE/src/app/modules/assessments/components/interventions/interventions-detail/intervention-detail.component.spec.ts`: with a row that has no `assessmentId` field, the input `assessmentId` = 1 and `data.id` = 5, the details show the "Activity history" section and request the history for (1, 5); verify it fails (AC-14)
+- [x] 2.6 Fix: add the `assessmentId` input to `InterventionDetailComponent`, pass it from `intervention-list.component.html`, embed the history with it and drop the condition on `data.assessmentId` (AC-14); verify the test from 2.5 passes and the specs of the list and of the history still pass
+
+- [x] 2.7 Write a spec (no AC tag) in `ERAS-FE/src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts`: one `.activity-bullet` per entry; verify it fails (AC-14)
+- [x] 2.8 Add the bullet markup and styles (`var(--primary-700)`) for each entry in the `intervention-activity-history` component (AC-14); verify the spec from 2.7 passes and the AC-14 to AC-18 specs still pass
+
+## 3. Verification
+
+- [x] 3.1 The AGENTS.md section 8.7 gates pass. BE gates in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%
+- [x] 3.2 FE gates pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build`
+- [x] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate 680-add-activity-history-to-intervention-details --strict` passes
+
+## Traceability
+| AC | Scenario | Side | Test |
+|----|----------|------|------|
+| AC-1 | Creating an intervention records "Intervention created" | BE | test/Eras.Application.Tests/Features/Assessments/Commands/AddInterventionCommandHandlerTests.cs › HandleAsync_NewIntervention_RecordsCreatedEventAsync |
+| AC-3 | Adding a comment records "Comment added" | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_CommentAdded_RecordsCommentAddedEventAsync |
+| AC-4 | Changing the status records the previous and the new value | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_StatusChanged_RecordsPreviousAndNewStatusAsync |
+| AC-5 | Saving without a tracked change records no event | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_NoTrackedChange_RecordsNoEventAsync |
+| AC-6 | A rejected status change records no event | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_RejectedStatusTransition_RecordsNoEventAsync |
+| AC-7 | Events are listed oldest first | BE | test/Eras.Application.Tests/Features/Assessments/Queries/GetInterventionActivityQueryHandlerTests.cs › HandleAsync_UnorderedEvents_ReturnsOldestFirstAsync |
+| AC-8 | Student Services Officer can read the history | BE | test/Eras.Api.Tests/Authorization/InterventionActivityPolicyTests.cs › GetInterventionActivity_StudentServicesOfficer_IsAuthorizedAsync |
+| AC-9 | Professional can read the history | BE | test/Eras.Api.Tests/Authorization/InterventionActivityPolicyTests.cs › GetInterventionActivity_Professional_IsAuthorizedAsync |
+| AC-10 | Guest cannot read the history | BE | test/Eras.Api.Tests/Authorization/InterventionActivityPolicyTests.cs › GetInterventionActivity_Guest_IsForbiddenAsync |
+| AC-11 | Events of one intervention never appear for another | BE | test/Eras.Application.Tests/Features/Assessments/Queries/GetInterventionActivityQueryHandlerTests.cs › HandleAsync_OtherInterventionHasEvents_ReturnsOnlyItsOwnAsync |
+| AC-12 | An unknown intervention is not found | BE | test/Eras.Application.Tests/Features/Assessments/Queries/GetInterventionActivityQueryHandlerTests.cs › HandleAsync_UnknownIntervention_ThrowsKeyNotFoundAsync |
+| AC-13 | An intervention without events returns an empty list | BE | test/Eras.Application.Tests/Features/Assessments/Queries/GetInterventionActivityQueryHandlerTests.cs › HandleAsync_NoEvents_ReturnsEmptyListAsync |
+| AC-14 | The section lists the events with description, time and user | FE | src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts › [680-add-activity-history-to-intervention-details/AC-14] lists description, YYYY-MM-DD HH:mm time and user name in the order received |
+| AC-15 | The section is read only | FE | src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts › [680-add-activity-history-to-intervention-details/AC-15] is read only, no edit or delete action |
+| AC-16 | An intervention with only its creation shows that single entry | FE | src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts › [680-add-activity-history-to-intervention-details/AC-16] shows only the creation entry without empty rows |
+| AC-17 | An intervention with no events shows a message | FE | src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts › [680-add-activity-history-to-intervention-details/AC-17] shows "No activity recorded yet." when there are no events |
+| AC-18 | Event text is displayed as plain text | FE | src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts › [680-add-activity-history-to-intervention-details/AC-18] shows the user name as plain text |
+| AC-19 | Changing a comment records an event and clearing it does not | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_CommentChangedThenCleared_RecordsOnlyTheChangeAsync |
+| AC-20 | Changing the type of an intervention keeps its history | BE | test/Eras.Application.Tests/Features/Assessments/Commands/ReplaceInterventionCommandHandlerTests.cs › HandleAsync_TypeChanged_KeepsTheEventsAsync |
