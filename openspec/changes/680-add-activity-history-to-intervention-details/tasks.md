@@ -30,6 +30,9 @@
 - [x] 2.5 Write a regression test (no AC tag: the AC-14 test stays the only tagged one) in `ERAS-FE/src/app/modules/assessments/components/interventions/interventions-detail/intervention-detail.component.spec.ts`: with a row that has no `assessmentId` field, the input `assessmentId` = 1 and `data.id` = 5, the details show the "Activity history" section and request the history for (1, 5); verify it fails (AC-14)
 - [x] 2.6 Fix: add the `assessmentId` input to `InterventionDetailComponent`, pass it from `intervention-list.component.html`, embed the history with it and drop the condition on `data.assessmentId` (AC-14); verify the test from 2.5 passes and the specs of the list and of the history still pass
 
+- [x] 2.7 Write a spec (no AC tag) in `ERAS-FE/src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts`: one `.activity-bullet` per entry; verify it fails (AC-14)
+- [x] 2.8 Add the bullet markup and styles (`var(--primary-700)`) for each entry in the `intervention-activity-history` component (AC-14); verify the spec from 2.7 passes and the AC-14 to AC-18 specs still pass
+
 ## 3. Verification
 
 - [x] 3.1 The AGENTS.md section 8.7 gates pass. BE gates in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%

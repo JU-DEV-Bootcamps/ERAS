@@ -101,4 +101,21 @@ After the fix of the Round 1 finding (the details panel now receives the assessm
 
 Approved by Judith Paco, 2026-11-06
 
-Verified 2026-11-06: no gaps, no drift, gates green
+
+### 2026-11-06 – Round 3
+
+Scope: visual only (FE). Each entry of the "Activity history" now has a bullet of colour `--primary-700` (tasks 2.7 and 2.8).
+
+| Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
+|---|---|---|---|---|
+| AC-14 | Open the details of an intervention with several events. | Each entry shows a bullet of colour `#117473` aligned with its description; description, time and user are as before. | ⬜ | |
+| AC-16 | Open the details of an intervention with only "Intervention created". | One entry with its bullet. | ⬜ | |
+| AC-17 | Open the details of an intervention without events. | Only "No activity recorded yet."; no bullet. | ⬜ | |
+
+The `Verified` line above predates this change; `/sdd-verify` refreshes it after this round.
+
+The developer checked the bullets in the running app and reported that they look as expected and work well.
+
+Approved by Judith Paco, 2026-11-06
+
+Verified 2026-11-06: no gaps, no drift, gates green (after Round 3)
