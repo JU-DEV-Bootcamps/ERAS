@@ -14,7 +14,7 @@ No component reacts to the viewport through a shared, mockable source; `layout.c
 
 **Goals:**
 - Hide the side menu on a screen narrower than 768px and open it from the header (AC-1 to AC-4), compact the header (AC-5) and keep the layout of wider screens (AC-6).
-- Adapt the Students list controls, cards, pagination, the four student modals and the current courses to mobile (AC-7 to AC-15).
+- Adapt the Students list controls, cards, pagination, the four student modals, the current courses and the details header to mobile (AC-7 to AC-16).
 
 **Non-Goals:**
 - Moving `app-table-with-actions` and the import previews from `window.innerWidth` to the new service; they keep working at the same 768px threshold.
@@ -60,7 +60,7 @@ No component reacts to the viewport through a shared, mockable source; `layout.c
 
 | Piece | Change | Files | ACs |
 |---|---|---|---|
-| Service | New `ViewportService` with `isMobile` (D1) | `src/app/core/services/layout/viewport.service.ts` (new) | AC-1 to AC-15 |
+| Service | New `ViewportService` with `isMobile` (D1) | `src/app/core/services/layout/viewport.service.ts` (new) | AC-1 to AC-16 |
 | Shell | `menuOpen`, `over`/`side` mode, width and margin by viewport, close on backdrop and `NavigationEnd`, hide the expand button on mobile (D2) | `src/app/core/components/layout/layout.component.{ts,html,scss}` | AC-1, AC-2, AC-3, AC-4, AC-6 |
 | Header | Menu button, `menuToggle` output, compact v2 header, container forwarding (D3) | `src/app/core/components/layout/header/header-v2/header-v2.component.{ts,html,scss}`, `.../header-v2/header-container.component.ts`, `.../header/header.component.{ts,html,scss}` | AC-2, AC-5, AC-6 |
 | Messages | Accessible label of the menu button | `src/app/core/constants/messages.ts` | AC-2 |

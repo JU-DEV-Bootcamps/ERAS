@@ -33,7 +33,7 @@
 - [x] 4.2 Write the spec `[659-improve-students-mobile-view/AC-11] keeps the 1100px profile summary on a desktop screen` for (AC-11) in the same file and verify it fails or already passes against today's options
 - [x] 4.3 Write the specs `[659-improve-students-mobile-view/AC-13] opens the student details full screen on mobile`, `[659-improve-students-mobile-view/AC-14] opens the student record full screen on mobile` and `[659-improve-students-mobile-view/AC-15] opens the new student form full screen on mobile` for (AC-13), (AC-14) and (AC-15) in the same file, as three separate `it()` blocks asserting the options passed to `MatDialog.open`, and verify they fail
 - [x] 4.4 Implement the dialog size helper in `students-list.component.ts` and use it in `openStudentDetails`, `openProfileSummaryModal`, the student record and the new student form for (AC-10), (AC-11), (AC-13), (AC-14) and (AC-15), and verify the specs from 4.1 to 4.3 pass
-- [x] 4.5 Add `.mobile-fullscreen-dialog` (square corners, flex column, scrolling content, visible footer, `100vh` fallback) in `ERAS-FE/src/styles/utils/index.scss`, and release the `max-height: 75vh` of `.profile-modal` inside it, for (AC-10), (AC-13), (AC-14) and (AC-15), and verify the spec from 4.1 passes
+- [x] 4.5 Add `.mobile-fullscreen-dialog` (square corners, flex column, scrolling content, visible footer, `100vh` fallback) in `ERAS-FE/src/styles/utils/index.scss`, and release the `max-height: 75vh` of `.profile-modal` inside it (this override lives in `student-profile-summary-modal.component.scss` with `:host-context(.mobile-fullscreen-dialog)`, because a global rule with the same specificity loses to the component stylesheet), for (AC-10), (AC-13), (AC-14) and (AC-15), and verify the spec from 4.1 passes
 - [x] 4.6 Write the spec `[659-improve-students-mobile-view/AC-16] stacks the student data and keeps the three buttons in one row on mobile` for (AC-16) in `ERAS-FE/src/app/shared/components/modals/modal-student-detail/v2/student-detail-v2/student-detail-v2.component.spec.ts` (existing; 375px host, `ViewportService` mocked) and verify it fails
 - [x] 4.7 Implement the `mobile` class and the stacked header in `student-detail-v2.component.{ts,html,scss}` for (AC-16) and verify the spec from 4.6 passes and the existing specs of the component still pass
 
@@ -46,7 +46,7 @@
 
 - [x] 6.1 BE gates: no BE file changed in `ERAS-BE/` (`git -C ERAS-BE status` shows only the local `appsettings.json`); nothing to run
 - [x] 6.2 FE gates pass in `ERAS-FE/` (AGENTS.md section 8.7): `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build`
-- [x] 6.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 FE test per AC (AC-1 to AC-15), and `openspec validate 659-improve-students-mobile-view --strict` passes
+- [x] 6.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 FE test per AC (AC-1 to AC-16), and `openspec validate 659-improve-students-mobile-view --strict` passes
 
 ## Traceability
 | AC | Scenario | Side | Test |
