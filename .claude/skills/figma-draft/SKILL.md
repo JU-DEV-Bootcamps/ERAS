@@ -10,6 +10,7 @@ Run only when the developer asks with `/figma-draft <screen and sections>`. A fr
 never the spec. Rules and background: `openspec/figma-mcp-guide.md`. Keep token use low: one build call, one screenshot.
 
 ## Inputs (ask for any that is missing, one question)
+0. Figma is used in this project; its content is sent to the AI model provider, so use mock data only.
 1. The screen: name, sections, and the states to show (empty, filled, error, sent...).
 2. The **scratch file** link (the developer's own drafts; never a team design file).
 3. The **ERAS Style Guide** link (a node with the tokens).

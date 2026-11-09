@@ -1,7 +1,7 @@
 # Guide: ask for a design with the Figma MCP
 
-**Status:** Draft. How to draft a screen in Figma from Claude Code before writing its spec. It adopts no tool
-(see `openspec/figma-mcp-research.md`). Origin: issue ERAS#660, change `660-add-tools-to-improve-sdd`.
+**Status:** Draft. How to draft a screen in Figma from Claude Code before writing its spec. It adds no dependency
+and no project configuration; the PoC and the limits are in `openspec/figma-mcp-research.md`. Origin: issue ERAS#660, change `660-add-tools-to-improve-sdd`.
 
 A Figma frame is **input** for `/sdd-spec`, never the spec: the ACs stay the source of truth (AGENTS.md §1.1).
 
@@ -16,6 +16,7 @@ style guide and hardcodes them. The developer who owns the screen (or the FE lea
 
 ## 2. Rules
 
+- **Figma is used in this project** for first drafts of screens. Its content is sent to the AI model provider, so a frame holds only what is safe to send.
 - **Mock data only.** No student names, ids or emails in a frame.
 - **Scratch file first.** The developer who owns the screen reviews the draft (a second look from the FE lead is optional) and moves the approved version to the team file.
 - **One screen, one attempt.** Ask for tweaks in follow-ups, not a full redo, to keep token use low.

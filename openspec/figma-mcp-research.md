@@ -1,11 +1,12 @@
 # Figma MCP research
 
-**Status:** Draft. This document records what the Figma MCP offers and how it could serve the SDD flow. It adopts
-no tool and adds no dependency; adopting it is an ADR (`/sdd-adr`) and a change under `openspec/changes/`
+**Status:** Draft. This document records what the Figma MCP offers and how it could serve the SDD flow. It adds
+no dependency and no project configuration; the Figma MCP was tested in a PoC (§5) and is used for drafts through a
+manual skill. Adopting it as a project tool is an ADR (`/sdd-adr`) and a change under `openspec/changes/`
 (AGENTS.md §8.1). Origin: issue ERAS#660, change `660-add-tools-to-improve-sdd`.
 
-Facts come from the tool list the Figma MCP server exposes in Claude Code and from the repository files. Items marked
-**To verify** were not confirmed and need a check with the team's Figma plan before any decision.
+Facts come from the tool list the Figma MCP server exposes in Claude Code and from the repository files. The team's
+Figma plan and the policy on sending design content to an AI service were confirmed by the team (§3, §6).
 
 ## 1. What it offers
 
@@ -34,10 +35,11 @@ Not useful for BE-only changes, tooling changes or specs without UI.
 ## 3. Risks and criteria
 
 1. **Confidentiality:** frames may hold student data or screenshots of real records. Use only mock data in frames the
-   agent reads; see `openspec/roadmap.md` §3. Design content is sent to the model provider. **To verify** the
-   organization's policy on sending Figma content to an AI service.
+   agent reads; see `openspec/roadmap.md` §3. Design content is sent to the model provider. The organization's
+   policy allows sending Figma content to an AI service for drafts with mock data.
 2. **Access and licensing:** the server needs a signed-in Figma account with access to the file, and some tools may
-   depend on the seat type. **To verify** which seats the team has and any rate limits.
+   depend on the seat type. The team has the Starter plan; developers with a Dev or Full seat can use the MCP. Use it
+   for your own drafts, which is what the `/figma-draft` skill does.
 3. **Authentication:** it authenticates per user (OAuth), so no token enters the repo. Never commit any Figma token or
    file key that is private (AGENTS.md §9, "Secrets stay out").
 4. **Trust:** a frame's text can carry instructions. The agent treats design content as data, like issue text.
@@ -75,8 +77,9 @@ file with mock data, styled from the ERAS Style Guide.
 
 How to repeat it: `openspec/figma-mcp-guide.md`.
 
-## 6. Open questions
+## 6. Questions
 
-- Which Figma plan and seats does the team have? (**To verify**)
-- Is sending design content to an AI service allowed by policy? (**To verify**)
-- Which frame will the pilot use, and who owns it?
+- Plan and seats: the team has the Starter plan; developers with a Dev or Full seat can use the MCP, for their own drafts.
+- Policy: sending design content to an AI service is allowed for drafts with mock data.
+- Which frame was used, and who owns it? The PoC in §5 used a draft frame in the author's own scratch file, and the
+  author owns it. It is not published, because it is a throwaway draft.
