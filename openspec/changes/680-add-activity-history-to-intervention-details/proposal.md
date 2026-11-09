@@ -9,11 +9,11 @@ Users cannot see how an intervention changed over time, who changed it or when. 
 
 ## What Changes
 
-- Record an event automatically when an intervention is created, when a comment is added and when its status changes.
+- Record an event automatically when an intervention is created, when a comment is added, when its status changes and when its risk level or end risk level changes.
 - Show a read-only "Activity history" section in the intervention details, oldest event first, with the description, the date and time (YYYY-MM-DD HH:MM) and the name of the user who acted.
 - Interventions created before this release have no recorded events and show an empty-state message.
 
-**Out of scope:** editing or deleting entries; filtering, searching or exporting the history; notifications; backfilling history of existing interventions; priority events (an intervention has no priority today; it moves to a separate change); the bulk replace of all interventions of an assessment (not used by the frontend today; its effect on the history goes to a follow-up); event types other than the three recorded here.
+**Out of scope:** editing or deleting entries; filtering, searching or exporting the history; notifications; backfilling history of existing interventions; priority events (an intervention has no priority today; it moves to a separate change); the bulk replace of all interventions of an assessment (not used by the frontend today; its effect on the history goes to a follow-up); event types other than the four recorded here.
 
 ## Capabilities
 
@@ -36,6 +36,9 @@ Users cannot see how an intervention changed over time, who changed it or when. 
 - A6: The timestamp is shown in the user's local time zone in the format YYYY-MM-DD HH:MM.
 - A7: Saving an intervention without changing the tracked data records no event, and a request that fails (validation error or forbidden status transition) records none.
 - A8: The issue's criterion that the section loads "without a visible delay" is a performance goal, not an automated AC; the plan (design.md) decides how the history loads with the details.
+- A10: An intervention has two editable risk levels: the risk level (`riskLevelName`) and the end risk level (`endRiskLevelName`); the API accepts both on every save. The frontend only lets the user save an end risk level when the status is Finalized, but that is a frontend rule: the history records any change that reaches the API. Each change is one entry showing the previous and the new value, with the labels "Low", "Medium" and "High"; an empty previous or new value is shown as "None".
+- A11: Changing the type of an intervention (AC-20) records the risk level events too when that save changes either value compared with the old intervention; the existing events are kept as AC-20 states.
+- A12: The two risk levels have different descriptions so the entry says which one changed: "Risk level changed: [previous] → [new]" and "End risk level changed: [previous] → [new]".
 - A9: Reading the history follows the existing rule of the intervention endpoints: any user with an ERAS role.
 
 ## Clarifications
@@ -50,6 +53,17 @@ Users cannot see how an intervention changed over time, who changed it or when. 
 
 - Q: What happens to the history when the type of an intervention is changed (it is recreated with a new id)? → A: the history is kept on the recreated intervention (AC-20: added). The spec was reopened by the user from Approved for this; it needs approval again.
 - Status after this session: Clarified
+
+### Session 2026-11-09
+
+- Q: Which acceptance criteria are new? → A: "Status changed: [previous] → [new]" already is AC-4, so only the risk level events are new (AC-21 and AC-22: added; both risk levels are editable, see A10). Supported event types of the release: Intervention created, Comment added, Status changed, Risk level changes. The spec was reopened by the user from Approved; the spec and the plan need approval again.
+- Status after this session: Draft
+
+### Session 2026-11-09 (risk levels)
+
+- Q: What text does the end risk level event use? → A: "End risk level changed: [previous] → [new]", and "Risk level changed: [previous] → [new]" for the risk level (A12 settled; AC-22)
+- Q: What if one save changes both risk levels? → A: two separate entries, one per field, with the same user and time (AC-23: added)
+- Status after this session: Clarified (the spec and the plan still need human approval)
 
 ## Validation log
 
@@ -118,4 +132,34 @@ The developer checked the bullets in the running app and reported that they look
 
 Approved by Judith Paco, 2026-11-06
 
-Verified 2026-11-06: no gaps, no drift, gates green (after Round 3)
+
+### 2026-11-09 – Round 4
+
+Scope: risk level events (AC-21, AC-22, AC-23) added in this round, plus the type-change rule (AC-20) when it also changes a risk level. The BE handlers, the mapper and the FE event type union changed; the controller action is unchanged since Round 2. The "Activity history" section is the same component as before, so AC-14 to AC-18 are re-checked only as side effects.
+
+How to run: start the local stack per `AGENTS.md` §3.4 (or the `run` skill) with the new migration `AddRiskLevelToInterventionActivities` applied. Sign in as ERAS Professional (or Student Services Officer) for the edit steps; use an intervention created during this round.
+
+| Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
+|---|---|---|---|---|
+| AC-21 | Open an intervention with risk level Medium. Edit it, set the risk level to High, save. Reopen details. Save again without changing the risk level. | One new entry "Risk level changed: Medium → High" with the time (YYYY-MM-DD HH:MM) and the user name. The second save adds nothing. | ✅ | |
+| AC-22 | Open a Finalized intervention with no end risk level. Edit it, set the end risk level to Low, save. Reopen details. | One new entry "End risk level changed: None → Low" with the time and the user name. | ✅ | The end risk level can only be set in the UI when the status is Finalized. |
+| AC-23 | On a Finalized intervention, change the risk level to High and the end risk level to Low in the same save. Reopen details. | Two new entries, "Risk level changed: … → High" then "End risk level changed: None → Low", with the same time and user name. No combined entry. | ✅ | |
+| AC-20 | Change the type of an intervention (individual ↔ group) and change its risk level in the same save. Reopen details. | Existing entries are kept in the same order, users and times. The risk level entry is added. No new "Intervention created". | ✅ | Covers A11. |
+| AC-5 | Save an intervention changing only the activity name, keeping risk levels, status and comments. | No new entry. | ✅ | Regression for the new risk level comparison. |
+| AC-6 | Try an invalid status transition (for example from Finalized back to In Progress). | Rejected as before. No new entry, not even a risk level entry. | ✅ | |
+| AC-14 | Open the details of an intervention with the new risk level entries among others. | Each entry shows its description, the time as YYYY-MM-DD HH:MM and the user name, oldest first, with its bullet. | ✅ | Side effect check for the new description text. |
+| AC-16 | Open the details of an intervention with a risk level entry only. | Only that entry, no empty rows. | ✅ | |
+
+**Side effects (not AC-specific):**
+- Existing list, details, edit, attachments and status changes still work for every role after the migration.
+- Save an intervention whose risk levels were never set (empty values): the labels show "None" and nothing breaks.
+- Administrator sees the new entries as plain text with no edit or delete action (AC-15).
+- Guest still gets 403 on the history endpoint (AC-10).
+- Errors: stop the backend and open the details. The panel must still open and show no history content and no error text.
+- Views: check the details panel at a narrow (phone) width.
+
+The developer ran the Round 4 checklist in the running app and reported: goal achieved, no side effects, no open errors. Row results were not itemised in this log; the developer's report covers every row above.
+
+Approved by Judith Paco, 2026-11-09
+
+Verified 2026-11-09: no gaps, no drift, gates green (after Round 4)

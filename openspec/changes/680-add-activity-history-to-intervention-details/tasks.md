@@ -20,6 +20,12 @@
 - [x] 1.16 Write the Api tests `GetInterventionActivity_StudentServicesOfficer_IsAuthorizedAsync` (AC-8), `GetInterventionActivity_Professional_IsAuthorizedAsync` (AC-9) and `GetInterventionActivity_Guest_IsForbiddenAsync` (AC-10), one per AC, in `ERAS-BE/test/Eras.Api.Tests/Authorization/InterventionActivityPolicyTests.cs` with `ControllerPolicyEvaluator`, and verify they fail
 - [x] 1.17 Add `GET {id:int}/interventions/{interventionId:int}/history` (`GetInterventionActivity`, `[Authorize(Policy = ErasPolicies.AnyErasRole)]`, `ProducesResponseType` 200/403/404, `CancellationToken`) to `AssessmentsController` for (AC-8, AC-9, AC-10) and verify the tests from 1.16 pass
 
+- [x] 1.18 Add the types `RiskLevelChanged` and `EndRiskLevelChanged` to `InterventionActivityType`, the nullable `PreviousRiskLevel` and `NewRiskLevel` to `InterventionActivity`, map them in `InterventionActivityConfiguration` and generate the new migration `AddRiskLevelToInterventionActivities` (never edit the applied migration or the snapshot by hand); verify `dotnet build Eras.sln -warnaserror` passes and the migration only adds the two nullable columns
+- [x] 1.19 Write the AC tests `HandleAsync_RiskLevelChanged_RecordsPreviousAndNewRiskLevelAsync` (AC-21), `HandleAsync_EndRiskLevelChanged_RecordsPreviousAndNewEndRiskLevelAsync` (AC-22) and `HandleAsync_BothRiskLevelsChanged_RecordsTwoEventsAsync` (AC-23), one per AC, in `ERAS-BE/test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs`, tagged `Change` and `AC`, and verify they fail
+- [x] 1.20 Extend `InterventionActivityFactory.FromChange` with the previous and new risk level and end risk level (one event per changed field, after the status event), and make `UpdateInterventionCommandHandler` read both previous values into locals before the mutation and pass them, for (AC-21, AC-22, AC-23) and verify the tests from 1.19 and the existing AC-3 to AC-6 and AC-19 tests pass
+- [x] 1.21 Write an untagged test in `ReplaceInterventionCommandHandlerTests.cs`: a type change that also changes the risk level records a `RiskLevelChanged` event and keeps the old events (A11); verify it fails, then make `ReplaceInterventionCommandHandler` compare the risk levels with the old intervention and record the events, and verify it passes and the AC-20 test still passes
+- [x] 1.22 Write an untagged test in `ERAS-BE/test/Eras.Application.Tests/Mappers/` for `InterventionActivityToDtoMapper`: the descriptions "Risk level changed: Medium → High" and "End risk level changed: None → Low"; verify it fails, then add both cases to `Describe` with the labels Low, Medium, High and "None" for null, and verify it passes
+
 ## 2. Frontend (FE)
 
 - [x] 2.1 Add `ERAS-FE/src/app/core/models/intervention-activity.model.ts` mirroring the DTO, the `getActivity` method in `core/services/api/intervention.service.ts` and `INTERVENTION_ACTIVITY_MESSAGES` in `core/constants/messages.ts`; verify `npm run build` compiles
@@ -33,11 +39,14 @@
 - [x] 2.7 Write a spec (no AC tag) in `ERAS-FE/src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts`: one `.activity-bullet` per entry; verify it fails (AC-14)
 - [x] 2.8 Add the bullet markup and styles (`var(--primary-700)`) for each entry in the `intervention-activity-history` component (AC-14); verify the spec from 2.7 passes and the AC-14 to AC-18 specs still pass
 
+- [x] 2.9 Add `RiskLevelChanged` and `EndRiskLevelChanged` to the type union of `ERAS-FE/src/app/core/models/intervention-activity.model.ts` (D6); no AC test is added because the section already shows the description of any event (AC-14); verify `npm run build` and the specs of the history component still pass
+
 ## 3. Verification
 
 - [x] 3.1 The AGENTS.md section 8.7 gates pass. BE gates in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%
 - [x] 3.2 FE gates pass in `ERAS-FE/`: `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build`
 - [x] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate 680-add-activity-history-to-intervention-details --strict` passes
+- [x] 3.4 After tasks 1.18 to 2.9, run again the gates of 3.1 and 3.2, the traceability check of 3.3 and `openspec validate 680-add-activity-history-to-intervention-details --strict`, and verify every gate is green, reporting the real results
 
 ## Traceability
 | AC | Scenario | Side | Test |
@@ -61,3 +70,6 @@
 | AC-18 | Event text is displayed as plain text | FE | src/app/modules/assessments/components/interventions/interventions-detail/intervention-activity-history/intervention-activity-history.component.spec.ts › [680-add-activity-history-to-intervention-details/AC-18] shows the user name as plain text |
 | AC-19 | Changing a comment records an event and clearing it does not | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_CommentChangedThenCleared_RecordsOnlyTheChangeAsync |
 | AC-20 | Changing the type of an intervention keeps its history | BE | test/Eras.Application.Tests/Features/Assessments/Commands/ReplaceInterventionCommandHandlerTests.cs › HandleAsync_TypeChanged_KeepsTheEventsAsync |
+| AC-21 | Changing the risk level records the previous and the new value | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_RiskLevelChanged_RecordsPreviousAndNewRiskLevelAsync |
+| AC-22 | Changing the end risk level records the previous and the new value | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_EndRiskLevelChanged_RecordsPreviousAndNewEndRiskLevelAsync |
+| AC-23 | Changing both risk levels in one save records two events | BE | test/Eras.Application.Tests/Features/Assessments/Commands/UpdateInterventionCommandHandlerTests.cs › HandleAsync_BothRiskLevelsChanged_RecordsTwoEventsAsync |

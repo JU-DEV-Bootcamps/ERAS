@@ -3,7 +3,7 @@
 ## ADDED Requirements
 
 ### Requirement: Record the activity of an intervention
-The system SHALL automatically record an event, with its description, the time and the name of the authenticated user, when an intervention is created, when a comment is added and when its status changes.
+The system SHALL automatically record an event, with its description, the time and the name of the authenticated user, when an intervention is created, when a comment is added, when its status changes and when its risk level or end risk level changes.
 
 #### Scenario: AC-1 Creating an intervention records "Intervention created"
 **Side:** BE
@@ -31,6 +31,27 @@ The system SHALL automatically record an event, with its description, the time a
 - **WHEN** they change its status to "In Progress"
 - **THEN** the intervention has an event "Status changed: Remitted → In Progress" with the time and the user name "Luis Gómez"
 - **AND** a later change to "Finalized" adds a second event "Status changed: In Progress → Finalized"
+
+#### Scenario: AC-21 Changing the risk level records the previous and the new value
+**Side:** BE
+- **GIVEN** an intervention with risk level "Medium" and a user named "Luis Gómez"
+- **WHEN** they change its risk level to "High"
+- **THEN** the intervention has an event "Risk level changed: Medium → High" with the time and the user name "Luis Gómez"
+- **AND** saving later with the risk level still "High" adds no event
+
+#### Scenario: AC-22 Changing the end risk level records the previous and the new value
+**Side:** BE
+- **GIVEN** a Finalized intervention with no end risk level and a user named "Luis Gómez"
+- **WHEN** they save it with the end risk level "Low"
+- **THEN** the intervention has an event "End risk level changed: None → Low" with the time and the user name "Luis Gómez"
+- **AND** saving later with the end risk level still "Low" adds no event
+
+#### Scenario: AC-23 Changing both risk levels in one save records two events
+**Side:** BE
+- **GIVEN** a Finalized intervention with risk level "Medium", no end risk level and a user named "Luis Gómez"
+- **WHEN** they save it with the risk level "High" and the end risk level "Low"
+- **THEN** the intervention has two events, "Risk level changed: Medium → High" and "End risk level changed: None → Low", each with the same time and the user name "Luis Gómez"
+- **AND** no combined event is recorded
 
 #### Scenario: AC-5 Saving without a tracked change records no event
 **Side:** BE
