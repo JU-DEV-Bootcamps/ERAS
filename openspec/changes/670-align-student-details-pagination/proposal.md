@@ -55,7 +55,7 @@ Setup: run the local stack (`AGENTS.md` §3.4) or `npm start` in `ERAS-FE` (the 
 | AC-4 | At 320px (and 360px) open `Students`, press "See more details" on a student with 40 or more answers, scroll to the answers and go to its third page | The range "21 – 30 of ..." is on one line and the page buttons are below it, both inside the card of the answers, nothing cut | | Added after the review; pending the manual look |
 | AC-3 | At 375px open any other list with pagination (`Students`, `Evaluation process`, `Recent alerts`) | Its pagination looks as before this change | ✅ | Side effect check |
 | – | Open the student details of a student with no answers, and with the backend stopped, at 375px | The empty and error states show as before | ✅ | Regression check |
-| – | Open the student details with the older design (turn the `studentDetails` flag off) at 375px | The pagination looks as before; its range is already on one line | ✅ | The older version is not changed |
+| – | Open the student details with the older design (turn the `studentDetails` flag off) at 375px | The pagination looks as before; its range is already on one line | ✅ | The older version is not changed (measured once with a temporary spec) |
 | – | Open the browser console during all of the above | No new errors or warnings | ✅ | |
 
 Approved by Lucia Becerra, 2026-11-10 (reported in chat: everything fine; the rows marked ✅ were approved as a whole from that report, the chat did not list them one by one).

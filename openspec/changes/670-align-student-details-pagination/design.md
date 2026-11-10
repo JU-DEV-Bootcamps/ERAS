@@ -38,7 +38,7 @@ FE only. The spec is `specs/students-mobile-view/spec.md` (AC-1 to AC-3); the re
 | Piece | Change | Files | ACs |
 |---|---|---|---|
 | Student details v2 | `mobile` class on `.card-answers` and the range label rule under it (D1) | `src/app/shared/components/modals/modal-student-detail/v2/student-detail-v2/student-detail-v2.component.{html,scss}` | AC-1, AC-2 |
-| Student details (older) | no change: its list has less padding than the card of v2, so its range label does not wrap at 375px (checked by a guard test with no AC tag, task 1.5; it has less padding than v2) | `src/app/shared/components/modals/modal-student-detail/student-detail/student-detail.component.spec.ts` | (none) |
+| Student details (older) | no change: its list has less padding than the card of v2, so its range label does not wrap at 375px (measured once with a temporary spec, task 1.5) |  | (none) |
 | Shared list | no change |  | AC-3 (tested from the spec of v2) |
 
 ## API contract
@@ -51,7 +51,7 @@ No schema change.
 
 ## Test strategy
 
-AC-1, AC-2 and AC-4 render the real `StudentDetailV2Component` with its services mocked as the existing spec does, 46 answers (10 per page) and `ViewportService` mocked with `{ isMobile: signal(true) }` for AC-1 and `signal(false)` for AC-2; the component is placed in a host as wide as the modal's list (375px on a phone, 320px on the narrowest phones, as wide as the modal; 1100px on a desktop) because the paginator wraps by the width of its container, which holds in the default Karma window and in a 375px one. The test goes to the third page by pressing the next button twice, so the label is "21 – 30 of 46", the widest case. It measures the range label (height of one line, on the same row as the page buttons, inside the host). AC-3 creates a real `mat-paginator` with 46 items outside the answers card, next to the modal, and checks that its range label, container and buttons keep the style of Material. The same measurement for the older version is an extra test with no AC tag. The 375px run follows the way of #670 (`npm test -- --watch=true --include=<specs>` and `http://localhost:9876/debug.html` in the Browser pane with the Mobile preset). Coverage gate: FE >= 15% (AGENTS.md section 8.7).
+AC-1, AC-2 and AC-4 render the real `StudentDetailV2Component` with its services mocked as the existing spec does, 46 answers (10 per page) and `ViewportService` mocked with `{ isMobile: signal(true) }` for AC-1 and `signal(false)` for AC-2; the component is placed in a host as wide as the modal's list (375px on a phone, 320px on the narrowest phones, as wide as the modal; 1100px on a desktop) because the paginator wraps by the width of its container, which holds in the default Karma window and in a 375px one. The test goes to the third page by pressing the next button twice, so the label is "21 – 30 of 46", the widest case. It measures the range label (height of one line, on the same row as the page buttons, inside the host). AC-3 creates a real `mat-paginator` with 46 items outside the answers card, next to the modal, and checks that its range label, container and buttons keep the style of Material. The 375px run follows the way of #670 (`npm test -- --watch=true --include=<specs>` and `http://localhost:9876/debug.html` in the Browser pane with the Mobile preset). Coverage gate: FE >= 15% (AGENTS.md section 8.7).
 
 | AC | Side | Layer / project | Planned test (file › name) |
 |---|---|---|---|
@@ -66,7 +66,7 @@ AC-2 and AC-3 may already pass before the change (they guard what must not chang
 
 - [`::ng-deep` is deprecated] → it is the way the shared list is styled from outside today (`list.component.scss`), and the rule is nested under one container class so it reaches nothing else.
 - [The label and four buttons need about 253px, and a phone narrower than about 370px has less] → the range actions wrap, so at 320px the buttons go below the range, inside the card; AC-4 measures it (task 1.7), and an extra spec with no AC tag measures 360px, the most common Android width, which has the same layout: the row needs about 253px and a 360px card has less, so the buttons go below the range. From 375px the row fits.
-- [Two versions of the modal] → only v2 wraps its label at 375px (task 1.5); the older one is left as it is and keeps a guard test.
+- [Two versions of the modal] → only v2 wraps its label at 375px (task 1.5); the older one is left as it is, and a later change of its layout would need its own check.
 
 ## Open Questions
 
