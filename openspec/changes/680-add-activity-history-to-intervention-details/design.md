@@ -60,9 +60,9 @@ See `proposal.md` (Why) and `specs/intervention-management/spec.md` (AC-1..AC-23
 | Application | Add: record "Intervention created" after the id exists | `.../Handlers/AddInterventionCommandHandler.cs` | AC-1 |
 | Application | Update: capture previous values, record events in the transaction | `.../Handlers/UpdateInterventionCommandHandler.cs` | AC-3, AC-4, AC-5, AC-6, AC-19, AC-21, AC-22, AC-23 |
 | Application | Replace: keep and re-add events, record changes | `.../Handlers/ReplaceInterventionCommandHandler.cs` | AC-20 |
-| Application | Query `GetInterventionActivityQuery(AssessmentId, InterventionId)` and handler (order oldest first, `KeyNotFoundException` when the intervention is not in the assessment) | `.../Queries.cs`, `.../Handlers/GetInterventionActivityQueryHandler.cs` (new) | AC-7, AC-11, AC-12, AC-13 |
-| Application | `InterventionActivityDto` + mapper (description, status and risk level labels) registered in `ApplicationServiceRegistration` | `src/Eras.Application/DTOs/AssessmentManagement/InterventionActivityDto.cs`, `Mappers/AssessmentManagement/InterventionActivityToDtoMapper.cs` (new) | AC-7 |
-| Infrastructure | EF configuration, `DbSet`, repository, DI line, new migrations `AddInterventionActivities` and `AddRiskLevelToInterventionActivities` (D6) | `.../PostgreSQL/Configurations/AssessmentManagement/InterventionActivityConfiguration.cs`, `AppDbContext.cs`, `Repositories/AssessmentManagement/InterventionActivityRepository.cs`, `PersistenceServiceRegistration.cs`, `Migrations/` (new) | AC-1..AC-20 |
+| Application | Query `GetInterventionActivityQuery(AssessmentId, InterventionId)` and handler (order oldest first, `NotFoundException` (`Eras.Error.Bussiness`, status 404) when the assessment does not exist or the intervention is not in it; a plain `KeyNotFoundException` is turned into a 500 by the global `ErrorFilter`, found in manual validation 1) | `.../Queries.cs`, `.../Handlers/GetInterventionActivityQueryHandler.cs` (new) | AC-7, AC-11, AC-12, AC-13 |
+| Application | `InterventionActivityDto` + mapper (description, status labels and risk level labels) registered in `ApplicationServiceRegistration` | `src/Eras.Application/DTOs/AssessmentManagement/InterventionActivityDto.cs`, `Mappers/AssessmentManagement/InterventionActivityToDtoMapper.cs` (new) | AC-7 |
+| Infrastructure | EF configuration, `DbSet`, repository, DI line, new migration `AddInterventionActivities` and `AddRiskLevelToInterventionActivities` (D6) | `.../PostgreSQL/Configurations/AssessmentManagement/InterventionActivityConfiguration.cs`, `AppDbContext.cs`, `Repositories/AssessmentManagement/InterventionActivityRepository.cs`, `PersistenceServiceRegistration.cs`, `Migrations/` (new) | AC-1..AC-20 |
 | Api | `GetInterventionActivity` action with `[Authorize(Policy = ErasPolicies.AnyErasRole)]` | `src/Eras.Api/Controllers/AssessmentManagement/AssessmentsController.cs` | AC-8, AC-9, AC-10 |
 
 ### Frontend (`ERAS-FE/`)
@@ -104,7 +104,7 @@ New table `intervention_activities` (first migration) (FK `intervention_id` casc
 | AC-23 | BE | same folder | `UpdateInterventionCommandHandlerTests.cs` › `HandleAsync_BothRiskLevelsChanged_RecordsTwoEventsAsync` |
 | AC-7 | BE | Application, `.../Features/Assessments/Queries/` | `GetInterventionActivityQueryHandlerTests.cs` › `HandleAsync_UnorderedEvents_ReturnsOldestFirstAsync` |
 | AC-11 | BE | same file | `HandleAsync_OtherInterventionHasEvents_ReturnsOnlyItsOwnAsync` |
-| AC-12 | BE | same file | `HandleAsync_UnknownIntervention_ThrowsKeyNotFoundAsync` |
+| AC-12 | BE | Api, `test/Eras.Api.Tests/Controllers/` | `InterventionActivityNotFoundTests.cs` › `GetInterventionActivity_UnknownIntervention_RespondsNotFoundAsync` |
 | AC-13 | BE | same file | `HandleAsync_NoEvents_ReturnsEmptyListAsync` |
 | AC-8 | BE | Api, `test/Eras.Api.Tests/Authorization/` | `InterventionActivityPolicyTests.cs` › `GetInterventionActivity_StudentServicesOfficer_IsAuthorizedAsync` |
 | AC-9 | BE | same file | `GetInterventionActivity_Professional_IsAuthorizedAsync` |
@@ -130,3 +130,5 @@ Extra edge tests carry no AC tag (planned: the Replace handler records risk leve
 - Priority events need a separate change that first adds a priority field to interventions.
 - Backfilling history for existing interventions (out of scope in the issue).
 - New FE specs use `provideHttpClient()`; the older `intervention.service.spec.ts` still uses the legacy testing module (left alone).
+- `GetInterventionActivityQueryHandler` loads the whole assessment with all its interventions (`GetByIdWithInterventionsAsync`) only to check that the intervention belongs to it; a small existence query (assessment id + intervention id) would avoid it (review nit of ERAS-BE#588, not blocking).
+- `intervention-activity-history` and `assessment-activity-history` duplicate markup and styles, and `INTERVENTION_ACTIVITY_MESSAGES` and `ASSESSMENT_ACTIVITY_MESSAGES` are identical; a shared presentational component and one message object can replace both in a refactor change (review nit of ERAS-FE#1123; also listed in change 681).

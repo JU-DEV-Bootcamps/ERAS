@@ -162,4 +162,30 @@ The developer ran the Round 4 checklist in the running app and reported: goal ac
 
 Approved by Judith Paco, 2026-11-09
 
-Verified 2026-11-09: no gaps, no drift, gates green (after Round 4)
+Verified 2026-11-09: no gaps, no drift, gates green (after Round 4; predates Round 5)
+
+
+### 2026-11-09 – Round 5
+
+Scope: BE only, from the review of ERAS-BE#588. `GetInterventionActivityQueryHandler` now throws `NotFoundException`, so an unknown intervention or assessment answers 404 instead of 500 (tasks 1.23 and 1.24). AC-12 was ❌ in Round 1 ("It responds 500 error internal") and was not re-checked in Round 2. AC-7, AC-11 and AC-13 are re-checked because the same handler is touched.
+
+How to run: restart the API first so it runs the fixed code (stop Eras.Api / Visual Studio before any rebuild), then use the local stack per `AGENTS.md` §3.4 or Swagger.
+
+| Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
+|---|---|---|---|---|
+| AC-12 | Call `GET api/v1/assessments/{id}/interventions/999999/history` with a valid assessment id. Then call it with an unknown assessment id (for example 999999) and any intervention id. | 404 Not Found in both cases, with no event data and no stack trace. | ✅ | |
+| AC-7 | With several events, call the endpoint or open the details. | Entries are listed oldest first. | ✅ | |
+| AC-11 | Open the details of a second intervention in the same assessment, with events only on the first. | The second shows only its own entries. | ✅ | |
+| AC-13 | Open the details of an intervention created before this release. | "No activity recorded yet." and the rest of the panel loads. | ✅ | |
+
+**Side effects (not AC-specific):**
+- A valid assessment and intervention still return 200 with the history for ERAS Professional and Student Services Officer.
+- Guest still gets 403 (AC-10).
+- The FE details panel still opens for an existing intervention.
+
+
+Approved by judithmarg-dev, 2026-11-10 (Round 5: AC-12 now answers 404; AC-7, AC-11 and AC-13 still pass)
+
+Verified 2026-11-10: no gaps, no drift, gates green (after Round 5; FE test had one flaky PdfService timeout, green on re-run)
+
+Verified 2026-11-10 (re-run): no gaps, no drift, gates green, all 8 gates passed with no flaky retry
