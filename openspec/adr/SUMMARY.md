@@ -14,6 +14,9 @@ Rule: keep manuals as files in `manuals/` at the root of the parent repository, 
 ### [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md): Limit a professional's access to students of their assigned assessments
 Rule: a professional only reaches students of assessments whose `AssignedProfessionals` holds their Keycloak sub; Administrator and Officer are not limited and Guest is denied. One Application-layer resolver enforces it (a violation is a `BussinessException` 403), and `StudentsController` declares a policy on every action, checked by a reflection test.
 
+### [ADR-0009](0009-limit-professional-profile-to-professionals.md): Limit the professional profile endpoints to the ERAS Professional role
+Rule: the endpoints `GET` and `PUT api/v1/users/me/professional-profile` declare the policy `ProfessionalOnly`, which requires only the `ERAS Professional` role; Administrator, Officer and Guest get 403. This is an exception to "Administrator passes every check" (AGENTS.md §4.3) and applies only to endpoints that declare `ProfessionalOnly`.
+
 ## data
 
 ### [ADR-0002](0002-store-short-id-lists-in-array-columns.md): Store short lists of identifiers in PostgreSQL array columns
