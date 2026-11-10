@@ -106,3 +106,5 @@ Side effects to check in Round 2:
 Approved by judithmarg-dev, 2026-11-09 (goal achieved, no side effects, no open errors; the developer wrote the date as 2023-11-09, taken as a typo for today).
 
 Verified 2026-11-09: no gaps, no drift, gates green (design.md aligned with the AC-12 fix: `NotFoundException`, the Api-level AC-12 test and the follow-up on change 680's intervention history).
+
+Verified 2026-11-10: no gaps, no drift, gates green

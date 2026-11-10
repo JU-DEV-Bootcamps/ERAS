@@ -125,8 +125,7 @@ Apply `AddAssessmentActivities` with the normal migration step of the deploy; no
 
 ## Follow-ups
 
-- `intervention-activity-history` and `assessment-activity-history` duplicate markup and styles; a shared presentational component can replace both in a refactor change.
+- `intervention-activity-history` and `assessment-activity-history` duplicate markup and styles, and `INTERVENTION_ACTIVITY_MESSAGES` and `ASSESSMENT_ACTIVITY_MESSAGES` are identical; a shared presentational component and one message object can replace both in a refactor change (review nit of ERAS-FE#1123).
 - `InterventionActivity` and `AssessmentActivity` are parallel tables; unify only if a third entity needs history.
-- `GetInterventionActivityQueryHandler` (change 680) throws `KeyNotFoundException` for an unknown assessment or intervention, which the global `ErrorFilter` turns into a 500 instead of a 404; switch it to `NotFoundException` in its own change.
 - Backfilling history for existing assessments (out of scope in the issue).
 - The issue text says "four" event types but lists three; confirm with the author whether a fourth exists.
