@@ -53,20 +53,24 @@ Where the shared components are used: `app-table-with-actions` is rendered by `a
 
 | Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
 |---|---|---|---|---|
-| AC-1 | Open `Students` at 375px. Then widen the window to 1280px without reloading, and narrow it again | At 375px each student is a card with its columns and actions and there is no table. At 1280px a table with the same students. The switch happens while resizing, at 768px | | |
-| AC-1 | Repeat on `Recent alerts` and `Evaluation process` (screens that use the same list component) | Same behavior: cards below 768px, table from 768px | | Side effect check |
-| AC-1 | Open an import and go to `Import status` (`/evaluation-process/import-status/<id>`) at 375px and at 1280px | Cards at 375px, table at 1280px; the selection checkboxes and the row actions still work | | Side effect check |
+| AC-1 | Open `Students` at 375px. Then widen the window to 1280px without reloading, and narrow it again | At 375px each student is a card with its columns and actions and there is no table. At 1280px a table with the same students. The switch happens while resizing, at 768px | ✅ | Approved as a whole in chat |
+| AC-1 | Repeat on `Recent alerts` and `Evaluation process` (screens that use the same list component) | Same behavior: cards below 768px, table from 768px | ✅ | Side effect check |
+| AC-1 | Open an import and go to `Import status` (`/evaluation-process/import-status/<id>`) at 375px and at 1280px | Cards at 375px, table at 1280px; the selection checkboxes and the row actions still work | ✅ | Side effect check |
 | AC-2 | Not visible in the app (component not rendered by any screen) | Proven by its tagged test | n.a. | |
 | AC-3 | Not visible in the app (component not rendered by any screen) | Proven by its tagged test | n.a. | |
-| AC-4 | Go to `Evaluation process > Import preview`, load a preview with students, at 375px. Reload the page directly at 375px (do not resize) | At the first render each student is a card with its columns and its save switch and there is no table (before this change a direct load at 375px showed the table). At 1280px a table with the same students | | Real bug fixed: the flag was only set on resize |
-| AC-5 | At 375px, on `Students` (or `Import status`), look at the action buttons of a card and tap each one with the touch emulation. Inspect one button in the dev tools: its touch target element (`.mat-mdc-button-touch-target`) | Each action is easy to tap, with a tap area of at least 48 by 48 px, they do not overlap, and the card looks as before (same height, same visible buttons) | | Tests proved the tap area already was 48px, so no CSS was added |
+| AC-4 | Go to `Evaluation process > Import preview`, load a preview with students, at 375px. Reload the page directly at 375px (do not resize) | At the first render each student is a card with its columns and its save switch and there is no table (before this change a direct load at 375px showed the table). At 1280px a table with the same students | ✅ | Real bug fixed: the flag was only set on resize |
+| AC-5 | At 375px, on `Students` (or `Import status`), look at the action buttons of a card and tap each one with the touch emulation. Inspect one button in the dev tools: its touch target element (`.mat-mdc-button-touch-target`) | Each action is easy to tap, with a tap area of at least 48 by 48 px, they do not overlap, and the card looks as before (same height, same visible buttons) | ✅ | Tests proved the tap area already was 48px, so no CSS was added |
 | AC-6 | Not visible in the app (component not rendered by any screen) | Proven by its tagged test | n.a. | |
-| AC-7 | At 1280px, on `Students` and `Import status`, compare the row height and the action controls with `develop` | Nothing is enlarged: same row height and same 40 px controls | | |
-| – | Errors and states: open `Students` with a search that returns nothing, and with the backend stopped | The empty and error messages show as before at 375px and at 1280px | | Regression check |
-| – | Roles: sign in as `ERAS Student Services Officer` and `ERAS Professional` and open `Students` at 375px | The cards and actions each role is allowed to see appear as before; no new action is shown | | Side effect check |
-| – | Screens whose unused mobile flag was removed: open `Polls answered` (Reports), `Evaluation process`, `Import students` list and the student details modal at 375px | They load and look as before (no error in the console) | | Dead code removed, no AC |
-| – | Open the browser console during all of the above | No errors or warnings caused by the viewport service | | |
+| AC-7 | At 1280px, on `Students` and `Import status`, compare the row height and the action controls with `develop` | Nothing is enlarged: same row height and same 40 px controls | ✅ | Approved as a whole in chat |
+| – | Errors and states: open `Students` with a search that returns nothing, and with the backend stopped | The empty and error messages show as before at 375px and at 1280px | ✅ | Regression check |
+| – | Roles: sign in as `ERAS Student Services Officer` and `ERAS Professional` and open `Students` at 375px | The cards and actions each role is allowed to see appear as before; no new action is shown | ✅ | Side effect check |
+| – | Screens whose unused mobile flag was removed: open `Polls answered` (Reports), `Evaluation process`, `Import students` list and the student details modal at 375px | They load and look as before (no error in the console) | ✅ | Dead code removed, no AC |
+| – | Open the browser console during all of the above | No errors or warnings caused by the viewport service | ✅ | Approved as a whole in chat |
 
-Approved by Lucia, 2026-11-06 (reported in chat: everything fine, no problems; AC-2, AC-3 and AC-6 are proven by their tests only).
+Approved by Lucia, 2026-11-06 (reported in chat: everything fine, no problems; AC-2, AC-3 and AC-6 are proven by their tests only). The rows marked ✅ were approved as a whole from that report; the chat did not list them one by one.
 
 Verified 2026-11-06: no gaps, no drift, gates green
+
+Post-review change 2026-11-10 (reviewer comments on ERAS-FE#1122 and ERAS#683): the guard tests of AC-5, AC-6 and AC-7 no longer use fixed sizes or Material internals. They compare the mobile layout with the desktop one, a standard Material icon button and the layout with the touch targets hidden; the only number left is the 48px of the AC. The Round 1 results above were filled from the approval in chat. The new tests were proven to fail by hiding the touch targets, enlarging the buttons on mobile only and enlarging them everywhere.
+
+Verified 2026-11-10: no gaps, no drift, gates green (AC-1 to AC-7)
