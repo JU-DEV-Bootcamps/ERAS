@@ -9,7 +9,7 @@ On a phone, the pagination of the Student Details modal wraps its range label: "
 
 ## What Changes
 
-- On a screen narrower than 768px the range label of the pagination of the Student Details modal ("21 – 30 of 46") is on one line and sits aligned with the page buttons.
+- On a screen narrower than 768px the range label of the pagination of the Student Details modal ("21 – 30 of 46") is on one line. From 375px wide it sits on the same row as the page buttons; on narrower phones the buttons go below it, inside the card of the answers.
 - From 768px the pagination of the Student Details modal looks as it does today.
 - Every other list and every other modal keeps its pagination exactly as it is.
 
@@ -32,7 +32,7 @@ On a phone, the pagination of the Student Details modal wraps its range label: "
 ## Assumptions
 
 - A1: "Student Details modal" is the modal opened with "See more details" in the Students list, in both of its versions (the one shown with the `studentDetails` feature flag and the older one), because both show the same list with the same pagination.
-- A2: "Aligned" means the range label is on one line and on the same row as the page buttons, with the page-size selector kept as it is today.
+- A2: "Aligned" means the range label is on one line and, from 375px wide, on the same row as the page buttons (on narrower phones the buttons go below it, inside the card), with the page-size selector kept as it is today.
 
 ## Clarifications
 
@@ -60,6 +60,6 @@ Setup: run the local stack (`AGENTS.md` §3.4) or `npm start` in `ERAS-FE` (the 
 
 Approved by Lucia Becerra, 2026-11-10 (reported in chat: everything fine; the rows marked ✅ were approved as a whole from that report, the chat did not list them one by one).
 
-Post-review change 2026-11-10 (an independent review of the PRs, ERAS#670): a 320px phone had less room than the row needs and the range went out of the card, so AC-4 was added (spec text: the range is on the same row as the buttons from 375px; below that the buttons go under it), the paginator loses its 8px of side padding on a phone and its actions wrap, AC-3 is now tested next to the modal with a real paginator, and the spec says "third page" (46 answers at 10 per page) where it said "second". Needs a manual look at 320px and 360px (row AC-4) and the reviewer for the spec text; run /sdd-verify again before archiving.
+Post-review change 2026-11-10 (an independent review of the PRs, ERAS#670): a 320px phone had less room than the row needs and the range went out of the card, so AC-4 was added (spec text: the range is on the same row as the buttons from 375px; below that the buttons go under it), the paginator loses its 8px of side padding on a phone and its actions wrap, AC-3 is now tested next to the modal with a real paginator, and the spec says "third page" (46 answers at 10 per page) where it said "second". The gates, the traceability and the diff against `develop` were checked again after these changes (line below). Still open before archiving: the manual look at 320px and 360px (row AC-4) and a human confirmation of the spec text with AC-4, which was added after `Status` was approved.
 
 Verified 2026-11-10: no gaps, no drift, gates green (AC-1 to AC-4)

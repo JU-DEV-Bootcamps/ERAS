@@ -15,7 +15,7 @@ Work in `ERAS-FE/` on a branch built on `develop`. Tag every AC spec as `[670-al
 ## 2. Verification
 
 - [x] 2.1 Run the specs of the modals and of the list in a 375px tab (`npm test -- --watch=true --browsers=ChromeHeadless --include="src/app/shared/components/modals/**/*.spec.ts" --include="src/app/shared/components/list/**/*.spec.ts"` and `http://localhost:9876/debug.html` in the Browser pane with the Mobile preset) and verify 0 failures (done: the 85 specs of the student details, with AC-1 and AC-2, and the AC-3 spec pass in the 375px tab; the 8 PDF export specs of the list timed out there because the pane was hidden and the page throttled, and pass in headless Chrome, 180 of 180)
-- [x] 2.2 Compare with `develop`: `git -C ERAS-FE diff develop --stat` lists only `student-detail-v2.component.html`, `.scss` and `.spec.ts`, and nothing else; verify that the output has exactly those three files (done: exactly the five files)
+- [x] 2.2 Compare with `develop`: `git -C ERAS-FE diff develop --stat` lists only `student-detail-v2.component.html`, `.scss` and `.spec.ts`, and nothing else; verify that the output has exactly those three files (done: exactly the three files)
 - [x] 2.3 FE gates pass in `ERAS-FE/` (AGENTS.md section 8.7): `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage` (>= 15%), `npm run build` (done)
 - [x] 2.4 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 FE test per AC (AC-1 to AC-4), `bash .claude/skills/sdd-implement/scripts/check-impl.sh 670-align-student-details-pagination --final` and `openspec validate 670-align-student-details-pagination --strict` pass (done)
 

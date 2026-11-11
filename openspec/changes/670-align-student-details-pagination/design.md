@@ -12,7 +12,7 @@ FE only. The spec is `specs/students-mobile-view/spec.md` (AC-1 to AC-3); the re
 ## Goals / Non-Goals
 
 **Goals:**
-- The range label of the paginator of the Student Details modal is on one line, on the same row as the page buttons, on a phone (AC-1).
+- The range label of the paginator of the Student Details modal is on one line on a phone; from 375px wide it is on the same row as the page buttons (AC-1), and on narrower phones the buttons go below it, inside the card (AC-4).
 - Desktop and every other pagination keep today's look (AC-2, AC-3) and, on the narrowest phones, the buttons below the range inside the card (AC-4).
 
 **Non-Goals:**
