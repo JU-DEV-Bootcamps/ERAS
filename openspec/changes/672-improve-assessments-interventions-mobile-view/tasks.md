@@ -46,6 +46,8 @@ Paths are inside `ERAS-FE/`. `A/` is `src/app/modules/assessments/components/`. 
 - [x] 1.40 Fix any desktop regression the spec from 1.39 shows for (AC-19) (no code change expected; note it if so) and verify the spec, `assessments.component.spec.ts` and `interventions.component.spec.ts` pass
 - [x] 1.41 Write the regression test for (AC-4) in `A/assessment-detail/assessment-detail-dialog.component.spec.ts` (no AC tag): inside a 375px mobile detail the cards of the list of students and the content of the detail have no horizontal scroll; verify it fails
 - [x] 1.42 Fix: let the student cards of the assessment detail shrink to the width of a mobile detail in `A/assessment-detail/assessment-detail-dialog.component.scss`, on mobile only, for (AC-4) and verify the test from 1.41 and the existing specs of the detail pass
+- [x] 1.43 Write the regression tests for (AC-4) and (AC-5) (no AC tag): while the detail covers a mobile screen the `.page-header` of each list is not displayed, in `A/assessment-list/assessment-list-mobile.component.spec.ts` and `A/interventions/interventions-list/intervention-list-mobile.component.spec.ts`, and the filters are not displayed, in `A/interventions/interventions-mobile.component.spec.ts`; they come back when it closes and stay on desktop; verify they fail
+- [x] 1.44 Fix: hide the `.page-header` of both lists and the filters of the Interventions tab while the detail covers a mobile screen (D4), in `A/styles/_mobile-list.scss`, the two list components and `A/interventions/interventions.component.{html,scss}`, for (AC-4) and (AC-5) and verify the tests from 1.43 and the existing specs of the module pass
 
 ## 2. Verification
 
