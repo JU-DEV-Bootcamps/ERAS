@@ -46,6 +46,12 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 |---|---|---|---|
 | [ADR-0004](0004-read-user-manuals-from-repository-files.md) | Read user manuals from files managed in the repository | Accepted | — |
 
+### frontend
+
+| ADR | Title | Status | Superseded by |
+|---|---|---|---|
+| [ADR-0010](0010-use-jspdf-autotable-for-vector-pdf-tables.md) | Use jspdf-autotable to build vector PDF tables in the frontend | Accepted | — |
+
 ### auth
 
 | ADR | Title | Status | Superseded by |
