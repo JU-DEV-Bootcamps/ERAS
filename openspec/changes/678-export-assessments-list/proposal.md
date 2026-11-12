@@ -78,7 +78,7 @@ Required: the change modifies an FE screen (Assessments list). Run the app with 
 | AC-10 | Open the CSV in Excel with names/comments that have accents (á, ñ, é) | Accents show correctly | ✅ | |
 | AC-11 | Export an assessment whose comment has commas, quotes and a line break | One row, field intact in Excel | ✅ | |
 | AC-12 | Create an assessment with comment `=1+1`, export CSV, open in Excel | Cell shows the text `=1+1`, not a result | ✅ | |
-| AC-13 | Export PDF | First page shows "Assessments", export date/time, your name, "Filters: None" | | |
+| AC-13 | Export PDF | First page shows "Assessments", export date/time, your name, "Filters: None" | ✅ | |
 | AC-14 | Export PDF with enough rows for 2+ pages | Column headers repeat on every page | ✅ | |
 | AC-15 | Click CSV or PDF | Progress indication while generating; Export button disabled until the download ends, then enabled | ✅ | |
 | AC-16 | Simulate a failure (for example block `jspdf-autotable` chunk in DevTools network and export PDF) | Error toast, no file, no stuck progress indication | ✅ | |
@@ -86,6 +86,6 @@ Required: the change modifies an FE screen (Assessments list). Run the app with 
 | Side effects | Use Create, Edit, View, Delete and paging on the list; open the status badge; use another screen with CSV/PDF export (for example Students list) | Everything behaves as before | ✅ | |
 | Views | Narrow viewport (mobile width) | Header buttons still usable | ✅ | |
 
-Approved by judithmarg-dev, 2026-11-11 (goal achieved, no side effects, no open errors; per-row results are in the table above; the AC-13 row has no result recorded and needs the developer's confirmation).
+Approved by judithmarg-dev, 2026-11-11 (goal achieved, no side effects, no open errors; per-row results are in the table above).
 
 Verified 2026-11-11: no gaps, no drift, gates green

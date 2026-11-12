@@ -16,7 +16,7 @@
 - [x] 1.12 Write the spec `[678-export-assessments-list/AC-11] commas, quotes and line breaks are escaped` for (AC-11) in `assessment-export.service.spec.ts` and verify it fails
 - [x] 1.13 Confirm the Papa output escapes the field and keeps one data row for (AC-11) and verify the spec from 1.12 passes
 - [x] 1.14 Write the spec `[678-export-assessments-list/AC-12] formula-like cells get a leading single quote` for (AC-12) in `assessment-export.service.spec.ts` and verify it fails
-- [x] 1.15 Enable `escapeFormulae` in `exportCsv` for (AC-12) and verify the spec from 1.14 passes
+- [x] 1.15 Neutralize formula-like cells (first character `=`, `+`, `-`, `@`, tab or CR, also in multi-line values) in `exportCsv` for (AC-12) and verify the spec from 1.14 passes
 - [x] 1.16 Write the spec `[678-export-assessments-list/AC-13] PDF shows title, date and time, user and filters` for (AC-13) in `assessment-export.service.spec.ts` and verify it fails
 - [x] 1.17 Implement `TablePdfService.buildDocument` header block and `AssessmentExportService.exportPdf` (title "Assessments", local date-time, user full name from `UserDataService`, "Filters: None") for (AC-13) and verify the spec from 1.16 passes
 - [x] 1.18 Write the spec `[678-export-assessments-list/AC-4] PDF table has all 100 rows` for (AC-4) in `assessment-export.service.spec.ts` and verify it fails

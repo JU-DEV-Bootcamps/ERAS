@@ -38,7 +38,7 @@ Frontend-only change (see `proposal.md`). What exists today and shapes the appro
 **Alternative:** read the rendered DOM → slow and loses the full values.
 
 ### D4. CSV: same Papa + `CSV_CONFIG` + `downloadTextFile` path, in a new service
-**Choice:** new `AssessmentExportService` (`modules/assessments/services/assessment-export.service.ts`) extends `BaseExportService` (extension `csv`), runs `Papa.unparse` with `{ ...CSV_CONFIG, escapeFormulae: true }`, prepends `'﻿'` and calls the inherited `downloadTextFile`. `escapeFormulae` prefixes a single quote to any cell starting with `=`, `+`, `-`, `@` (also tab and carriage return) and quotes fields with commas, quotes and line breaks as Papa does. File name `FileNameUtils.generateFileName('assessments')`.
+**Choice:** new `AssessmentExportService` (`modules/assessments/services/assessment-export.service.ts`) extends `BaseExportService` (extension `csv`), neutralizes formulas in its own code, runs `Papa.unparse` with `CSV_CONFIG`, prepends `'﻿'` and calls the inherited `downloadTextFile`. The neutralizer prefixes a single quote to any cell whose first character is `=`, `+`, `-`, `@`, tab or carriage return (`/^[=+\-@\t\r]/`), so a multi-line comment such as `=1+1` + line break + text is covered too; Papa quotes fields with commas, quotes and line breaks as before. Papa's own `escapeFormulae` is not used: its regex has no multiline flag and leaves such comments unchanged (comments allow line breaks, AC-11). File name `FileNameUtils.generateFileName('assessments')`.
 **Alternative:** call `CsvService.exportToCSV` → cannot add the BOM or escaping without changing the shared service, which the user asked to keep.
 
 ### D5. Table PDF service takes plain data
@@ -58,9 +58,9 @@ Frontend-only change (see `proposal.md`). What exists today and shapes the appro
 |---|---|---|---|
 | Dependency | add `jspdf-autotable` | `package.json`, `package-lock.json` | AC-4, AC-13, AC-14 |
 | Columns / labels | column definition and status label map; badge reuses the map | `modules/assessments/models/assessment-export.columns.ts` (new), `modules/assessments/models/assessment-status-labels.ts` (new), `assessment-status-badge.component.ts` | AC-6, AC-7 |
-| Mapper | rows → strings | `modules/assessments/utils/assessment-export-rows.ts` (new) | AC-6..AC-9, AC-17 |
+| Row model / mapper | `AssessmentRowViewModel` moves from the list component to a model file so the service and mapper do not import the component; rows → strings | `modules/assessments/models/assessment-row.model.ts` (new), `modules/assessments/utils/assessment-export-rows.ts` (new) | AC-6..AC-9, AC-17 |
 | PDF engine | build and save | `core/services/exports/table-pdf.service.ts` (new) | AC-4, AC-13, AC-14 |
-| Export service | CSV with BOM and escaping, PDF orchestration | `modules/assessments/services/assessment-export.service.ts` (new) | AC-3..AC-5, AC-10..AC-14 |
+| Export service | CSV with BOM and formula neutralization, PDF orchestration | `modules/assessments/services/assessment-export.service.ts` (new) | AC-3..AC-5, AC-10..AC-14 |
 | Component | Export menu (CSV, PDF) in `.page-header`, progress and error handling | `assessment-list.component.ts/.html/.scss` | AC-1, AC-2, AC-3, AC-5, AC-15, AC-16, AC-17 |
 | Export state / overlay | optional `{ indeterminate, background }` start options and an `indeterminate` signal; the overlay binds the bar mode | `core/services/exports/export-state.service.ts`, `shared/components/export-loading-overlay/export-loading-overlay.component.{ts,html}` | AC-15 |
 | Messages | button label, error toast text | `core/constants/messages.ts` (`ASSESSMENT_EXPORT_MESSAGES`) | AC-1, AC-16 |
@@ -102,7 +102,7 @@ Extra edge-case tests carry no AC tag. Coverage gate: FE >= 15% (AGENTS.md secti
 ## Risks / Trade-offs
 
 - [Moving the status label map touches the badge] → the badge keeps the same labels; its existing spec must stay green.
-- [`escapeFormulae` also prefixes cells starting with tab or carriage return] → harmless, stricter than AC-12; noted in the service.
+- [Prefixing cells that start with tab or carriage return] → harmless, stricter than AC-12; noted in the service. The AC-12 test includes multi-line comments.
 - [A comment of 4000 characters makes a very tall PDF row] → `autoTable` wraps cell text and splits rows across pages (A10).
 - [`jspdf-autotable` must match the installed `jspdf` 4.x] → pin a version compatible with jsPDF 4 and check it in the build (task 2.1).
 - [`ExportStateService` and the overlay are shared with other exports] → the new options are optional and default to the old behavior; their specs cover both paths.
