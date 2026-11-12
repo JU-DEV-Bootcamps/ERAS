@@ -19,7 +19,7 @@ Frontend-only change (see `proposal.md`). What exists today and shapes the appro
 - Keep one column definition for the table and both files, and give the export engines plain columns and rows so an engine can be replaced later.
 
 **Non-Goals:**
-- No change to `CsvService`, `PdfService`, `BaseExportService`, `ExportStateService` or the overlay.
+- No change to `CsvService`, `PdfService` or `BaseExportService`. `ExportStateService` and the overlay get only a small additive change (D6); their behavior for the other screens stays the same.
 - No generic "export any table" feature or refactor of `list.component`.
 
 ## Decisions
@@ -46,7 +46,8 @@ Frontend-only change (see `proposal.md`). What exists today and shapes the appro
 **Alternative:** put PDF code in the component → harder to swap the engine.
 
 ### D6. Progress, single-flight and errors
-**Choice:** the component calls `ExportStateService.startExport(type, count)`, yields one macrotask (`setTimeout(0)`) so the overlay paints, runs the export in `try`, shows an error toast in `catch` (no file saved), and always calls `endExport()` in `finally`. The Export button is `[disabled]="exportState.isExporting()"`.
+**Choice:** the component calls `ExportStateService.startExport(type, count, { indeterminate: true, background: true })`, yields one macrotask (`setTimeout(0)`) so the overlay paints, runs the export in `try`, shows an error toast in `catch` (no file saved), and always calls `endExport()` in `finally`. The Export button is `[disabled]="exportState.isExporting()"`. `startExport` gets an optional third argument `{ indeterminate, background }` (new `indeterminate` signal): the assessments export shows the non-blocking notification with an indeterminate bar and "Generating PDF...", because the PDF has no measurable progress and the app must stay usable. Without options the behavior is unchanged; the overlay binds the bar mode to `indeterminate`.
+**Alternative:** keep the blocking overlay with the determinate bar → it stays at 0% and shows a time estimate made for the html2canvas flow.
 **Alternative:** web worker → unnecessary at 100 rows.
 
 ## Changes by layer
@@ -61,6 +62,7 @@ Frontend-only change (see `proposal.md`). What exists today and shapes the appro
 | PDF engine | build and save | `core/services/exports/table-pdf.service.ts` (new) | AC-4, AC-13, AC-14 |
 | Export service | CSV with BOM and escaping, PDF orchestration | `modules/assessments/services/assessment-export.service.ts` (new) | AC-3..AC-5, AC-10..AC-14 |
 | Component | Export menu (CSV, PDF) in `.page-header`, progress and error handling | `assessment-list.component.ts/.html/.scss` | AC-1, AC-2, AC-3, AC-5, AC-15, AC-16, AC-17 |
+| Export state / overlay | optional `{ indeterminate, background }` start options and an `indeterminate` signal; the overlay binds the bar mode | `core/services/exports/export-state.service.ts`, `shared/components/export-loading-overlay/export-loading-overlay.component.{ts,html}` | AC-15 |
 | Messages | button label, error toast text | `core/constants/messages.ts` (`ASSESSMENT_EXPORT_MESSAGES`) | AC-1, AC-16 |
 
 ## API contract
@@ -103,7 +105,7 @@ Extra edge-case tests carry no AC tag. Coverage gate: FE >= 15% (AGENTS.md secti
 - [`escapeFormulae` also prefixes cells starting with tab or carriage return] → harmless, stricter than AC-12; noted in the service.
 - [A comment of 4000 characters makes a very tall PDF row] → `autoTable` wraps cell text and splits rows across pages (A10).
 - [`jspdf-autotable` must match the installed `jspdf` 4.x] → pin a version compatible with jsPDF 4 and check it in the build (task 2.1).
-- [The overlay shows "Generating PDF (estimated …)" text] → acceptable; the shared state service is not changed.
+- [`ExportStateService` and the overlay are shared with other exports] → the new options are optional and default to the old behavior; their specs cover both paths.
 
 ## Follow-ups
 

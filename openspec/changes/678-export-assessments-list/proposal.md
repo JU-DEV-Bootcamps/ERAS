@@ -86,6 +86,6 @@ Required: the change modifies an FE screen (Assessments list). Run the app with 
 | Side effects | Use Create, Edit, View, Delete and paging on the list; open the status badge; use another screen with CSV/PDF export (for example Students list) | Everything behaves as before | ✅ | |
 | Views | Narrow viewport (mobile width) | Header buttons still usable | ✅ | |
 
-Approved by judithmarg-dev, 2026-11-11 (goal achieved, no side effects, no open errors; per-row results not recorded).
+Approved by judithmarg-dev, 2026-11-11 (goal achieved, no side effects, no open errors; per-row results are in the table above; the AC-13 row has no result recorded and needs the developer's confirmation).
 
 Verified 2026-11-11: no gaps, no drift, gates green
