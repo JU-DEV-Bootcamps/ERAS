@@ -35,7 +35,7 @@ Mobile infrastructure that already exists: `ViewportService.isMobile` (`core/ser
 **Alternative:** `@media (max-width: 767.98px)` in each stylesheet → the Karma window width is not controlled per test, so no AC could be proven, and it would be a second source for the 768px rule.
 
 ### D2. Each list renders its own cards
-**Choice:** below 768px each list renders one `mat-card` per row of the current page: label and value rows for the fields of A3, then a row of actions. Cells that have markup today (status and risk badges, `app-assessment-student-data`, comment preview) are moved to `ng-template`s used by both the table cell and the card, so the two views cannot drift. The paginator stays and, on mobile, hides the page-size selector and the first and last buttons so that it fits 375px.
+**Choice:** below 768px each list renders one `mat-card` per row of the current page: label and value rows for the fields of A3, then a row of actions. The cells built from more than a value (the students, the status badge and, in the interventions, the risk and end risk badges) are moved to `ng-template`s used by both the table cell and the card, so the two views cannot drift; the plain values and the type and mode badges are one line each and are written in both. The paginator stays and, on mobile, hides the page-size selector and the first and last buttons so that it fits 375px.
 **Alternative:** move both lists to `app-list` + `app-table-with-actions`, which already has cards → a refactor of two screens (push layout, panel, role-gated buttons, CSV export) outside this change; recorded under Follow-ups. A CSS-only restyle of the `mat-table` rows → 12 columns, and not provable in a test.
 
 ### D3. Card actions are three icon buttons with the rules of the inline buttons
@@ -47,7 +47,7 @@ Mobile infrastructure that already exists: `ViewportService.isMobile` (`core/ser
 **Alternative:** open the detail in a `MatDialog` on mobile → the detail components are inline components with inputs and outputs; they would need a wrapper and a second code path for close, refresh and "Create Intervention".
 
 ### D5. One helper builds the dialog size
-**Choice:** a new pure function `responsiveDialogSize(isMobile, desktop)` in `src/app/core/utils/dialogs/responsive-dialog-size.ts` (new) returns the desktop config untouched from 768px and, below it, `width: '100vw'`, `maxWidth: '100vw'`, `height: '100dvh'`, `maxHeight: '100dvh'`, no `minWidth`, and `panelClass` plus `mobile-fullscreen-dialog`: the values of `studentDialogSize()` from change 659. It is used by the five `MatDialog.open` calls for forms and student details: `AssessmentsComponent` (create, edit), `InterventionsComponent` (create, edit), `AssessmentListComponent.onCreateIntervention` and `AssessmentDetailDialogComponent.openStudentDetails`. `assessments-modal-styles.scss` gets a `:host-context(.mobile-fullscreen-dialog)` block: 16px header padding, the content scrolls and the actions stay at the bottom.
+**Choice:** a new pure function `responsiveDialogSize(isMobile, desktop)` in `src/app/core/utils/dialogs/responsive-dialog-size.ts` (new) returns the desktop config untouched from 768px and, below it, `width: '100vw'`, `maxWidth: '100vw'`, `height: '100dvh'`, `maxHeight: '100dvh'`, no `minWidth`, and `panelClass` plus `mobile-fullscreen-dialog`: the values of `studentDialogSize()` from change 659. It is used by the six `MatDialog.open` calls for forms and student details: `AssessmentsComponent` (create, edit), `InterventionsComponent` (create, edit), `AssessmentListComponent.onCreateIntervention` and `AssessmentDetailDialogComponent.openStudentDetails`. `assessments-modal-styles.scss` gets a `:host-context(.mobile-fullscreen-dialog)` block: 16px header padding, the content scrolls and the actions stay at the bottom.
 **Alternative:** copy the object in four components → four copies of a rule that already exists once. Reuse `studentDialogSize()` → it is private to `StudentsListComponent`; moving it changes that component and is a Follow-up.
 
 ### D6. Confirmations get a maximum width, not a mobile branch
@@ -66,11 +66,11 @@ Mobile infrastructure that already exists: `ViewportService.isMobile` (`core/ser
 |---|---|---|---|
 | Dialog helper | new `responsiveDialogSize` (D5) and its unit spec | `src/app/core/utils/dialogs/responsive-dialog-size.ts` (new), `responsive-dialog-size.spec.ts` (new) | AC-9 to AC-12, AC-14, AC-19 |
 | Assessment list | `isMobile`; cards with fields and icon actions; compact paginator; full-screen panel; `page-header` wraps; `onCreateIntervention` uses the helper | `A/assessment-list/assessment-list.component.{ts,html,scss}` | AC-1, AC-4, AC-6, AC-10, AC-15, AC-17 |
-| Assessment detail | standard close button and sticky header under mobile; `openStudentDetails` uses the helper | `A/assessment-detail/assessment-detail-dialog.component.{ts,scss}` | AC-4, AC-14 |
+| Assessment detail | standard close button under mobile; the student cards shrink to the detail; `openStudentDetails` uses the helper | `A/assessment-detail/assessment-detail-dialog.component.{ts,scss}` | AC-4, AC-14 |
 | Student names | tap opens the popover; mobile position (D7) | `A/assessment-list/assessment-student-data/assessment-student-data.component.{ts,scss}` | AC-8 |
 | Assessment forms | `modalConfig` goes through the helper for create and edit; mobile block in the shared modal styles | `A/assessments.component.ts`, `src/app/modules/assessments/styles/assessments-modal-styles.scss` | AC-9, AC-11, AC-19 |
 | Intervention list | `isMobile`; cards with fields and icon actions; compact paginator; full-screen panel; `page-header` wraps | `A/interventions/interventions-list/intervention-list.component.{ts,html,scss}` | AC-2, AC-5, AC-7, AC-16, AC-18 |
-| Intervention detail | standard close button and sticky header under mobile | `A/interventions/interventions-detail/intervention-detail.component.scss` | AC-5 |
+| Intervention detail | standard close button under mobile | `A/interventions/interventions-detail/intervention-detail.component.scss` | AC-5 |
 | Interventions page | create and edit dialogs use the helper; delete confirmation gets `maxWidth` | `A/interventions/interventions.component.ts` | AC-10, AC-12, AC-13, AC-19 |
 | Intervention forms | the attachment manager and the form fit the full-screen dialog | `A/interventions/edit-intervention-modal/edit-intervention-modal.component.scss`, `src/app/shared/components/attachment-manager/*.scss` (only if a fixed width overflows 375px) | AC-10, AC-12 |
 | Filters | `mobile` class: the form is a column, each filter is full width, the Apply button below | `src/app/shared/components/list-filters/list-filters.component.{ts,html,scss}` | AC-3 |
@@ -83,7 +83,9 @@ Implementation notes (2026-11-11), where the files differ from the table above w
 - The maximum width of D6 is the constant `CONFIRMATION_DIALOG_MAX_WIDTH`, next to `responsiveDialogSize`.
 - The untagged 375px fit check of the four form modals uses `src/app/modules/assessments/testing/expect-fits-mobile-dialog.ts` (new, test only).
 - No sticky header was needed in the details: their header is already a fixed flex row and only the content scrolls. No change was needed in `edit-intervention-modal.component.scss` or in the attachment manager: the form already fits 375px.
-- Two existing specs changed: `interventions.component.spec.ts` now provides a desktop `ViewportService`, and `modal-delete-confirmation.service.spec.ts` expects the new `maxWidth`.
+- The Karma browser window is narrower than 768px, so the existing specs of the units this change makes responsive (`assessment-list`, `intervention-list`, `assessments`, `interventions`, `list-filters`, and the two specs that got an AC test) now provide a desktop `ViewportService` and keep testing the desktop view. `modal-delete-confirmation.service.spec.ts` expects the new `maxWidth`.
+- After the manual validation (tasks 1.41 and 1.42) the student cards of the assessment detail shrink to the detail on mobile, with a regression test in the spec of the detail.
+- The full-screen panel has `overscroll-behavior: contain`, so scrolling to the end of a detail does not scroll the page behind it.
 
 ## API contract
 No API change.
@@ -117,21 +119,21 @@ All tests are FE (Jasmine/Karma) with `[672-improve-assessments-interventions-mo
 | AC-18 | FE | `intervention-list-mobile.component.spec.ts` | `[672-improve-assessments-interventions-mobile-view/AC-18] keeps the interventions table, the more menu and the 480px side panel on a 1280px screen` |
 | AC-19 | FE | `assessments-mobile.component.spec.ts`; the same `it` also mounts `InterventionsComponent` | `[672-improve-assessments-interventions-mobile-view/AC-19] keeps the desktop sizes of the assessment and intervention forms` |
 
-Extra tests without an AC tag: the unit spec of `responsiveDialogSize`, and a 375px fit check (no horizontal overflow, Cancel and save buttons inside the host) in the existing specs of the four form modals, which backs the "no field cut off" part of AC-9 to AC-12 that a dialog config cannot show. AC-15 to AC-19 are guard tests: they are expected to pass once the cards exist, so each one is proven by breaking the rule it guards (removing a `[disabled]`, forcing the mobile branch) and seeing it fail. Existing specs that assert dialog configs (`interventions.component.spec.ts:391`, `width: '520px'`) keep passing because the desktop config is returned untouched. Coverage gate: FE >= 15% (AGENTS.md section 8.7); the FE gates are in `ERAS-FE/AGENTS.md` §3.3.
+Extra tests without an AC tag: the unit spec of `responsiveDialogSize`; a 375px fit check (header, every form field and the Cancel and save buttons inside the panel) in the existing specs of the four form modals, which backs the "no field cut off" part of AC-9 to AC-12 that a dialog config cannot show; a 320px check of the cards and the pagination in both list specs; and the regression test of the student cards of the assessment detail at 375px. The tests do not use Material's internal classes or fixed sizes other than the numbers of the ACs (375px, 1280px, 480px). AC-15 to AC-19 are guard tests: they are expected to pass once the cards exist, so each one is proven by breaking the rule it guards (removing a `[disabled]`, forcing the mobile branch) and seeing it fail. Existing specs that assert dialog configs (`interventions.component.spec.ts:391`, `width: '520px'`) keep passing because the desktop config is returned untouched. Coverage gate: FE >= 15% (AGENTS.md section 8.7); the FE gates are in `ERAS-FE/AGENTS.md` §3.3.
 
 ## Risks / Trade-offs
 
-- [The table and the card duplicate the row] → shared `ng-template`s for the cells with markup, one list of card fields per component, and AC-17 and AC-18 guard the table.
+- [The table and the card duplicate the row] → shared `ng-template`s for the cells built from more than a value, and AC-1, AC-2, AC-17 and AC-18 check the fields of both views.
 - [`position: fixed` panel inside the shell] → no ancestor has a transform (`app-tabbed-layout` is a `router-outlet`); AC-4 and AC-5 assert that the panel rectangle equals the window. If a containing block appears later, those tests fail.
 - [`app-list-filters` and `ModalDeleteConfirmationService` are shared] → the filters are used only by the Interventions tab and change only under `.mobile`; the confirmation only gains a `maxWidth` larger than its width on any screen wider than 450px.
-- [The Karma window is not 375px] → layout is asserted inside a fixed-width host; the full-screen panel is asserted against `window.innerWidth` and `innerHeight`; real phones are checked in `/sdd-validate-impl`.
+- [The Karma window is not 375px] → layout is asserted inside a fixed-width host; the full-screen panel is compared with an element fixed to the four edges of the screen; real phones are checked in `/sdd-validate-impl`.
 - [`mobile-fullscreen-dialog` was written for the student modals] → it already targets `.modal-content`; the four forms get the untagged 375px fit check.
 - [A resize across 768px with the detail open] → the selection is kept, so the detail moves between the panel and the full screen without closing.
 
 ## Follow-ups
 - "Create Intervention" in the assessment detail and in the empty state of the Interventions list has no role or Finalized check in the front end (recorded in `proposal.md`, Out of scope).
 - The `/assessments` route declares its roles on child routes while the guard runs on the parent, so the guard does not enforce them (`ERAS-FE/AGENTS.md` §7.1 step 1); its own change, it touches auth.
-- The Karma browser window is narrower than 768px, so the existing specs that do not replace `ViewportService` run the mobile branch of the components they mount. They pass, but each should state its screen size.
+- The Karma browser window is narrower than 768px, so a spec outside this change that mounts a component reading `ViewportService` without replacing it runs its mobile branch. Each such spec should state its screen size.
 - Move `StudentsListComponent.studentDialogSize()` onto `responsiveDialogSize` so the rule has one home.
 - Move the two lists to the shared `app-list` / `app-table-with-actions`, and replace the legacy `@Input()` / `@Output()` / `*ngFor` of this module.
 - The close control of the four form modals is a bare `mat-icon` with `(click)`, not a button (no keyboard focus, small tap area); the forms keep their Cancel button.
