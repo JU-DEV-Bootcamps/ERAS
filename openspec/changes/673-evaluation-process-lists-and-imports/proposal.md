@@ -51,9 +51,9 @@ On a 375px phone screen the Evaluation Process list already shows each process a
 
 | Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
 |---|---|---|---|---|
-| AC-1 | At 375px, open Evaluation Process with a process whose Poll Name is 100 characters without spaces | The whole Poll Name is inside its card, broken over several lines; the card is not wider than the screen; no horizontal scroll | | |
-| AC-1 | At 375px, check a process with a short Poll Name and the other cards | Cards look as before (labels, status badge, edit / import / view actions) | | |
-| AC-2 | At 1280px, open Evaluation Process | A table with the same columns as before, no cards, and the Poll Name on one line | | |
+| AC-1 | At 375px, open Evaluation Process with a process whose Poll Name is 100 characters without spaces | The whole Poll Name is inside its card, broken over several lines; the card is not wider than the screen; no horizontal scroll | ✅ | Reported by Lucia Becerra, checked in the browser |
+| AC-1 | At 375px, check a process with a short Poll Name and the other cards | Cards look as before (labels, status badge, edit / import / view actions) | ✅ | Reported by Lucia Becerra, checked in the browser |
+| AC-2 | At 1280px, open Evaluation Process | A table with the same columns as before, no cards, and the Poll Name on one line | ✅ | Reported by Lucia Becerra, checked in the browser |
 
 Approved by Lucia Becerra, 2026-11-13
 Verified 2026-11-13: no gaps, no drift, gates green

@@ -23,7 +23,7 @@ The mobile switch comes from `ViewportService.isMobile` (`ERAS-FE/src/app/core/s
 **Alternative:** pass a `mapClass` card class from the evaluation process list → needs a global style, because the card is rendered in the child component, and leaves the other lists with the same bug.
 
 ### D2. Prove the behavior with a layout test, not a style string
-**Choice:** the AC test renders the list in a host 343px wide, with a Poll Name of 100 characters, and compares the widths (`scrollWidth <= clientWidth` of the card and of its rows), so it fails when the text overflows and passes when it wraps. `ViewportService` is replaced by a signal, as `table-with-actions.component.spec.ts` already does, so the test does not depend on the size of the Karma window.
+**Choice:** the AC test renders the list in a host 343px wide, with a Poll Name of 100 characters, and checks that the Poll Name is broken over more than one line, that it ends inside the card, and that neither its row nor the host scrolls sideways, so it fails when the text overflows and passes when it wraps. `ViewportService` is replaced by a signal, as `table-with-actions.component.spec.ts` already does, so the test does not depend on the size of the Karma window.
 **Alternative:** assert `overflow-wrap` in the computed style → passes with any rule that sets it and does not prove that nothing overflows.
 
 ## Changes by layer
