@@ -24,9 +24,10 @@ Each group below is one commit, so one group can be reverted without touching th
 - [x] 4.1 In `.claude/skills/sdd-implement/SKILL.md` step 2, add one sentence on a single line that starts with "If" and contains "exists", naming `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md`, to read them for the sides the tasks touch before the first code task, and verify the line matches the optional-path rule of `check-skills.sh`
 - [x] 4.2 Run `check-skills.sh` with the submodules present and from a copy without them, and verify 0 errors in both runs
 
-## 5. F3: branch to change mapping (Docs)
+## 5. F3 and the deferred-improvements document (Docs)
 
 - [x] 5.1 Add one row to the table of `openspec/sdd-conventions.md` that says the first run of digits in a branch name or in `#<n>` is matched against `openspec/changes/<n>-*`, and that zero or several matches mean ask the user, and verify the table still renders (same number of columns in every row)
+- [x] 5.2 Add `docs/sdd-improvement-proposals.md` in English and link it from the "Deferred improvements" section of `proposal.md`, and verify the file exists, that `grep` finds no reference to a `SDD-*` file outside the repository in the repo's Markdown files, and that `openspec validate` passes
 
 ## 6. Verification
 

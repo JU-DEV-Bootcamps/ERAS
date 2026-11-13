@@ -13,10 +13,11 @@ The SDD flow has two gaps that only need text, not tooling. First, no document s
 - **T4.** `.claude/skills/sdd-implement/SKILL.md` step 2: read `ERAS-BE/AGENTS.md` and/or `ERAS-FE/AGENTS.md` for the sides the tasks touch before the first code task. The sentence is written as "if the file exists" so `check-skills.sh` passes with or without the submodules checked out.
 - **F3.** `openspec/sdd-conventions.md`: one row that says how a branch or `#<n>` maps to a change (first run of digits in the branch name, matched against `openspec/changes/<n>-*`).
 - **T8.** `AGENTS.md` section 8.5: a three-row "Which command when" table (feature or behavior change: `/sdd-spec` to `/sdd-archive`; no behavior change: `/opsx:propose` with `skip_specs`; thinking only: `/opsx:explore`) and one sentence that points to the `#<n>` rule of `CLAUDE.md`. Only lines are added; no row or heading is removed or renumbered.
+- **Docs.** `docs/sdd-improvement-proposals.md` (new, in English): the write-up of the SDD flow review (ids F1-F6, N1-N5, T1-T8, S1-S7, L1-L4) that the "Deferred improvements" table below points to, so the deferred ideas are kept in the repository. Documentation only.
 
 **Prepares change `0001-add-sdd-checks-ci`:** nothing here depends on CI, and nothing here may stop `check-skills.sh` from passing on a runner without submodules (T4 wording). Both changes ship in one PR but are implemented in separate commits (one per task group) so any group can be reverted on its own.
 
-**Out of scope:** everything in "Deferred improvements" below, and any edit under `ERAS-BE/`, `ERAS-FE/` or `.github/`. This change only edits text (`CLAUDE.md`, `AGENTS.md`, one `SKILL.md`, `sdd-conventions.md`); it adds no skill, script, agent, hook or workflow.
+**Out of scope:** everything in "Deferred improvements" below, and any edit under `ERAS-BE/`, `ERAS-FE/` or `.github/`. This change only edits text (`CLAUDE.md`, `AGENTS.md`, one `SKILL.md`, `sdd-conventions.md`) and adds one document under `docs/`; it adds no skill, script, agent, hook or workflow.
 
 ## Deferred improvements (not lost)
 
@@ -41,7 +42,7 @@ These came out of the review of the SDD flow, written up in `docs/sdd-improvemen
 ## Impact
 
 - **Submodules:** none (parent repo only)
-- **Files:** `CLAUDE.md`, `AGENTS.md` (section 8.5), `.claude/skills/sdd-implement/SKILL.md`, `openspec/sdd-conventions.md`
+- **Files:** `CLAUDE.md`, `AGENTS.md` (section 8.5), `.claude/skills/sdd-implement/SKILL.md`, `openspec/sdd-conventions.md`, `docs/sdd-improvement-proposals.md` (new)
 - **Roles / who can do what:** no change
 - **API contract:** none
 - **Data / migration:** none
@@ -49,3 +50,13 @@ These came out of the review of the SDD flow, written up in `docs/sdd-improvemen
 - **Rollback:** one commit per task group, so `git revert <commit>` undoes one group without touching the others.
 
 No behavior changes, so this change sets `skip_specs: true` (AGENTS.md section 3, tooling and docs).
+
+## Decisions
+
+Scope amended on 2026-11-13, at the request of the change author (stated in chat) after `/sdd-verify` found `docs/sdd-improvement-proposals.md` was not traceable to any task: the document is now listed in "What Changes" and covered by task 5.2.
+
+## Validation log
+
+2026-11-13 – Skipped: no BE controller or FE change.
+
+Verified 2026-11-13: no gaps, no drift, gates green
