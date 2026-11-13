@@ -1,0 +1,78 @@
+name: SDD checks
+
+# Runs the checks of the spec-driven flow on every pull request that touches the specs, the SDD skills or the
+# rules: `openspec validate`, `check-skills.sh`, and, for the changes the pull request touches (not the archived
+# ones), `check-plan.sh`, `check-adr.sh` and `check-spec.sh`. See openspec/changes/0001-add-sdd-checks-ci.
+#
+# NON-BLOCKING for now (`continue-on-error`). A human removes it, and marks the check as required in the
+# repository settings, after the check has been green on real pull requests.
+on:
+  pull_request:
+    paths:
+      - "openspec/**"
+      - ".claude/skills/**"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - ".github/workflows/sdd-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  sdd-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    continue-on-error: true
+
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Node (the OpenSpec CLI needs Node 20.19 or newer)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install gawk (the check scripts were only tested with GNU awk)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gawk
+          awk --version | head -1
+
+      - name: Install the OpenSpec CLI (same version as the generated skills)
+        run: |
+          npm install -g @fission-ai/openspec@1.14.1
+          openspec --version
+
+      - name: Validate every change and spec
+        run: openspec validate --all --strict
+
+      - name: Check the SDD skills
+        run: bash .claude/skills/sdd-plan/tests/check-skills.sh
+
+      - name: Check the changes this pull request touches
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -u
+          ids=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- openspec/changes \
+            | grep -v '^openspec/changes/archive/' \
+            | sed -n 's#^openspec/changes/\([^/]*\)/.*#\1#p' | sort -u)
+          if [ -z "$ids" ]; then
+            echo "This pull request touches no active change: nothing to check."
+            exit 0
+          fi
+          failed=0
+          for id in $ids; do
+            [ -d "openspec/changes/$id" ] || continue
+            echo "=== $id"
+            bash .claude/skills/sdd-plan/scripts/check-plan.sh "$id" || failed=1
+            bash .claude/skills/sdd-adr/scripts/check-adr.sh --change "$id" || failed=1
+            if ! grep -q '^skip_specs: *true' "openspec/changes/$id/.openspec.yaml" 2>/dev/null; then
+              bash .claude/skills/sdd-spec/scripts/check-spec.sh "$id" || failed=1
+            fi
+          done
+          exit "$failed"

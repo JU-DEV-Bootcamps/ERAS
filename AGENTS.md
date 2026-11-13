@@ -291,6 +291,16 @@ Full table with what each one does: [`openspec/sdd-conventions.md`](openspec/sdd
 | `/sdd-archive <change-id>` | 🟨 | 6. Archive |
 | `/sdd-adr ["<decision>"]` | 🟨 | 1. Propose (or any time) |
 
+Which command when (the `/sdd-*` skills carry the ERAS gates; the generic `/opsx:*` commands do not):
+
+| You want to… | Use |
+|---|---|
+| Build a feature or change behavior | `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` → `/sdd-archive` |
+| Change something with no observable behavior (CI, docs, refactor, tooling) | `/opsx:propose` with `skip_specs: true`, then `/opsx:apply`; archive it with `/sdd-archive` |
+| Only think or investigate | `/opsx:explore` |
+
+When a request is only a bare `#<n>`, follow the lookup rule in `CLAUDE.md` ("Claude Code specifics").
+
 ### 8.6 AC traceability check (Git Bash)
 
 For each AC in a change, this lists how many BE and FE tests carry its key. Each side the AC affects must show **exactly 1**.
