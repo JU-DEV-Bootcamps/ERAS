@@ -20,7 +20,7 @@ The SDD flow has two gaps that only need text, not tooling. First, no document s
 
 ## Deferred improvements (not lost)
 
-These came out of the review of the SDD flow (`SDD-PROPUESTAS-MEJORA.md`, ids kept). They are not part of this change; each is meant for a later change. The change ids are placeholders, to be renamed when their issues exist.
+These came out of the review of the SDD flow, written up in `docs/sdd-improvement-proposals.md` (ids kept). They are not part of this change; each is meant for a later change. The change ids are placeholders, to be renamed when their issues exist.
 
 | Later change | Improvements | Why it is not here |
 |---|---|---|
