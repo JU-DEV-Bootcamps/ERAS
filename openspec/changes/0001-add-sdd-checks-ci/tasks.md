@@ -13,7 +13,7 @@ Each group below is one commit, so one group can be reverted without touching th
 - [x] 2.1 Create `.github/workflows/sdd-checks.yml` with the `pull_request` trigger and the path filter of the proposal, `submodules: recursive` checkout, `gawk` and the pinned CLI install, and verify the file is valid YAML (for example `node -e "require('fs').readFileSync('.github/workflows/sdd-checks.yml','utf8')"` plus a review against `manuals-validation.yml`)
 - [x] 2.2 Add the steps `openspec validate --all --strict` and `check-skills.sh`, and verify each step names the exact command from tasks 1.2 and the `check-skills.sh` path
 - [x] 2.3 Add a step that lists the changes touched by the PR (`git diff --name-only` against the base branch, `openspec/changes/<id>/` excluding `archive/`) and runs `check-plan.sh` and `check-adr.sh` for each, and `check-spec.sh` only when the change has no `skip_specs: true`, and verify with a local dry run of the same shell commands on change `0000-improve-sdd-entry-and-rules`
-- [ ] 2.4 Set `continue-on-error: true` on the job and add a comment in the file saying a human flips it after the check is green on real pull requests, and verify the job cannot block a merge
+- [x] 2.4 Set `continue-on-error: true` on the job and add a comment in the file saying a human flips it after the check is green on real pull requests, and verify the job cannot block a merge
 
 ## 3. Verification
 
