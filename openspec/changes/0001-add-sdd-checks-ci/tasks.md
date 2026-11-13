@@ -17,7 +17,7 @@ Each group below is one commit, so one group can be reverted without touching th
 
 ## 3. Verification
 
-- [ ] 3.1 Open a draft pull request that only touches this change and verify the workflow runs on it, that the checkout includes `ERAS-BE/AGENTS.md`, and that `check-skills.sh` reports 0 errors on the runner
-- [ ] 3.2 On the same draft pull request, add a temporary scenario heading with 3 `#` to a scratch change and verify `check-spec.sh` reports the error on the runner (proving the scripts behave the same with the runner's awk), then remove the scratch change
+- [x] 3.1 Open a draft pull request that only touches this change and verify the workflow runs on it, that the checkout includes `ERAS-BE/AGENTS.md`, and that `check-skills.sh` reports 0 errors on the runner
+- [ ] 3.2 On the same draft pull request, add a temporary scratch change `9999-scratch-ci-check` whose scenario has no `**Side:**` line (a rule `openspec validate` does not enforce, so the job reaches `check-spec.sh`; a heading with 3 `#` would fail `openspec validate` first and `check-spec.sh` would never run) and verify the workflow reports the error on the runner (proving the scripts behave the same with the runner's awk), then remove the scratch change in the next commit
 - [ ] 3.3 Run `git status --short` and verify only `.github/workflows/sdd-checks.yml` and this change folder are new, and that no existing workflow, `ERAS-BE/` or `ERAS-FE/` file changed (AGENTS.md section 8.7 gates do not apply: no BE or FE code)
 - [ ] 3.4 Run `openspec validate "0001-add-sdd-checks-ci" --strict` and verify it passes
