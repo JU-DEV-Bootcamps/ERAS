@@ -4,15 +4,15 @@ Each group below is one commit, so one group can be reverted without touching th
 
 ## 1. Baseline (Infra)
 
-- [ ] 1.1 Install the OpenSpec CLI locally at the version recorded in the generated skills (`generatedBy` in `.claude/skills/openspec-*`), confirm the npm package name from the OpenSpec project page, and verify `openspec --version` prints that version
-- [ ] 1.2 Run `openspec validate --all --strict` and record the result, and verify whether the baseline is green or lists errors before the workflow exists
-- [ ] 1.3 Run `check-plan.sh`, `check-adr.sh` and, for non-`skip_specs` changes, `check-spec.sh` for each active change and record the errors, and verify the list matches the Risk section of the proposal
+- [x] 1.1 Install the OpenSpec CLI locally at the version recorded in the generated skills (`generatedBy` in `.claude/skills/openspec-*`), confirm the npm package name from the OpenSpec project page, and verify `openspec --version` prints that version
+- [x] 1.2 Run `openspec validate --all --strict` and record the result, and verify whether the baseline is green or lists errors before the workflow exists
+- [x] 1.3 Run `check-plan.sh`, `check-adr.sh` and, for non-`skip_specs` changes, `check-spec.sh` for each active change and record the errors, and verify the list matches the Risk section of the proposal
 
 ## 2. Workflow (Infra)
 
-- [ ] 2.1 Create `.github/workflows/sdd-checks.yml` with the `pull_request` trigger and the path filter of the proposal, `submodules: recursive` checkout, `gawk` and the pinned CLI install, and verify the file is valid YAML (for example `node -e "require('fs').readFileSync('.github/workflows/sdd-checks.yml','utf8')"` plus a review against `manuals-validation.yml`)
-- [ ] 2.2 Add the steps `openspec validate --all --strict` and `check-skills.sh`, and verify each step names the exact command from tasks 1.2 and the `check-skills.sh` path
-- [ ] 2.3 Add a step that lists the changes touched by the PR (`git diff --name-only` against the base branch, `openspec/changes/<id>/` excluding `archive/`) and runs `check-plan.sh` and `check-adr.sh` for each, and `check-spec.sh` only when the change has no `skip_specs: true`, and verify with a local dry run of the same shell commands on change `0000-improve-sdd-entry-and-rules`
+- [x] 2.1 Create `.github/workflows/sdd-checks.yml` with the `pull_request` trigger and the path filter of the proposal, `submodules: recursive` checkout, `gawk` and the pinned CLI install, and verify the file is valid YAML (for example `node -e "require('fs').readFileSync('.github/workflows/sdd-checks.yml','utf8')"` plus a review against `manuals-validation.yml`)
+- [x] 2.2 Add the steps `openspec validate --all --strict` and `check-skills.sh`, and verify each step names the exact command from tasks 1.2 and the `check-skills.sh` path
+- [x] 2.3 Add a step that lists the changes touched by the PR (`git diff --name-only` against the base branch, `openspec/changes/<id>/` excluding `archive/`) and runs `check-plan.sh` and `check-adr.sh` for each, and `check-spec.sh` only when the change has no `skip_specs: true`, and verify with a local dry run of the same shell commands on change `0000-improve-sdd-entry-and-rules`
 - [ ] 2.4 Set `continue-on-error: true` on the job and add a comment in the file saying a human flips it after the check is green on real pull requests, and verify the job cannot block a merge
 
 ## 3. Verification
