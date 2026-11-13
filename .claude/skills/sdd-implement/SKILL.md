@@ -40,6 +40,7 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
    - For each side the tasks touch, `git -C ERAS-BE branch --show-current` (same for `ERAS-FE`). If it is `develop` or
      `main`, stop and ask the user for the branch name (`<prefix>/<storyNumber>/<storyTitle>`, prefix one of
      `feature|bugfix|refactor|ci|docs|chore|style|release`). Do not create it with a name you invented.
+   - If `ERAS-BE/AGENTS.md` exists (or `ERAS-FE/AGENTS.md`), read it in full for each side the tasks touch before the first code task: it holds the golden paths, rules and test conventions that the root `AGENTS.md` only points to. Say in the report which ones you read.
    - Note `git status` of each submodule so you can tell your changes from earlier ones, and never revert work you did not write.
    - If `dotnet build/test` is blocked by file locks (a running `Eras.Api` or Visual Studio), ask the user to stop it; do not fight it.
 
