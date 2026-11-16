@@ -9,6 +9,11 @@ every status is in [README.md](README.md). `/sdd-adr` keeps this file in sync an
 ### [ADR-0004](0004-read-user-manuals-from-repository-files.md): Read user manuals from files managed in the repository
 Rule: keep manuals as files in `manuals/` at the root of the parent repository, declared in `manifest.json`; the backend only reads them (folder from `UserManuals:Path`) through its own read-only endpoints, never as attachments or static frontend files. Changes go through a reviewed PR and the pipeline validates the folder; the same approach applies to other read-only, developer-maintained reference files.
 
+## frontend
+
+### [ADR-0010](0010-use-jspdf-autotable-for-vector-pdf-tables.md): Use jspdf-autotable to build vector PDF tables in the frontend
+Rule: build PDF tables in the frontend from plain columns and rows with `jspdf-autotable` on top of `jspdf` (real text, headers repeated on every page), loaded with a dynamic `import()`; new table exports do not use DOM snapshots.
+
 ## auth
 
 ### [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md): Limit a professional's access to students of their assigned assessments
