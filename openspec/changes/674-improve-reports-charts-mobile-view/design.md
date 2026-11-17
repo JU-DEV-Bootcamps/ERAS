@@ -47,7 +47,7 @@ How each piece behaved before this change, from the code:
 **Alternative:** show the details under the chart → the issue allows it, but the clarification of the spec chose a screen of its own, and a fixed screen matches the rest of the app.
 
 ### D5. The student list in the details fits by a scoped override
-**Choice:** `app-mat-card-details` is also used by the Lists module, so its stylesheet is not changed. `details-panel.component.scss` gets, under `:host(.mobile)`, `::ng-deep .row-info { width: auto; min-width: 0; flex: 1 }` and `::ng-deep mat-card { flex-wrap: wrap }`; the column panel already shows `app-list` (cards on mobile), so it only needs `min-width: 0` on its body.
+**Choice:** `app-mat-card-details` is also used by the Lists module, so its stylesheet is not changed. `details-panel.component.scss` gets, under `:host(.mobile)`, `::ng-deep .row-info { width: auto; min-width: 0; flex: 1 }` and a one-row card that lines up whatever the text length (AC-28): `mat-card` with `flex-wrap: nowrap`, `mat-card-content` as the text column (`flex: 1 1 0; min-width: 0; overflow-wrap: anywhere`), the risk badge (`.row-mobile.badge`) as a fixed 72px column, `mat-card-actions` as a fixed 32px column and its Material button at 32px without the 64px minimum width; the column panel already shows `app-list` (cards on mobile), so it only needs `min-width: 0` on its body.
 **Alternative:** edit `mat-card-details.component.scss` → changes the Lists screen outside this change.
 
 ### D6. The Summary heatmap adapts through template bindings and sits in a scrolling card
