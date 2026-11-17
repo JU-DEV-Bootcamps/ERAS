@@ -119,8 +119,8 @@ The system SHALL provide in the manuals folder a README that guides a developer,
 - **GIVEN** the manuals folder at the root of the main ERAS repository
 - **WHEN** its README is read
 - **THEN** it gives numbered steps to add or change a manual, and it explains the manifest fields, the supported file types ("pdf" and "odt") and the 10 MB limit
-- **AND** it states that the folder is mounted read-only in the backend so edits appear without a rebuild, and that "docker compose up" is only needed after the mount itself changes, and says to run it once after pulling the change that adds the mount
-- **AND** it gives numbered steps to run the backend outside Docker by setting "UserManuals__Path" in the environment to the manuals folder, and warns not to commit a personal path in a shared settings file
+- **AND** it states that the folder is mounted read-only in the backend so edits appear without a rebuild, and that "docker compose up" is only needed after the mount itself changes, and says to run it once if the stack was started before the manuals mount was added
+- **AND** it gives numbered steps to run the backend outside Docker by setting "UserManuals:Path" to the manuals folder with user-secrets, which are not versioned, says that a variable set in a terminal does not reach the Visual Studio debugger, gives the environment variable "UserManuals__Path" as an alternative for a run from a shell, and warns not to commit a personal path in a shared settings file
 - **AND** it explains how to validate the folder with the user manuals tests
 
 #### Scenario: AC-25 The README explains each error code of the page

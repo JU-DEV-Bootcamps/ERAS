@@ -28,6 +28,7 @@ The motivation is in `proposal.md`; the behavior is in `specs/user-manuals/spec.
 ### D1. An exception that declares an error code gets a `{ code, message }` body
 **Choice:** add `IErrorCodeException` (property `ErrorCode`) in `Eras.Error`. `ErrorFilter` returns the new record `ErrorCodeResponse(Code, Message)` as the body when the exception implements it, and keeps returning the plain `FriendlyMessage` for every other exception, so no other endpoint changes. The JSON is camelCase (`code`, `message`), as the API already serializes.
 **Alternative:** a response header such as `X-Error-Code` → the FE could read it from the blob download without parsing, but a custom header has to be exposed through CORS and a body is what a client would normally read. Changing the body of all errors → breaks every other endpoint and its callers.
+**No ADR:** decided locally. The `{ code, message }` body applies only to exceptions that opt in through `IErrorCodeException`, and only the user manuals use it; every other endpoint keeps its body. If a second feature adopts the pattern, write the ADR then (`/sdd-adr`).
 
 ### D2. One exception type carries the four causes, the friendly text and the log text
 **Choice:** `UserManualsException` (new, `Eras.Error/Bussiness/`) extends `ErasException` and implements `IErrorCodeException`. It has four named constructors, one per cause: `ManifestMissing(folder)`, `ManifestInvalid(problem)`, `FileMissing(id, fileName, folder)` and `NotFound(id)`. Each one sets the status (500, 500, 500, 404), the code (`manuals_manifest_missing`, `manuals_manifest_invalid`, `manuals_file_missing`, `manuals_not_found`), a **fixed** friendly message without any path, and a separate log message with the detail (the manual or the manifest, the file, the folder and the problem). `LogException()` writes the log message; the severity is `ERROR` for the three server-side causes and `WARNING` for `NotFound`. The code values live in a `UserManualsErrorCodes` constants class next to it. The pattern copies `ExistingEvaluationNameException`, which also keeps its log message apart from the friendly one.
@@ -46,7 +47,7 @@ The motivation is in `proposal.md`; the behavior is in `specs/user-manuals/spec.
 **Alternative:** parse the blob in the component → mixes transport and presentation, and the list would need another path.
 
 ### D6. The README is exempt from the folder validation by name
-**Choice:** `UserManualsFolderValidator` skips `README.md` (and `manifest.json`, as today) when it looks for undeclared files (AC-14). The name is a constant next to `UserManualsManifest.FileName`. The README is written for the ACs and checked by two tests that read the real file, found the way `UserManualsCodeownersTests` finds `CODEOWNERS`: they do nothing when only ERAS-BE is checked out. The tests look for the topics of the ACs, not for exact wording (A7).
+**Choice:** `UserManualsFolderValidator` skips `README.md` (and `manifest.json`, as today) when it looks for undeclared files (AC-14). The name is a constant next to `UserManualsManifest.FileName`. The README is written for the ACs and checked by two tests that read the real file, found the way `UserManualsCodeownersTests` finds `CODEOWNERS`: they do nothing when only ERAS-BE is checked out. The tests look for the topics of the ACs (numbered steps, the manifest fields, the mount, `dotnet user-secrets set "UserManuals:Path"`, Visual Studio and the four codes), not for exact wording (A7).
 **Alternative:** declare the README in the manifest → it would be listed as a manual. Move the guide outside `manuals/` → the issue asks for `manuals/README.md`.
 
 ## Changes by layer
@@ -73,7 +74,7 @@ The motivation is in `proposal.md`; the behavior is in `specs/user-manuals/spec.
 
 | Item | Change | Files | ACs |
 |---|---|---|---|
-| README | New guide: numbered steps for the Docker stack and for the backend outside Docker, manifest fields, types and 10 MB, read-only mount, when `docker compose up` is needed (once after pulling the mount), `UserManuals__Path` in the environment and no personal path in shared settings, the validation command, and a table of the four error codes with cause and fix | `manuals/README.md` | AC-13, AC-25 |
+| README | New guide: numbered steps for the Docker stack and for the backend outside Docker, manifest fields, types and 10 MB, read-only mount, when `docker compose up` is needed (once if the stack was started before the manuals mount of #640 existed), user-secrets (`UserManuals:Path`) as the main step for the backend outside Docker with the Visual Studio note, `UserManuals__Path` as an alternative for a shell run and no personal path in shared settings, the validation command, and a table of the four error codes with cause and fix | `manuals/README.md` | AC-13, AC-25 |
 
 The compose files, CODEOWNERS and `manuals-validation.yml` do not change; the workflow already runs on `manuals/**` and filters on `FullyQualifiedName~UserManuals`, so the new tests run in it.
 
@@ -132,7 +133,7 @@ Extra tests with no AC tag: the filter keeps the plain-string body for a non-cod
 - [Re-tagging the four validator tests and changing two expected exception types touch #640 tests] → only the tags and the expected type change, not what they prove.
 
 ## Migration Plan
-No deployment steps. Merge the BE and FE pull requests and the parent change (README, spec), then bump the submodule pointers. A developer who already runs the stack runs `docker compose up --build` once to get the new backend and the mount, as the README says.
+No deployment steps. Merge the BE and FE pull requests and the parent change (README, spec), then bump the submodule pointers. A developer who already runs the stack runs `docker compose up --build` once to get the new backend, as the README says; the manuals mount itself already exists since #640.
 
 ## Follow-ups
 - `ExceptionHandlerMiddleware` returns `StackTrace` in its response for exceptions that escape the action filters; it is outside this change and worth its own security review.

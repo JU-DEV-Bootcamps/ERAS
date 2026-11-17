@@ -42,6 +42,8 @@
 - [x] 3.8 Write the regression test for (AC-13) by extending `UserManualsReadmeTests.Readme_GuidesTheLocalWorkflowStepByStep` in `ERAS-BE/test/Eras.Infrastructure.Tests/UserManuals/UserManualsReadmeTests.cs` (same single AC tag): the README must mention Visual Studio, say that a variable set in a terminal does not reach the debugger, and give the `dotnet user-secrets set "UserManuals:Path"` step; verify it fails
 - [x] 3.9 Fix `manuals/README.md` for (AC-13): in "With the backend outside Docker" make user-secrets the main numbered step (not versioned, survives restarts), add the Visual Studio note, keep the environment variable as an alternative for a shell run, and say that the Docker stack is optional when it is only used for Keycloak and the database; verify the test from 3.8 passes and `Validate_RealManualsFolder_HasNoProblems` still passes
 
+- [x] 3.10 Fix the wording of `manuals/README.md` for (AC-13): the manuals mount already exists since #640, so say that `docker compose up --build` is needed once only if the stack was started before the mount existed; verify the README tests (AC-13, AC-25) still pass (they check topics, not wording)
+
 ## 4. Verification
 
 - [x] 4.1 BE gates of AGENTS.md section 8.7 pass in `ERAS-BE/`: `dotnet build Eras.sln -warnaserror`, `dotnet format Eras.sln --verify-no-changes`, `dotnet test Eras.sln`, coverage >= 25%, and `dotnet test Eras.sln --filter "FullyQualifiedName~UserManuals"` passes

@@ -1,7 +1,7 @@
 # Proposal
 
-**Status:** Approved
-**Plan:** Approved
+**Status:** Draft
+**Plan:** Draft
 
 ## Why
 
@@ -66,7 +66,7 @@ Validation required: the FE page and its service changed, and the BE error respo
 | Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
 |---|---|---|---|---|
 | AC-13 | Follow `manuals/README.md` step by step on the backend outside Docker: set `UserManuals__Path` to `manuals/`, start the backend, open the User Manuals page | The two manuals are listed; each step of the README worked as written | ❌ | The manual "With the backend outside docker" the command export UserManuals__Path="/path/to/ERAS/manuals" does not work, the term 'export' is not recognized in terminal of Visual Studio. |
-| AC-13 | With the Docker stack: edit the `title` of an entry in `manifest.json`, reload the page | The new title shows without `docker compose up` or a rebuild | ❌ | |
+| AC-13 | With the Docker stack: edit the `title` of an entry in `manifest.json`, reload the page | The new title shows without `docker compose up` or a rebuild | ❌ | Same above. |
 | AC-8 | Unset `UserManuals__Path` (or rename `manifest.json` temporarily), reload the page | "The list of user manuals is not available right now. Please contact support." and no list items | ✅ | |
 | AC-1 | Same state as AC-8, call `GET api/v1/manuals` with a token | 500 with body `{ code: "manuals_manifest_missing", message }`; no path and no stack trace | ✅ | |
 | AC-9 / AC-2 | Set a `format` of `docx` in `manifest.json`, reload | "The list of user manuals is set up incorrectly. Please contact support."; the response code is `manuals_manifest_invalid` | ❌ | The code is still: "manuals_manifest_missing" |
@@ -102,3 +102,7 @@ Repeats the rows of Round 1 that stayed open. The backend runs from Visual Studi
 Approved by Judith Paco, 2026-11-16.
 
 Verified 2026-11-16: no gaps, no drift, gates green
+
+### 2026-11-17 – Review of ERAS#695
+
+The reviewer found drift between AC-13, `design.md` (D6 and the Infra row) and the README: the README makes user-secrets the main step and the environment variable an alternative. AC-13 and the design now say the same (AC-13 changed in its AND lines; the scenario title and the test are the same), the README wording about the mount was fixed (task 3.10), and `design.md` D1 records why there is no ADR. Status and Plan are back to Draft until a human approves the updated AC-13 and design. The Round 1 row "Docker stack: edit a title, reload, no `docker compose up`" is still without a result and is not repeated in Round 2: it is for the developer to run it, or to mark it n.a.

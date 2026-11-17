@@ -35,7 +35,7 @@ One bad entry in `manifest.json` makes the list and every download fail, so run 
 
 Optional if you only use Docker for Keycloak and the database. The compose files mount this folder in the backend container as read-only (`./manuals:/app/manuals:ro`), so your edits appear without a rebuild: save the file and reload the page.
 
-1. Once, after you pull the change that adds this mount, run `docker compose up --build` from the repository root (or `docker compose -f docker-compose.local.yml up --build`). Until you do, the backend has no `manuals/` folder and the page reports a missing manifest.
+1. Once, only if your containers were created before the manuals mount existed (it came with the User Manuals page), run `docker compose up --build` from the repository root (or `docker compose -f docker-compose.local.yml up --build`). Until you do, the backend has no `manuals/` folder and the page reports a missing manifest.
 2. From then on, `docker compose up` is only needed again after the mount itself changes (a change in a compose file) or when you want new backend code. Adding or editing a manual needs neither it nor a rebuild.
 
 ### With the backend outside Docker (Visual Studio or `dotnet run`)
