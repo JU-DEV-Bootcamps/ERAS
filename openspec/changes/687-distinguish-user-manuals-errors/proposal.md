@@ -1,7 +1,7 @@
 # Proposal
 
-**Status:** Draft
-**Plan:** Draft
+**Status:** Approved
+**Plan:** Approved
 
 ## Why
 
