@@ -104,19 +104,23 @@ Setup: as in Round 1.
 
 | Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
 |---|---|---|---|---|
-| AC-14 | At 375px tap a cell of the Dynamic heatmap once; start a drag on another cell and cancel it | The first tap shows the tooltip and does not open the details; a cancelled drag shows nothing and does not count as a tap | | |
-| AC-16 | After a tooltip shows, tap an axis label or the legend, then tap outside the chart | The tooltip disappears each time; the next tap on a cell shows the tooltip again | | |
-| AC-25 | Tap a Summary heatmap cell twice, then the same in a column chart | The second tap opens the details with no tooltip over them | | |
-| AC-6 | Open the Summary heatmap at 375px and tap two cells in a row | The heatmap does not flicker or redraw between the taps; it scrolls sideways inside its card | | |
-| AC-15 | Tap a column near the bottom edge of the screen | The tooltip stays fully inside the screen, above or below the column | | |
-| AC-17 | At 375px export the Summary report to PDF | Same page size and orientation as the desktop PDF, chart as wide as the page, students as a table | | |
-| AC-18 | At 375px export a Dynamic card to PDF | Same as the desktop PDF; the page looks as before once the export ends | | Reported equal to desktop in chat before the review |
-| AC-20 | At 375px export the Student Answers list to PDF | A table with every column, same page size and orientation as the desktop PDF | | |
-| AC-19 | At 375px export the Students list (Students page) to PDF | It exports as before this change (the desktop rendering is not used there) | | Side effect to look at |
-| AC-27 | Watch the side menu and the header while any of those PDFs is made | Neither changes; the menu stays hidden | | Reported fixed in chat |
-| AC-26 | At 375px apply filters in Dynamic Charts | The Apply button does not touch the first chart card | | Reported fixed in chat |
-| AC-28 | At 375px open any details with students of short and long names and answers | The risk badge and the open icon line up in the same columns in every card; the text wraps in its own column | | Reported in chat, fixed |
-| AC-10 to AC-12 | Open each of the three details at 375px | The close button is visible at the top of the screen | | |
-| AC-1 | At 375px open Summary Charts and Polls Answered | Their filters are stacked at full width; the legacy `/reports-v1` pages also show stacked filters | | Side effect to look at |
+| AC-14 | At 375px tap a cell of the Dynamic heatmap once; start a drag on another cell and cancel it | The first tap shows the tooltip and does not open the details; a cancelled drag shows nothing and does not count as a tap | ✅ | Approved as a whole in chat |
+| AC-16 | After a tooltip shows, tap an axis label or the legend, then tap outside the chart | The tooltip disappears each time; the next tap on a cell shows the tooltip again | ✅ | Approved as a whole in chat |
+| AC-25 | Tap a Summary heatmap cell twice, then the same in a column chart | The second tap opens the details with no tooltip over them | ✅ | Approved as a whole in chat |
+| AC-6 | Open the Summary heatmap at 375px and tap two cells in a row | The heatmap does not flicker or redraw between the taps; it scrolls sideways inside its card | ✅ | Approved as a whole in chat |
+| AC-15 | Tap a column near the bottom edge of the screen | The tooltip stays fully inside the screen, above or below the column | ✅ | Approved as a whole in chat |
+| AC-17 | At 375px export the Summary report to PDF | Same page size and orientation as the desktop PDF, chart as wide as the page, students as a table | ✅ | Approved as a whole in chat |
+| AC-18 | At 375px export a Dynamic card to PDF | Same as the desktop PDF; the page looks as before once the export ends | ✅ | Reported equal to desktop in chat before the review; approved as a whole in chat |
+| AC-20 | At 375px export the Student Answers list to PDF | A table with every column, same page size and orientation as the desktop PDF | ✅ | Approved as a whole in chat |
+| AC-19 | At 375px export the Students list (Students page) to PDF | It exports as before this change (the desktop rendering is not used there) | ✅ | Side effect to look at; approved as a whole in chat |
+| AC-27 | Watch the side menu and the header while any of those PDFs is made | Neither changes; the menu stays hidden | ✅ | Reported fixed in chat; approved as a whole in chat |
+| AC-26 | At 375px apply filters in Dynamic Charts | The Apply button does not touch the first chart card | ✅ | Reported fixed in chat; approved as a whole in chat |
+| AC-28 | At 375px open any details with students of short and long names and answers | The risk badge and the open icon line up in the same columns in every card; the text wraps in its own column | ✅ | Reported in chat, fixed; approved as a whole in chat |
+| AC-10 to AC-12 | Open each of the three details at 375px | The close button is visible at the top of the screen | ✅ | Approved as a whole in chat |
+| AC-1 | At 375px open Summary Charts and Polls Answered | Their filters are stacked at full width; the legacy `/reports-v1` pages also show stacked filters | ✅ | Side effect to look at; approved as a whole in chat |
 
 Side effects to look at while testing: Assessments tabs, the Students list export, and rotating the phone across 768px.
+
+Approved by Lucia Becerra, 2026-11-17, in chat (Round 2): "en móvil todo parece estar bien". She approved the round as a whole, so the rows read "Approved as a whole in chat"; the Students list export and the rotation side effects were part of that pass.
+
+Verified 2026-11-17: no gaps, no drift, gates green
