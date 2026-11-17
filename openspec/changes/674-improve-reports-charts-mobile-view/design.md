@@ -17,7 +17,7 @@ How each piece behaved before this change, from the code:
 **Goals:**
 - Filters, tabs, Dynamic Charts and Summary Charts that fit 375px, with smaller chart labels and room below the filters (AC-1 to AC-7, AC-24, AC-26).
 - Lists as cards that fit, and the Student Answers export controls below the title (AC-8, AC-9, AC-24).
-- Details as a centered full-screen page with a student list that fits (AC-10 to AC-13).
+- Details as a centered full-screen page with a student list that fits and lines up (AC-10 to AC-13, AC-28).
 - A tooltip that fits the screen, opens details on the second tap, hides when they open and hides on a tap outside (AC-14 to AC-16, AC-25).
 - PDFs from a phone equal to the desktop ones, without the app shell changing while they are made (AC-17 to AC-20, AC-27).
 - Nothing changes from 768px (AC-21 to AC-23).
@@ -90,7 +90,7 @@ How each piece behaved before this change, from the code:
 | Column charts | flag to the options, `responsive` off while exporting (D2, D8), tooltip builder (D9) | `R/dynamic-charts-v2/dynamic-column-chart-v2/*.ts`, `R/summary-charts-v2/summary-column-charts-v2/*.{ts,html}` | AC-4, AC-7, AC-15 |
 | Expandable card | `mobile` class, strip for the buttons, export asks for the card width (D3, D8) | `shared/components/expandable-card-v2/expandable-card.component.{ts,scss}` | AC-5, AC-18 |
 | Summary Charts | `.mobile` instead of `@media`, heatmap getters and scrolling card, details aside, `detailOpen`, tooltip wrapper, `stackExportOnMobile`, report export width (D4, D6, D7, D8, D9) | `R/summary-charts-v2/summary-charts-v2.component.{ts,html,scss}` | AC-6, AC-8, AC-11, AC-12, AC-17, AC-22, AC-24 |
-| Details panels | `mobile` class, scoped list override (D4, D5) | `shared/components/panels/details-panel-v2/details-panel.component.{ts,scss}`, `R/summary-charts-v2/column-risk-panel/column-risk-panel.component.{ts,scss}` | AC-10 to AC-13 |
+| Details panels | `mobile` class, scoped list override (D4, D5) | `shared/components/panels/details-panel-v2/details-panel.component.{ts,scss}`, `R/summary-charts-v2/column-risk-panel/column-risk-panel.component.{ts,scss}` | AC-10 to AC-13, AC-28 |
 | Shared list | `stackExportOnMobile` and `exportAsDesktopOnMobile` inputs (D7, D8) | `shared/components/list/list.component.{ts,scss}` | AC-20, AC-24 |
 | Polls Answered | no code change; guard test | `R/polls-answered/polls-answered.component.spec.ts` | AC-9 |
 | Tooltip | clamp, placement, two-tap gate, hiding, enabled input (D9) | `shared/components/apex-tooltip/apex-tooltip.directive.ts`, `apex-tooltip.component.scss` | AC-14 to AC-16, AC-23, AC-25 |
@@ -137,6 +137,7 @@ All tests are FE (Jasmine/Karma) with `[674-improve-reports-charts-mobile-view/A
 | AC-25 | FE | `apex-tooltip.directive.spec.ts` | `[674-improve-reports-charts-mobile-view/AC-25] hides the tooltip when the second tap opens the details` |
 | AC-26 | FE | `dynamic-charts-v2-mobile.component.spec.ts` | `[674-improve-reports-charts-mobile-view/AC-26] leaves space between the filters and the charts on mobile` |
 | AC-27 | FE | `src/app/core/components/layout/layout.component.spec.ts` | `[674-improve-reports-charts-mobile-view/AC-27] keeps the mobile shell while a PDF is rendered as desktop` |
+| AC-28 | FE | `S/panels/details-panel-v2/details-panel.component.spec.ts` | `[674-improve-reports-charts-mobile-view/AC-28] aligns the risk badge and the action of every student card on mobile whatever the text length` |
 
 Extra tests without an AC tag: `viewport.service.spec.ts` (`renderAsDesktop` and `isMobileScreen`); the position clamp (horizontal and vertical), the placement above or below the point, the cancelled gesture, the tap on a part without data and the disabled directive in `apex-tooltip.directive.spec.ts`; the options helpers (`heat-map-config-v2.spec.ts`, `column-chart.config.spec.ts`); the restore after an error, the final redraw and the exports that do not ask for desktop rendering in `exportReport.util.spec.ts` and `list.component.spec.ts`; the stable heatmap option objects, the heatmap tooltip guard and the mobile-only directive on the heatmap in `summary-charts-v2-mobile.component.spec.ts`; `tooltipFn` in `summary-column-charts-v2.component.spec.ts`; and the stacked filters without variables (the Summary Charts and Polls Answered case) in `poll-filters.component.spec.ts`. Specs that mount a changed unit without caring about the screen provide a desktop `ViewportService` or run with the real one, because the Karma window is narrower than 768px. AC-2, AC-8, AC-9 and AC-21 to AC-23 are guard tests: they pass on the code before the change (AC-8 only once the export controls no longer overflow); AC-2 and AC-9 were also proven by breaking the code they guard, and AC-21 to AC-23 assert real measurements of the desktop layout. The waits for Apex in the column chart specs poll for the rendered legend instead of a fixed timeout. Coverage gate: FE >= 15% (`ERAS-FE/AGENTS.md` §3.3).
 

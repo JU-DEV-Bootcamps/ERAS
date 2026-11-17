@@ -115,6 +115,7 @@ Setup: as in Round 1.
 | AC-19 | At 375px export the Students list (Students page) to PDF | It exports as before this change (the desktop rendering is not used there) | | Side effect to look at |
 | AC-27 | Watch the side menu and the header while any of those PDFs is made | Neither changes; the menu stays hidden | | Reported fixed in chat |
 | AC-26 | At 375px apply filters in Dynamic Charts | The Apply button does not touch the first chart card | | Reported fixed in chat |
+| AC-28 | At 375px open any details with students of short and long names and answers | The risk badge and the open icon line up in the same columns in every card; the text wraps in its own column | | Reported in chat, fixed |
 | AC-10 to AC-12 | Open each of the three details at 375px | The close button is visible at the top of the screen | | |
 | AC-1 | At 375px open Summary Charts and Polls Answered | Their filters are stacked at full width; the legacy `/reports-v1` pages also show stacked filters | | Side effect to look at |
 

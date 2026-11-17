@@ -96,7 +96,7 @@ The system SHALL show each row of the Student Answers list and of the Polls Answ
 - **AND** the selector and the button are as wide as the list, do not overlap the title and do not make the page scroll sideways
 
 ### Requirement: The chart details cover the whole screen on a mobile screen
-The system SHALL show the details of a chart element as a screen of its own, centered and as wide as the screen, with a visible close button, on a screen narrower than 768px, and SHALL show the list of students inside the details without scrolling sideways. The details are never a panel beside or over the chart.
+The system SHALL show the details of a chart element as a screen of its own, centered and as wide as the screen, with a visible close button, on a screen narrower than 768px, and SHALL show the list of students inside the details without scrolling sideways, each student card with its risk badge and action in the same place. The details are never a panel beside or over the chart.
 
 #### Scenario: AC-10 Dynamic Charts details open as a centered screen on mobile
 **Side:** FE
@@ -125,6 +125,13 @@ The system SHALL show the details of a chart element as a screen of its own, cen
 - **WHEN** the details are shown
 - **THEN** "Ana Torres" is shown with the student data inside the screen
 - **AND** the details have no horizontal scroll
+
+#### Scenario: AC-28 The student cards of the details are aligned on mobile
+**Side:** FE
+- **GIVEN** the details with two students, one with a short name and answer and one with a long name and answer, on a 375px wide screen
+- **WHEN** the details are shown
+- **THEN** the risk badge of both cards starts at the same place and has the same width
+- **AND** the action of both cards starts at the same place, on the same row as the badge, and the long text wraps inside its own column
 
 ### Requirement: The tooltip is readable and inside the screen on a mobile screen
 The system SHALL show, when the user taps a chart element on a screen narrower than 768px, a tooltip that is fully inside the screen with all its text readable, SHALL open the details only when the user taps the same element again, and SHALL hide the tooltip when the details open or when the user taps outside the chart.
