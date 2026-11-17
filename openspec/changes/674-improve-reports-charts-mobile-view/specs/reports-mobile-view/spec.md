@@ -46,6 +46,13 @@ The system SHALL show the Dynamic Charts in a single column, one chart below the
 - **THEN** the Export button, the chart type button and the expand button are inside the card and do not overlap each other
 - **AND** the chart title is not covered by any of them
 
+#### Scenario: AC-26 The filters leave space above the charts on mobile
+**Side:** FE
+- **GIVEN** a signed-in user on a 375px wide screen with a Dynamic Charts report shown
+- **WHEN** the filters and the first chart card are shown
+- **THEN** there are at least 16px between the Apply button and the first chart card
+- **AND** the Apply button does not touch the card
+
 ### Requirement: The Summary Charts fit a mobile screen
 The system SHALL show the Summary Charts chart, its legend and its Export and chart type buttons inside the width of a screen narrower than 768px, whichever chart type is selected, with the component names on the axes in a smaller font so that the chart itself stays readable.
 
@@ -180,6 +187,16 @@ The system SHALL produce, for a report exported to PDF from a screen narrower th
 - **WHEN** the user exports the list to PDF
 - **THEN** the PDF shows the students as a table with every column, as the PDF exported on a desktop screen
 - **AND** the PDF has the same page size and orientation as the one exported on a desktop screen
+
+### Requirement: The app shell keeps its mobile layout while a report is exported to PDF
+The system SHALL keep the side menu hidden and the page header in its mobile layout on a screen narrower than 768px while a report is being exported to PDF.
+
+#### Scenario: AC-27 The side menu does not open while a PDF is rendered
+**Side:** FE
+- **GIVEN** a signed-in user on a 375px wide screen with the side menu hidden
+- **WHEN** they export a report to PDF and the report is rendered for the export
+- **THEN** the side menu stays hidden and the page header keeps its menu button
+- **AND** the page content keeps the full width of the screen
 
 ### Requirement: Screens of 768px and wider keep the current Reports section
 The system MUST keep the current Reports layout, details panels and tooltip on a screen 768px wide or wider.
