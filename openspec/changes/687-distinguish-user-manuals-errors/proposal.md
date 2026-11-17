@@ -105,4 +105,14 @@ Verified 2026-11-16: no gaps, no drift, gates green
 
 ### 2026-11-17 – Review of ERAS#695
 
-The reviewer found drift between AC-13, `design.md` (D6 and the Infra row) and the README: the README makes user-secrets the main step and the environment variable an alternative. AC-13 and the design now say the same (AC-13 changed in its AND lines; the scenario title and the test are the same), the README wording about the mount was fixed (task 3.10), and `design.md` D1 records why there is no ADR. Status and Plan are back to Draft until a human approves the updated AC-13 and design. The Round 1 row "Docker stack: edit a title, reload, no `docker compose up`" is still without a result and is not repeated in Round 2: it is for the developer to run it, or to mark it n.a.
+The reviewer found drift between AC-13, `design.md` (D6 and the Infra row) and the README: the README makes user-secrets the main step and the environment variable an alternative. AC-13 and the design now say the same (AC-13 changed in its AND lines; the scenario title and the test are the same), the README wording about the mount was fixed (task 3.10), and `design.md` D1 records why there is no ADR. Status and Plan went back to Draft while the updated AC-13 and design were pending, and were approved again in 8e68f18. The Round 1 row "Docker stack: edit a title, reload, no `docker compose up`" was not repeated in Round 2; it is run in Round 3.
+
+### 2026-11-17 – Round 3
+
+Only the Docker row left open by Round 1 (its ❌ there came from the README not letting the backend be pointed at the folder).
+
+| Ref | Scenario (steps) | Expected result | Result (✅/❌/n.a.) | Notes |
+|---|---|---|---|---|
+| AC-13 | With the Docker stack: edit the `title` of an entry in `manifest.json`, reload the page | The new title shows without `docker compose up` or a rebuild | ✅ | Reported by the developer on 2026-11-17: the title was edited, the page reloaded and the new title showed. |
+
+Verified 2026-11-17: no gaps, no drift, gates green (re-run after the AC-13 and design changes of the review of ERAS#695; the first FE test run had one timeout in an unrelated PdfService spec, and the full re-run passed 2639 of 2639)
