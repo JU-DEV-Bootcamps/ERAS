@@ -51,6 +51,7 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 | ADR | Title | Status | Superseded by |
 |---|---|---|---|
 | [ADR-0010](0010-use-jspdf-autotable-for-vector-pdf-tables.md) | Use jspdf-autotable to build vector PDF tables in the frontend | Accepted | — |
+| [ADR-0012](0012-adopt-react-as-the-second-web-client-and-its-stack.md) | Adopt React as the second web client and its stack | Accepted | — |
 
 ### auth
 
@@ -58,6 +59,7 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 |---|---|---|---|
 | [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md) | Limit a professional's access to students of their assigned assessments | Accepted | — |
 | [ADR-0009](0009-limit-professional-profile-to-professionals.md) | Limit the professional profile endpoints to the ERAS Professional role | Accepted | — |
+| [ADR-0013](0013-authenticate-the-react-client-with-its-own-keycloak-public-client.md) | Authenticate the React client with its own Keycloak public client, PKCE and in-memory tokens | Accepted | — |
 
 ### data
 

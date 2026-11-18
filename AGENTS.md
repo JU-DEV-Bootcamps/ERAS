@@ -50,7 +50,7 @@ No code changes without an approved spec (see §8).
 |---|---|
 | `ERAS-BE/` | **Git submodule.** Backend: .NET 8, Onion Architecture, EF Core 9 + PostgreSQL 15, MediatR 12, Keycloak JWT. Solution: `ERAS-BE/Eras.sln` |
 | `ERAS-FE/` | **Git submodule.** Frontend v2: Angular 19 (standalone), Angular Material 3, keycloak-js, ApexCharts |
-| `ERAS-FE-React/` | **Git submodule (planned, not added yet).** Frontend v3: React. A second, permanent client of the same backend; its rules will live in its own `AGENTS.md` (ADR-0007) |
+| `ERAS-FE-React/` | **Local repository, not yet a submodule** (no remote yet; each clone ignores it through `.git/info/exclude`). Frontend v3: React 19 + TypeScript + Vite (ADR-0012). A second, permanent client of the same backend; its rules are in `ERAS-FE-React/AGENTS.md` (ADR-0007) |
 | `openspec/sides.conf` | The SDD sides: every submodule whose tests prove an AC, with its test folder, AC key form and gates (ADR-0011) |
 | `openspec/specs/` | Living specs: the current, agreed behavior of the system, grouped by capability |
 | `openspec/changes/<change-id>/` | Proposed or in-progress changes (proposal, spec deltas, design, tasks) |
