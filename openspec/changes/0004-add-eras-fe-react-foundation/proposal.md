@@ -66,6 +66,14 @@ No behavior changes in ERAS, so this change sets `skip_specs: true` (AGENTS.md s
 
 - 2026-11-18, scope amended at the request of the change author (stated in chat), after the first approval: v3 supports three languages (`en`, `es` neutral, `pt-BR`) instead of English only, with English as the fixed initial language; the language selector is left to a later change with a spec. New tasks 3.8 and 3.9; `ERAS-FE-React/AGENTS.md` §7.1 and §7.2 and ADR-0012 updated. The Status went back to Draft for a new approval.
 
+- 2026-11-18, recorded after `/sdd-verify` found implementation choices the proposal did not name (approved by the change author in chat):
+  - **Vitest launcher.** `npm test` and `npm run test:ci` start Vitest through `ERAS-FE-React/scripts/vitest.mjs`. On Windows, Git Bash passes the working directory with a lower-case drive letter (`c:\...`), which makes Vitest load itself twice and fail with "failed to find the current suite"; the launcher starts it from the same folder with an upper-case drive letter. Without it the `test:ci` gate fails on Windows. Documented in `ERAS-FE-React/AGENTS.md` §3.3.
+  - **Prettier, as in ERAS-FE.** `.prettierrc.json` with the options of `ERAS-FE` (without its Angular overrides), `.editorconfig`, and Prettier as an ESLint rule through `eslint-plugin-prettier` and `eslint-config-prettier`. In v3 the rule `prettier/prettier` is an **error**, not a warning as in `ERAS-FE`, because the v3 lint gate blocks (ADR-0012). `lint-staged` runs `eslint --fix` on code and `prettier --write` on JSON, Markdown, YAML, HTML and CSS; `npm run format` rewrites every file.
+  - **Local Keycloak client values** in `ERAS-FE-React/AGENTS.md` §3.3, after the manual validation found a hand-made client without the web origin (see the Validation log).
+  - **npm settings.** `.npmrc` sets `save-exact=true` (the exact versions of "Project scaffold") and `engine-strict=true` with `engines.node >=26` (the version of `.nvmrc`); the `preview` script of Vite serves the production build locally.
+  - **Folders.** `src/shared/` and `src/features/` are not created: git does not keep empty folders. `ERAS-FE-React/AGENTS.md` §4.2 says the first module that needs one creates it.
+  - **Versions.** TypeScript 6.0.3 instead of 7 and ESLint 9 instead of 10, because `typescript-eslint` supports TypeScript below 6.1 and `eslint-plugin-jsx-a11y` supports ESLint up to 9.
+
 ## Follow-ups
 
 - A change with a spec for the language selector (choose `en`, `es` or `pt-BR` in the UI and remember the choice).
@@ -73,3 +81,9 @@ No behavior changes in ERAS, so this change sets `skip_specs: true` (AGENTS.md s
 - ADR-0015 (Orval and adapters) and ADR-0016 (state and layers) before the first module change.
 - ADR-0017 (UI library), then Storybook.
 - Playwright end-to-end tests against the local stack.
+
+## Validation log
+
+- 2026-11-18 – Approved by the developer (stated in chat), manual validation of task 4.3 against the local stack: the Keycloak redirect login works for the four seed users (`admin@eras.local`, `officer@eras.local`, `professional@eras.local`, `guest@eras.local`) and lands on the shell home; no token appears in `localStorage` or `sessionStorage`; Log out returns to the Keycloak login page. Found and fixed during the validation: the client created by hand in the local Keycloak had no web origin `http://localhost:5173`, so the login ended in "ERAS could not start: Failed to fetch" (Keycloak answered `403 Invalid origin`); the exact client values are now in `ERAS-FE-React/AGENTS.md` §3.3.
+
+Verified 2026-11-18: no gaps, no drift, gates green
