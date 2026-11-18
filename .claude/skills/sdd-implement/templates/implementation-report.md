@@ -41,6 +41,7 @@ Delete this comment.
 |---|---|---|---|
 | `ERAS-BE/` | `<prefix>/<story>/<title>` | `feat: <…>` | `<files>` |
 | `ERAS-FE/` | `<prefix>/<story>/<title>` | `feat: <…>` | `<files>` |
+<!-- One row per submodule the change touched (the sides of openspec/sides.conf); delete the rows of untouched ones. -->
 | parent | `<branch>` | `docs: tick tasks of <change-id>` | `openspec/changes/<change-id>/tasks.md` |
 
 **Next:** `/sdd-validate-impl` (when a BE controller or the FE changed), then `/sdd-verify`.

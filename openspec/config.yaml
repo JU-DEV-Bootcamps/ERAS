@@ -3,20 +3,22 @@ schema: spec-driven
 # Project context. AGENTS.md (repo root) is the full rulebook; this holds only the
 # constraints OpenSpec workflows must apply while planning and implementing.
 context: |
-  ERAS is a parent repo with two git submodules: ERAS-BE (.NET 8 Onion, EF Core + PostgreSQL,
-  MediatR, Keycloak JWT) and ERAS-FE (Angular 19 standalone, Angular Material). Specs live in the
-  parent repo; code is committed inside the submodules. AGENTS.md defines the target coding style
-  (the "golden path") and the legacy patterns that must not be copied into new code.
-  Every scenario is an Acceptance Criterion (AC) with the key <change-id>/AC-<n>. Each AC maps to
-  exactly one tagged test on each side it affects: xUnit in ERAS-BE/test/ with
-  [Trait("Change", "<change-id>")] and [Trait("AC", "<change-id>/AC-<n>")], and Jasmine in
-  ERAS-FE/src/app/**/*.spec.ts with the it() title starting with "[<change-id>/AC-<n>]".
+  ERAS is a parent repo with one git submodule per side. The sides are listed in openspec/sides.conf
+  (ADR-0011), for example BE = ERAS-BE (.NET 8 Onion, EF Core + PostgreSQL, MediatR, Keycloak JWT) and
+  FE = ERAS-FE (web client v2, Angular 19 standalone, Angular Material). Specs live in the parent repo;
+  code is committed inside the submodules. AGENTS.md and each submodule's own AGENTS.md define the
+  target coding style (the "golden path") and the legacy patterns that must not be copied into new code.
+  Every scenario is an Acceptance Criterion (AC) with the key <change-id>/AC-<n> and a **Side:** line
+  naming the sides of openspec/sides.conf it affects, joined with " + ". Each AC maps to exactly one
+  tagged test on each side it affects, in the test folder and form that openspec/sides.conf gives for
+  that side: an xUnit [Trait("AC", "<change-id>/AC-<n>")] (with [Trait("Change", "<change-id>")]) for
+  BE, an it() title starting with "[<change-id>/AC-<n>]" for a web client.
   Roles: ERAS Administrator, ERAS Student Services Officer, ERAS Professional, plus Guest.
 
 rules:
   proposal:
-    - Link the GitHub issue (ERAS-BE#n / ERAS-FE#n) in Why
-    - State which submodules are affected (BE, FE or both) and what is out of scope
+    - Link the GitHub issue with its repository (for example ERAS-BE#n or ERAS-FE#n) in Why
+    - State which sides of openspec/sides.conf are affected and what is out of scope
     - State any change to who can do what (roles and ownership) explicitly
   specs:
     - Title every scenario "AC-<n> <short title>", numbered from 1, unique within the change and never renumbered

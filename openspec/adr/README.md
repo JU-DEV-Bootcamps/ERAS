@@ -74,3 +74,4 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 | [ADR-0001](0001-use-openspec-for-spec-driven-development.md) | Use OpenSpec for spec-driven development | Proposed | — |
 | [ADR-0007](0007-split-agent-rules-per-sub-project.md) | Split agent rules per sub-project, one rule one home | Accepted | — |
 | [ADR-0008](0008-review-and-sign-adrs-before-accepting.md) | Review and sign an ADR before it is accepted | Accepted | — |
+| [ADR-0011](0011-declare-the-sdd-sides-in-one-registry.md) | Declare the SDD sides in one registry | Accepted | — |

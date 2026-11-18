@@ -40,3 +40,6 @@ Rule: backend and frontend rules live only in `ERAS-BE/AGENTS.md` and `ERAS-FE/A
 
 ### [ADR-0008](0008-review-and-sign-adrs-before-accepting.md): Review and sign an ADR before it is accepted
 Rule: an ADR is reviewed like a PR with the checklist in `README.md`; anyone with write access reviews and signs, one sign-off is enough, and the result is recorded in `Reviewed by` and `Signed by`. Only a human accepts; skills never fill those fields.
+
+### [ADR-0011](0011-declare-the-sdd-sides-in-one-registry.md): Declare the SDD sides in one registry
+Rule: declare every side (the backend and each web client) once in `openspec/sides.conf`; scripts, skills and rules read it and never name a client by hand, and a `**Side:**` value names whole registered sides joined with ` + `. Adding or removing a client is one `[section]` there plus that client's own `AGENTS.md` (ADR-0007).

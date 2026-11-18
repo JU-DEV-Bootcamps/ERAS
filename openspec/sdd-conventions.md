@@ -16,7 +16,7 @@ The skills `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` �
 |---|---|
 | Files | `proposal.md` (why, what, status lines, logs), `specs/<capability>/spec.md` (ACs), `design.md` (**the plan**: layers, API contract, test strategy), `tasks.md` (checklist and Traceability) |
 | Status lines | In `proposal.md`: `**Status:** Draft \| Clarified \| Approved` for the spec and `**Plan:** Draft \| Approved` for `design.md` + `tasks.md`. **Only a human sets `Approved`.** Code waits for `Plan: Approved` |
-| AC | `#### Scenario: AC-<n> <title>` plus a line `**Side:** BE \| FE \| BE + FE`. Key: `<change-id>/AC-<n>` |
+| AC | `#### Scenario: AC-<n> <title>` plus a line `**Side:** <side>[ + <side>]…`, each side a whole name from `openspec/sides.conf` (for example `**Side:** BE`, `**Side:** BE + FE`), each at most once. Key: `<change-id>/AC-<n>`, the same on every side, so two clients reuse it (ADR-0011) |
 | Tasks | `- [ ] <group>.<n> <description>`. A test task starts with "Write" and cites `(AC-<n>)`, and comes before its implementation task. Replaced tasks are struck through, never renumbered |
 | Logs | `## Clarifications` and `## Validation log` live in `proposal.md`. **Never in `spec.md`**: it is a delta that is merged into `openspec/specs/` on archive |
 | Done | Every task ticked, Traceability filled with real tests (exactly 1 per AC per side), §8.7 gates green, `openspec validate --strict`; then the parent-repo commit carries the change folder and its ADR files (§8.3 step 5), the submodule PRs merge, the change is archived as the last commit of the ship PR (§8.3 step 6) and the ship PR merges. There is no separate `Implemented` status |

@@ -45,6 +45,8 @@ Delete every HTML comment and every section that truly does not apply to this ch
 | Infrastructure | <repository, EF configuration, migration, policy> | `src/Eras.Infrastructure/...` | AC-n |
 | Api | <controller action, route, `[Authorize(Policy = ...)]`> | `src/Eras.Api/Controllers/...` | AC-n |
 
+<!-- One section per web client the change declares (FE = ERAS-FE, Angular, below). Another client of
+     openspec/sides.conf uses the pieces of its own AGENTS.md section 4.2. -->
 ### Frontend (`ERAS-FE/`)
 
 | Piece | Change | Files | ACs |

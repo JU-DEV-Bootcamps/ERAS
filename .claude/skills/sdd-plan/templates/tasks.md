@@ -4,7 +4,8 @@
 TEMPLATE for openspec/changes/<change-id>/tasks.md, created by /sdd-plan.
 The apply phase parses checkboxes: every task is exactly `- [ ] <group>.<n> <description>`; nothing else is tracked.
 Rules (openspec/config.yaml and AGENTS.md):
-- Groups by side: BE, FE, Infra (only those the change touches), in dependency order.
+- Groups by side: the sides of openspec/sides.conf the change declares (for example BE, FE), plus Infra, in dependency order.
+  A side other than BE and FE uses the paths, test file names and gates of its own AGENTS.md.
 - For every AC the TEST task comes BEFORE its implementation task, inside the same group.
   A test task starts with "Write" (the checker relies on it). Each group lands its own tests;
   do not pile tests into a final group.
@@ -34,7 +35,8 @@ Delete every HTML comment from the output file.
 - [ ] 3.3 The AC traceability check (AGENTS.md section 8.6) shows exactly 1 test per AC per affected side, and `openspec validate <change-id> --strict` passes
 
 ## Traceability
-<!-- One row per AC per affected side (the Side line of the AC; "BE + FE" = two rows). The Test column carries the
+<!-- One row per AC per affected side (the Side line of the AC; "BE + FE" = two rows), with the side's exact name
+     from openspec/sides.conf. The Test column carries the
      planned test from design.md; /sdd-implement confirms it with the real names. -->
 | AC | Scenario | Side | Test |
 |----|----------|------|------|
