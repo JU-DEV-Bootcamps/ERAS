@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(/.env)",
+      "Edit(/.env)",
+      "Read(/deploy/.env.prod)",
+      "Edit(/deploy/.env.prod)",
+      "Read(**/environment.development.ts)",
+      "Edit(**/environment.development.ts)"
+    ]
+  }
+}
