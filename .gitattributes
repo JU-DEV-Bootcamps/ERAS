@@ -1,1 +1,2 @@
 .claude/skills/**/*.sh text eol=lf
+.claude/hooks/**/*.sh text eol=lf
