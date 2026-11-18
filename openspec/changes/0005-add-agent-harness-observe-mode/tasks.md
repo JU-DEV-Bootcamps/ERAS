@@ -35,7 +35,7 @@ change blocks a pull request or an agent: every check only warns (observe mode).
 ## 6. Verification
 
 - [x] 6.1 Run `bash .claude/hooks/tests/run-tests.sh`, `bash .claude/skills/sdd-plan/tests/run-tests.sh` and `bash .claude/skills/sdd-plan/tests/check-skills.sh`, and verify all are green and match the baseline of task 1.4
-- [ ] 6.2 Open a draft pull request that only touches this change and verify `sdd-checks.yml` runs, the new step is skipped (no pointer change) with its notice, and the job result is the same as before this change
+- [x] 6.2 Open a draft pull request that only touches this change and verify `sdd-checks.yml` runs, the new step is skipped (no pointer change) with its notice, and the job result is the same as before this change
 - [x] 6.3 Run `git status --short` and verify only the files listed in the Impact section of `proposal.md` and this change folder changed, and that nothing under `ERAS-BE/`, `ERAS-FE/` or `ERAS-FE-React/` changed (the AGENTS.md section 8.7 BE and FE gates do not apply: no submodule code)
 - [x] 6.4 Run `openspec validate "0005-add-agent-harness-observe-mode" --strict` and verify it passes
 

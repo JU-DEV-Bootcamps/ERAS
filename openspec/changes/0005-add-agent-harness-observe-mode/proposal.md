@@ -69,4 +69,6 @@ No behavior of ERAS changes, so this change sets `skip_specs: true` (AGENTS.md s
 
 **Line endings (found in task 6.3):** `.gitattributes` forced LF only for `.claude/skills/**/*.sh`. A clone with `core.autocrlf=true` would check the hook scripts out with CRLF, and Git Bash would then fail on every hook call (non-blocking, but a "hook error" notice on each edit). One line, `.claude/hooks/**/*.sh text eol=lf`, was added to `.gitattributes`, the same rule the skills already use; `git check-attr eol` now gives `lf` for the hook scripts.
 
+**Task 6.2 (2026-11-18):** the change was pushed to the existing PR #694 (branch `refactor/0000/improve-sdd`, head `b4fe6c5`, not a draft; the workflow runs on every `pull_request` push, draft or not), as the reviewer asked for one branch. Run 44413340940 of `sdd-checks.yml` passed. Every step succeeded, and the new step printed "This pull request moves no submodule pointer (not a ship PR): nothing to check.". `check-plan.sh`, `check-adr.sh` and `check-spec.sh` gave 0 errors for 0000, 0001, 0003, 0004 and 0005. The only warnings were the known ones: no `**Plan:**` line in the `skip_specs` changes, and missing sign-offs on older ADRs.
+
 **Task 1.4, baseline:** `run-tests.sh` 141 passed, 0 failed; `check-skills.sh` 8 skills, 0 errors.
