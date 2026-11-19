@@ -1,6 +1,6 @@
 ---
 name: sdd-implement
-description: Implements the tasks in an ERAS OpenSpec change's tasks.md in order, following its design.md (the plan), test first, checking off each task when its tests pass, then runs the AGENTS.md gates and reports real results. Use when a change's plan is approved (Plan - Approved) and the code needs to be written in ERAS-BE and/or ERAS-FE.
+description: Implements the tasks in an ERAS OpenSpec change's tasks.md in order, following its design.md (the plan), test first, checking off each task when its tests pass, then runs the AGENTS.md gates and reports real results. Use when a change's plan is approved (Plan - Approved) and the code needs to be written in one or more submodules (the sides of openspec/sides.conf, for example ERAS-BE and ERAS-FE).
 allowed-tools: Bash(openspec:*) Bash(bash .claude/skills/sdd-implement/scripts/check-impl.sh:*) Bash(bash .claude/skills/sdd-plan/scripts/check-plan.sh:*)
 ---
 
@@ -9,14 +9,14 @@ test per Acceptance Criterion (AC) per side, **test first**. This skill is the E
 `/opsx:apply`: same task loop, plus the approval gates, the AC test tags and the §8.7 gates.
 Rules: `AGENTS.md` (§1.1 principles, §6–§7 golden paths, rules and tests, §5.2 AC↔test, §3 commands) and `openspec/config.yaml`.
 
-**Boundary.** Edit code and tests in `ERAS-BE/` and `ERAS-FE/`, tick `tasks.md`, and fill its Traceability table.
+**Boundary.** Edit code and tests in the submodules of the sides the tasks touch (`openspec/sides.conf`), tick `tasks.md`, and fill its Traceability table.
 Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your own, do NOT set `**Status:**` or
 `**Plan:**`, do NOT commit or push, do NOT archive. Never read or print secrets (`.env`, `deploy/.env.prod`,
 `environment.development.ts`, keys in `appsettings*.json`) and never put tokens or personal data in logs or tests.
 
 **Templates:**
 - `.claude/skills/sdd-implement/templates/ac-test-be.md`: tagged xUnit test skeleton
-- `.claude/skills/sdd-implement/templates/ac-test-fe.md`: tagged Jasmine test skeleton
+- `.claude/skills/sdd-implement/templates/ac-test-fe.md`: tagged Jasmine test skeleton for the `FE` side (Angular); another web client follows its own `AGENTS.md` §7.3
 - `.claude/skills/sdd-implement/templates/implementation-report.md`: the report you give the user
 
 **Checkers:**
@@ -37,9 +37,10 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
 
 2. **Prepare the workspace.** Code changes live **inside** the submodules, on a branch there; the parent repo only
    gets `tasks.md`.
-   - For each side the tasks touch, `git -C ERAS-BE branch --show-current` (same for `ERAS-FE`). If it is `develop` or
+   - For each side the tasks touch, `git -C <submodule> branch --show-current`, with the side's `submodule` from `openspec/sides.conf`. If it is `develop` or
      `main`, stop and ask the user for the branch name (`<prefix>/<storyNumber>/<storyTitle>`, prefix one of
      `feature|bugfix|refactor|ci|docs|chore|style|release`). Do not create it with a name you invented.
+   - If `<submodule>/AGENTS.md` exists for a side the tasks touch (for example `ERAS-BE/AGENTS.md` or `ERAS-FE/AGENTS.md`), read it in full before the first code task: it holds the golden paths, rules and test conventions that the root `AGENTS.md` only points to. Say in the report which ones you read.
    - Note `git status` of each submodule so you can tell your changes from earlier ones, and never revert work you did not write.
    - If `dotnet build/test` is blocked by file locks (a running `Eras.Api` or Visual Studio), ask the user to stop it; do not fight it.
 
@@ -56,9 +57,14 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
      only when the task says so. Prove it can fail by temporarily breaking the code, restore it, and note this in the report.
    - **Tick `- [ ]` → `- [x]` immediately**, only when the task's specified behavior is fully done and its tests pass, never
      partially. Re-run `openspec instructions apply --change "<change-id>" --json` and confirm the progress changed.
-   - Tests: one tagged test per AC per side, tagged with exactly one AC key (BE `[Trait("Change", …)]` + `[Trait("AC", "<id>/AC-n")]`;
-     FE `it('[<id>/AC-n] …')`). Edge-case or helper tests are welcome and carry no AC tag. Never `fit`, `xit`, `fdescribe`,
-     `xdescribe` or a skipped `[Fact(Skip=…)]`. If `ERAS-FE/.claude/skills/eras-fe-test/SKILL.md` exists, follow it for FE tests.
+   - Tests: one tagged test per AC per side, tagged with exactly one AC key, in the side's test folder and form from
+     `openspec/sides.conf` (BE `[Trait("Change", …)]` + `[Trait("AC", "<id>/AC-n")]`; a web client such as FE `it('[<id>/AC-n] …')`).
+     Edge-case or helper tests are welcome and carry no AC tag. Never a focused or skipped test (`fit`, `xit`, `fdescribe`,
+     `xdescribe`, `.only`, `.skip`, `[Fact(Skip=…)]`). If `ERAS-FE/.claude/skills/eras-fe-test/SKILL.md` exists, follow it for FE tests.
+     In general, when the submodule of a side has a test skill (`<submodule>/.claude/skills/<name>-test/SKILL.md`, for example
+     `eras-fe-react-test` in `ERAS-FE-React`), follow it for that side's AC tests. Likewise, when it has a feature skill
+     (`<submodule>/.claude/skills/<name>-feature/SKILL.md`, for example `eras-fe-react-feature`), follow it for that
+     side's implementation tasks.
 
 5. **Code rules while writing** (AGENTS.md; do not relax them to make a task fit):
    - Target style only; never copy the legacy patterns listed in §6.2/§7.2. Do not refactor legacy code outside the change's scope.
@@ -104,4 +110,4 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
 - No spec, no code; no approved plan, no code. Test first, always: a test you never saw fail proves nothing.
 - Smallest thing that satisfies the spec: no speculative features, no "while I'm here" edits.
 - Never mark a task done on a red test, never edit the spec or tasks to make the work pass, never silence a failing gate.
-- Do not commit, push, archive or bump submodule pointers. Never commit `ERAS-BE/src/Eras.Api/appsettings.json` or `ERAS-FE/.husky/*`.
+- Do not commit, push, archive or bump submodule pointers. Never commit `ERAS-BE/src/Eras.Api/appsettings.json` or a submodule's `.husky/*` (for example `ERAS-FE/.husky/*`).

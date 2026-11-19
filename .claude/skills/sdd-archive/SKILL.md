@@ -17,7 +17,7 @@ secrets (`.env`, `deploy/.env.prod`, `environment.development.ts`, keys in `apps
 
 ## When
 
-- **BE/FE change:** the submodule PRs are merged and the parent-repo ship PR (spec, ADRs, pointer bump) is
+- **Change with submodule work** (any side of `openspec/sides.conf`): the submodule PRs are merged and the parent-repo ship PR (spec, ADRs, pointer bump) is
   approved. The archive is its last commit.
 - **Tooling or docs change** (`skip_specs: true`, no submodule work): the change's own PR is the ship PR; archive
   once it is approved.

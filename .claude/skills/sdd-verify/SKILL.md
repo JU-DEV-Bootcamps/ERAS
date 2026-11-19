@@ -22,13 +22,13 @@ the spec. The conventions it relies on are in `openspec/sdd-conventions.md` (sum
 
 ```
 openspec/changes/<change-id>/proposal.md   # **Status:** / **Plan:** lines, ## Validation log
-openspec/changes/<change-id>/specs/<capability>/spec.md   # ACs with "**Side:** BE|FE|BE + FE"
+openspec/changes/<change-id>/specs/<capability>/spec.md   # ACs with "**Side:** <sides of openspec/sides.conf>"
 openspec/changes/<change-id>/design.md     # the plan
 openspec/changes/<change-id>/tasks.md      # numbered tasks and ## Traceability
 ```
 
-AC key: `<change-id>/AC-n`. BE tests carry `[Trait("AC", "<change-id>/AC-n")]`; FE tests start their
-`it()` title with `[<change-id>/AC-n]`.
+AC key: `<change-id>/AC-n`, in the side's form from `openspec/sides.conf`: BE tests carry
+`[Trait("AC", "<change-id>/AC-n")]`; the tests of a web client such as FE start their `it()` title with `[<change-id>/AC-n]`.
 
 ## Workflow
 
@@ -52,14 +52,15 @@ old change).
 Run `bash .claude/skills/sdd-implement/scripts/check-impl.sh "<change-id>" --final`: it counts the tagged
 tests per AC per side declared by the `**Side:**` lines (exactly 1 each) and flags focused or skipped tests.
 Then read each test: it counts only if its assertions actually check the criterion, not merely touch the code.
-- Frontend (`ERAS-FE`, Jasmine/Karma): `AGENTS.md` §7.3.
+- Frontend (`ERAS-FE`, Jasmine/Karma): `AGENTS.md` §7.3. Another web client: §7.3 of its own `AGENTS.md`.
 - Backend (`ERAS-BE`, xUnit): `AGENTS.md` §6.3, written at the layer where the behavior is decided.
 - An AC with no test is a **gap**. Offer to write the test (don't write it silently), or for a criterion that is
   genuinely manual-only, require it to be recorded as such in the validation log.
 
 ### 4. Run the tests and the gates
 Run `bash .claude/skills/sdd-verify/scripts/run-gates.sh "<change-id>"` in the background (several minutes on
-Windows). It runs the gates below for the sides the specs declare (`--be` / `--fe` override them) and prints one
+Windows). It runs the gates of `openspec/sides.conf` for the sides the specs declare (`--side <name>`, `--be` or
+`--fe` override them) and prints one
 line per gate: `PASS`, `FAIL` with its first error lines and a log path, or `UNRUNNABLE` (tool missing or file
 locked). Read a log only for a failing gate. Exit 0 = all passed, 1 = a gate failed, 3 = a gate could not run.
 `FAIL` and `UNRUNNABLE` are gaps; report them as printed. The gates of `AGENTS.md` §8.7, which you can also run by
@@ -68,6 +69,7 @@ hand to capture pass/fail per mapped test:
   `dotnet test Eras.sln`, coverage ≥ 25%.
 - FE (`ERAS-FE/`): `npm run lint`, `npm test -- --watch=false --browsers=ChromeHeadless --code-coverage`
   (≥ 15%), `npm run build`.
+- Any other side: its `gate.*` commands in `openspec/sides.conf`, run in its submodule.
 - `openspec validate "<change-id>" --strict`.
 Run only the sides the change touches. A failing or unrunnable gate or test = gap. Report the real
 output; never claim a pass you didn't observe. If a build is blocked by file locks (running `Eras.Api` or
@@ -83,7 +85,7 @@ ADR or index: those files must ship with the change (step 8).
 
 ### 6. Drift check (no more, no less)
 Compare the feature's code against the spec and `design.md`. The code lives in the submodules, so diff
-each touched one: `git -C ERAS-BE diff develop...HEAD`, `git -C ERAS-FE diff develop...HEAD`.
+each touched one: `git -C <submodule> diff develop...HEAD` for every side the change declares (for example `ERAS-BE`, `ERAS-FE`).
 - **Less**: an AC or in-scope item with no corresponding code.
 - **More**: behavior, endpoints, UI, config or dependencies not traceable to an AC or task (unrelated
   refactors, extra features, out-of-scope items implemented).

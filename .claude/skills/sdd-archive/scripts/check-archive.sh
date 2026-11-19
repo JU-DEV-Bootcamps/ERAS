@@ -3,12 +3,19 @@
 # every task ticked, a Verified line in proposal.md, linked ADRs Accepted, bumped submodule pointers merged.
 # Usage (from the repository root): bash .claude/skills/sdd-archive/scripts/check-archive.sh <change-id>
 # Exit 0 = ready to archive (warnings may exist). Exit 1 = at least one error.
+# The submodule of each side comes from openspec/sides.conf (ADR-0011).
 set -u
+
+. "$(dirname "$0")/../../sdd-shared/sides.sh"
 
 change="${1:-}"
 dir="openspec/changes/$change"
 if [ -z "$change" ] || [ ! -d "$dir" ]; then
   echo "usage: check-archive.sh <change-id> (run from the repository root; '$dir' not found)" >&2
+  exit 2
+fi
+if ! sides_ok; then
+  echo "check-archive.sh: $SIDES_CONF not found (run from the repository root)" >&2
   exit 2
 fi
 
@@ -50,14 +57,15 @@ fi
 
 # Submodule pointers: a bump must point at a commit already merged into that submodule's origin/develop,
 # and a side with ACs must be bumped by this branch.
-sides=$(cat "$dir"/specs/*/spec.md 2>/dev/null | tr -d '\r' | sed -n 's/^\*\*Side:\*\* *//p')
+declared=$(sides_of_specs "$dir"/specs/*/spec.md | cut -d'|' -f2 | sort -u)
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
   warn "not a git work tree: submodule pointers not checked"
 elif ! base=$(git merge-base HEAD origin/develop 2>/dev/null); then
   warn "no origin/develop: run 'git fetch' to check the submodule pointers"
 else
-  for sm in ERAS-BE ERAS-FE; do
-    side=${sm#ERAS-}
+  for side in $(sides_list); do
+    sm=$(sides_get "$side" submodule)
+    [ -n "$sm" ] || continue
     new=$(git ls-tree HEAD "$sm" 2>/dev/null | awk '$2 == "commit" { print $3 }')
     [ -n "$new" ] || continue
     old=$(git ls-tree "$base" "$sm" 2>/dev/null | awk '$2 == "commit" { print $3 }')
@@ -67,7 +75,7 @@ else
       elif ! git -C "$sm" merge-base --is-ancestor "$new" origin/develop 2> /dev/null; then
         err "$sm: the pointer ($new) is not on $sm origin/develop; merge the submodule PR and bump to the merged commit"
       fi
-    elif echo "$sides" | grep -qw "$side"; then
+    elif echo "$declared" | grep -qxF -- "$side"; then
       err "the spec has $side ACs but this branch does not bump the $sm pointer"
     fi
   done

@@ -4,7 +4,7 @@ description: >
   Spec Driven Development workflow step that runs ONLY after sdd-implement and BEFORE
   sdd-verify (sdd-spec > sdd-clarify > sdd-plan > sdd-implement > sdd-validate-impl >
   sdd-verify). Applies only when the implementation created or changed a backend controller
-  (ERAS-BE) or implemented a frontend change (ERAS-FE); otherwise it is skipped and the flow
+  (ERAS-BE) or implemented a change in a web client (a frontend side of openspec/sides.conf, for example ERAS-FE); otherwise it is skipped and the flow
   goes straight to sdd-verify. Asks the developer to manually validate the feature, logs the
   result in the change's proposal.md, then routes the workflow: back to sdd-implement if the
   developer requests changes or reports problems, forward to sdd-verify if the developer
@@ -31,7 +31,7 @@ it standalone or at any other point of the workflow. The conventions it relies o
 
 ```
 openspec/changes/<change-id>/proposal.md   # **Status:** / **Plan:** lines, ## Validation log
-openspec/changes/<change-id>/specs/<capability>/spec.md   # ACs: "#### Scenario: AC-n", "**Side:** BE|FE|BE + FE"
+openspec/changes/<change-id>/specs/<capability>/spec.md   # ACs: "#### Scenario: AC-n", "**Side:** <sides of openspec/sides.conf>"
 openspec/changes/<change-id>/design.md     # the plan: changes by layer
 openspec/changes/<change-id>/tasks.md      # numbered tasks (1.1, 2.3 ...) and ## Traceability
 ```
@@ -52,7 +52,7 @@ tasks as a warning. If the implementation tasks are not all ticked (`[x]`), stop
 Decide from the change files (`tasks.md`, `design.md` "Changes by layer", `spec.md`), not from
 the git diff. Validation is **required** only if the work includes either:
 - a **new or modified controller** in `ERAS-BE`, or
-- a **frontend change** in `ERAS-FE` (component, template, service, route, style, etc.).
+- a **frontend change** in a web client (`ERAS-FE` or another frontend side of `openspec/sides.conf`: component, template, service, route, style, etc.).
 
 Otherwise (e.g. docs, config, CI, DB/migration-only, non-controller backend code) **skip**:
 1. Tell the user it is skipped and why (no controller/FE change).

@@ -14,6 +14,9 @@ Rule: keep manuals as files in `manuals/` at the root of the parent repository, 
 ### [ADR-0010](0010-use-jspdf-autotable-for-vector-pdf-tables.md): Use jspdf-autotable to build vector PDF tables in the frontend
 Rule: build PDF tables in the frontend from plain columns and rows with `jspdf-autotable` on top of `jspdf` (real text, headers repeated on every page), loaded with a dynamic `import()`; new table exports do not use DOM snapshots.
 
+### [ADR-0012](0012-adopt-react-as-the-second-web-client-and-its-stack.md): Adopt React as the second web client and its stack
+Rule: ERAS v3 is a permanent second web client in `ERAS-FE-React` (side `FE-React`), built with React 19, TypeScript strict and Vite, React Router, TanStack Query, React Hook Form + Zod, react-i18next (en, es, pt-BR; English first), keycloak-js and Axios, tested with Vitest, React Testing Library and MSW; a library is installed by the first change that uses it, and the lint, typecheck, test (≥ 15%) and build gates block every pull request.
+
 ## auth
 
 ### [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md): Limit a professional's access to students of their assigned assessments
@@ -21,6 +24,9 @@ Rule: a professional only reaches students of assessments whose `AssignedProfess
 
 ### [ADR-0009](0009-limit-professional-profile-to-professionals.md): Limit the professional profile endpoints to the ERAS Professional role
 Rule: the endpoints `GET` and `PUT api/v1/users/me/professional-profile` declare the policy `ProfessionalOnly`, which requires only the `ERAS Professional` role; Administrator, Officer and Guest get 403. This is an exception to "Administrator passes every check" (AGENTS.md §4.3) and applies only to endpoints that declare `ProfessionalOnly`.
+
+### [ADR-0013](0013-authenticate-the-react-client-with-its-own-keycloak-public-client.md): Authenticate the React client with its own Keycloak public client, PKCE and in-memory tokens
+Rule: v3 logs in through its own public Keycloak client in each environment (authorization code + PKCE S256, redirect, no check-sso iframe), keeps tokens only in memory, refreshes them before expiry and reads roles from the same roles resource as v2; the client has exact web origins and v2's audience mapper, so the backend accepts its tokens unchanged.
 
 ## data
 
@@ -40,3 +46,6 @@ Rule: backend and frontend rules live only in `ERAS-BE/AGENTS.md` and `ERAS-FE/A
 
 ### [ADR-0008](0008-review-and-sign-adrs-before-accepting.md): Review and sign an ADR before it is accepted
 Rule: an ADR is reviewed like a PR with the checklist in `README.md`; anyone with write access reviews and signs, one sign-off is enough, and the result is recorded in `Reviewed by` and `Signed by`. Only a human accepts; skills never fill those fields.
+
+### [ADR-0011](0011-declare-the-sdd-sides-in-one-registry.md): Declare the SDD sides in one registry
+Rule: declare every side (the backend and each web client) once in `openspec/sides.conf`; scripts, skills and rules read it and never name a client by hand, and a `**Side:**` value names whole registered sides joined with ` + `. Adding or removing a client is one `[section]` there plus that client's own `AGENTS.md` (ADR-0007).

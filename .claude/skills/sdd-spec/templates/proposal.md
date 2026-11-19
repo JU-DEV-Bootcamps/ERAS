@@ -14,8 +14,8 @@ design.md and tasks.md are NOT written here.
 
 ## Why
 
-<!-- 1-2 sentences: the problem, who has it, why now. Link the issue: ERAS-BE#<n> and/or ERAS-FE#<n>. -->
-<Problem and motivation.> Issue: ERAS-BE#<n> / ERAS-FE#<n>
+<!-- 1-2 sentences: the problem, who has it, why now. Link the issue with its repository, for example ERAS-BE#<n>. -->
+<Problem and motivation.> Issue: <repository>#<n>
 
 ## What Changes
 
@@ -37,7 +37,7 @@ design.md and tasks.md are NOT written here.
 
 ## Impact
 
-- **Submodules:** <BE | FE | BE + FE>
+- **Submodules:** <the sides of openspec/sides.conf, for example BE | FE | BE + FE>
 - **Roles / who can do what:** <state explicitly, e.g. "Student Services Officer may now ...", or "no change">
 - **API contract:** <new or changed endpoints in one line, or "none"> (details go to design.md)
 - **Data / migration:** <yes/no, one line>
