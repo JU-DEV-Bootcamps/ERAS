@@ -62,7 +62,9 @@ Do NOT change the spec (`proposal.md`, `specs/`) or the plan's approach on your 
      Edge-case or helper tests are welcome and carry no AC tag. Never a focused or skipped test (`fit`, `xit`, `fdescribe`,
      `xdescribe`, `.only`, `.skip`, `[Fact(Skip=…)]`). If `ERAS-FE/.claude/skills/eras-fe-test/SKILL.md` exists, follow it for FE tests.
      In general, when the submodule of a side has a test skill (`<submodule>/.claude/skills/<name>-test/SKILL.md`, for example
-     `eras-fe-react-test` in `ERAS-FE-React`), follow it for that side's AC tests.
+     `eras-fe-react-test` in `ERAS-FE-React`), follow it for that side's AC tests. Likewise, when it has a feature skill
+     (`<submodule>/.claude/skills/<name>-feature/SKILL.md`, for example `eras-fe-react-feature`), follow it for that
+     side's implementation tasks.
 
 5. **Code rules while writing** (AGENTS.md; do not relax them to make a task fit):
    - Target style only; never copy the legacy patterns listed in §6.2/§7.2. Do not refactor legacy code outside the change's scope.
