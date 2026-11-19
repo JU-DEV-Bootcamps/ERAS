@@ -54,3 +54,8 @@ ADR-0012 and later documents cite three ADRs that are not written yet as ADR-001
 - **Rollback:** one commit in the parent repository and one in `ERAS-FE-React`, each revertible on its own.
 
 No behavior of ERAS changes, so this change sets `skip_specs: true` (AGENTS.md section 8.1, docs).
+
+## Validation log
+
+- Skipped: no BE controller or FE change (ADR numbers in documentation only; no screen or behavior of a web client changed).
+- Verified 2026-11-19: no gaps, no drift, gates green

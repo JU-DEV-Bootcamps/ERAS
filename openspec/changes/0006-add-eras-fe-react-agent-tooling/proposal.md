@@ -121,3 +121,8 @@ No behavior of ERAS changes, so this change sets `skip_specs: true` (AGENTS.md s
   `package.json` and `package-lock.json` are unchanged.
 
 **Task 4.3, discovery check (2026-11-19):** in a new Claude Code session at the parent root, the user asked which skill the agent would follow for an FE-React implementation task, without writing code. No scratch change was created, so nothing had to be discarded. The agent chose `/sdd-implement` and reached `eras-fe-react-test`, `eras-fe-react-feature` and `eras-fe-react-i18n` through the pointer in `sdd-implement` (it cited `SKILL.md:63-67`) and through `ERAS-FE-React/AGENTS.md`. It also named the FE-React gates, `run-gates.sh`, `check-impl.sh`, `/sdd-validate-impl` and `eras-fe-react-review`. The answer does not show whether the nested skills are listed by name at session start; they are reached through the pointers, as the proposal expects.
+
+## Validation log
+
+- Skipped: no BE controller or FE change (agent skills, docs and lint configuration only; no screen or behavior of a web client changed).
+- Verified 2026-11-19: no gaps, no drift, gates green
