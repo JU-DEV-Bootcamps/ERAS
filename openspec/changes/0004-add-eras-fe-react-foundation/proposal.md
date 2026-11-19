@@ -15,7 +15,7 @@ ERAS v3 is a second, permanent web client in React, in its own repository `ERAS-
 - **Runtime configuration:** `public/config.json`, read before the app starts, holds the Keycloak URL, realm, client id, the roles resource and the three role names of `AGENTS.md` section 4.3. It holds no API URL: the app calls `/api/v1` on its own origin; in development the Vite server proxies `/api` to the backend (`http://localhost:8080`), and in Stage and production the v3 web server does the same (the v3 CI and infrastructure change).
 - **Authentication** (ADR-0013): keycloak-js with the authorization code flow and PKCE `S256`, login by redirect (no silent check-sso iframe), tokens only in memory (never `localStorage` or `sessionStorage`), refresh before expiry, roles read from `resource_access[<rolesResource>].roles`. An Axios interceptor adds the bearer token.
 - **App shell, no ERAS screen:** a route table with per-route roles (the v3 equivalent of v2's `ROUTE_METADATA`), a role guard, an authenticated placeholder home, an "access denied" page and a "not found" page. The 15 ERAS screens are later changes, one per module, through the full `/sdd-*` flow.
-- **Initial folder structure:** `src/app` (bootstrap, router, providers), `src/core` (config, auth, http, i18n), `src/shared` (generic pieces) and `src/features/<feature>` (one folder per module). ADR-0016 (state and layers) formalizes it before the first module.
+- **Initial folder structure:** `src/app` (bootstrap, router, providers), `src/core` (config, auth, http, i18n), `src/shared` (generic pieces) and `src/features/<feature>` (one folder per module). ADR-0015 (state and layers) formalizes it before the first module.
 - **Tests:** Vitest + React Testing Library + MSW, `jsdom`, coverage with a 15% line threshold enforced in the Vitest configuration. Tests cover the configuration loader, token handling, the role guard and the Axios interceptor. No AC tags: this change has no AC.
 - **Scripts that `openspec/sides.conf` calls:** `lint` (ESLint flat config with typescript-eslint, react-hooks and jsx-a11y), `test:ci` (`vitest run --coverage`), `typecheck` (`tsc --noEmit`), `build` (`vite build`); plus `dev` and `test`.
 - **Hooks:** husky + commitlint (`@commitlint/config-conventional`) + lint-staged, copied from `ERAS-FE` (`commit-msg`, `pre-commit`); `pre-push` runs `npm run test:ci`.
@@ -28,8 +28,8 @@ ERAS v3 is a second, permanent web client in React, in its own repository `ERAS-
 
 **Out of scope:**
 - Any ERAS screen or behavior (later changes, one per module, with specs).
-- The Orval client generated from the backend OpenAPI document (ADR-0015, before the first module that calls the API); TanStack Table and Virtual, React Hook Form and Zod (installed by the first module that needs them; adopted by ADR-0012).
-- Storybook (depends on the UI library, ADR-0017, not decided) and the UI library itself.
+- The Orval client generated from the backend OpenAPI document (ADR-0014, before the first module that calls the API); TanStack Table and Virtual, React Hook Form and Zod (installed by the first module that needs them; adopted by ADR-0012).
+- Storybook (depends on the UI library, ADR-0016, not decided) and the UI library itself.
 - Playwright end-to-end tests (they need the running stack; a later change).
 - The `Dockerfile`, the v3 nginx, the image workflow, Stage, production, CORS and the Stage/production Keycloak clients (the v3 CI and infrastructure change).
 - Registering `ERAS-FE-React` as a submodule (needs the remote URL).
@@ -78,8 +78,8 @@ No behavior changes in ERAS, so this change sets `skip_specs: true` (AGENTS.md s
 
 - A change with a spec for the language selector (choose `en`, `es` or `pt-BR` in the UI and remember the choice).
 
-- ADR-0015 (Orval and adapters) and ADR-0016 (state and layers) before the first module change.
-- ADR-0017 (UI library), then Storybook.
+- ADR-0014 (Orval and adapters) and ADR-0015 (state and layers) before the first module change.
+- ADR-0016 (UI library), then Storybook.
 - Playwright end-to-end tests against the local stack.
 
 ## Validation log

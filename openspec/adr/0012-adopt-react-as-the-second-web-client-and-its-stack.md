@@ -13,7 +13,7 @@ ERAS v2 is an Angular 19 client in `ERAS-FE/`, kept in production by another tea
 
 ## Decision
 
-ERAS v3 is a React client in its own repository `ERAS-FE-React`, side `FE-React` of `openspec/sides.conf`. Its stack is React 19 with TypeScript `strict` and Vite; React Router for routes; TanStack Query for server state; TanStack Table and Virtual for tables and long lists; React Hook Form with Zod for forms and validation; react-i18next for texts, in English, neutral Spanish and Brazilian Portuguese with English as the initial language (v2 stays English only); keycloak-js for login (ADR-0013); Axios for HTTP; Vitest, React Testing Library and MSW for unit and AC tests; Playwright for end-to-end tests. A library is installed by the first change that uses it, not before. The API client generated from OpenAPI (ADR-0015) and the UI library (ADR-0017) are separate decisions. The gates `lint`, `test:ci` (coverage at least 15%), `typecheck` and `build` block every pull request from the first commit.
+ERAS v3 is a React client in its own repository `ERAS-FE-React`, side `FE-React` of `openspec/sides.conf`. Its stack is React 19 with TypeScript `strict` and Vite; React Router for routes; TanStack Query for server state; TanStack Table and Virtual for tables and long lists; React Hook Form with Zod for forms and validation; react-i18next for texts, in English, neutral Spanish and Brazilian Portuguese with English as the initial language (v2 stays English only); keycloak-js for login (ADR-0013); Axios for HTTP; Vitest, React Testing Library and MSW for unit and AC tests; Playwright for end-to-end tests. A library is installed by the first change that uses it, not before. The API client generated from OpenAPI (ADR-0014) and the UI library (ADR-0016) are separate decisions. The gates `lint`, `test:ci` (coverage at least 15%), `typecheck` and `build` block every pull request from the first commit.
 
 ## Alternatives
 
@@ -29,5 +29,5 @@ ERAS v3 is a React client in its own repository `ERAS-FE-React`, side `FE-React`
 - Every v3 text exists in three languages, so each module change brings its texts in `en`, `es` and `pt-BR`, and someone must review the Spanish and Portuguese ones. This is a deliberate difference from v2, to be covered by the v2/v3 relationship ADR.
 - v3 rules live in `ERAS-FE-React/AGENTS.md` (ADR-0007); the root `AGENTS.md` keeps only what both clients share.
 - v3 starts with blocking gates; it does not inherit v2's non-blocking ones.
-- The API client (ADR-0015), state and layers (ADR-0016) and the UI library (ADR-0017) must be decided before the first v3 module.
+- The API client (ADR-0014), state and layers (ADR-0015) and the UI library (ADR-0016) must be decided before the first v3 module.
 - The v3 team owns dependency updates for this stack.
