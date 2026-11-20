@@ -52,6 +52,9 @@ Skills never fill these fields or set `Accepted`. `check-adr.sh` fails for an Ac
 |---|---|---|---|
 | [ADR-0010](0010-use-jspdf-autotable-for-vector-pdf-tables.md) | Use jspdf-autotable to build vector PDF tables in the frontend | Accepted | — |
 | [ADR-0012](0012-adopt-react-as-the-second-web-client-and-its-stack.md) | Adopt React as the second web client and its stack | Accepted | — |
+| [ADR-0014](0014-call-the-backend-from-the-react-client-through-hand-written-axios-services.md) | Call the backend from the React client through hand-written axios services, without code generators | Accepted | — |
+| [ADR-0015](0015-keep-server-state-in-tanstack-query-and-fix-the-layers-of-the-react-client.md) | Keep server state in TanStack Query and fix the layers of the React client | Accepted | — |
+| [ADR-0016](0016-use-mui-with-one-theme-as-the-ui-library-of-the-react-client.md) | Use MUI with one theme as the UI library of the React client | Accepted | — |
 
 ### auth
 

@@ -17,6 +17,15 @@ Rule: build PDF tables in the frontend from plain columns and rows with `jspdf-a
 ### [ADR-0012](0012-adopt-react-as-the-second-web-client-and-its-stack.md): Adopt React as the second web client and its stack
 Rule: ERAS v3 is a permanent second web client in `ERAS-FE-React` (side `FE-React`), built with React 19, TypeScript strict and Vite, React Router, TanStack Query, React Hook Form + Zod, react-i18next (en, es, pt-BR; English first), keycloak-js and Axios, tested with Vitest, React Testing Library and MSW; a library is installed by the first change that uses it, and the lint, typecheck, test (≥ 15%) and build gates block every pull request.
 
+### [ADR-0014](0014-call-the-backend-from-the-react-client-through-hand-written-axios-services.md): Call the backend from the React client through hand-written axios services, without code generators
+Rule: v3 calls the backend only through reviewed source code on the one client of `src/core/http/` (no Orval or other generator); failures become `ApiError` and the backend's `detailed` stack trace is never kept, shown or logged; each feature owns its DTO `interface`s in `types.ts` and typed calls in `api.ts`, validates critical responses with Zod and tests them with MSW.
+
+### [ADR-0015](0015-keep-server-state-in-tanstack-query-and-fix-the-layers-of-the-react-client.md): Keep server state in TanStack Query and fix the layers of the React client
+Rule: server data lives only in TanStack Query hooks of each feature (no global store, no copies in `useState`); the HTTP client reaches screens through `HttpClientProvider` / `useHttpClient()`; the layers `app`, `core`, `features/<feature>`, `shared` are final, a feature never imports another, and a boundaries lint plugin enforces it.
+
+### [ADR-0016](0016-use-mui-with-one-theme-as-the-ui-library-of-the-react-client.md): Use MUI with one theme as the UI library of the React client
+Rule: v3 uses only MUI, styled through one theme in `src/app/theme.ts` that copies v2's tokens and breakpoints (768px, 1024px) and is the single source of colors, typography, spacing and breakpoints; adjustments use `sx` or `styled()`, icons come from `@mui/icons-material`, and no other styling system (Tailwind, CSS modules, Sass) or component kit is added.
+
 ## auth
 
 ### [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md): Limit a professional's access to students of their assigned assessments
