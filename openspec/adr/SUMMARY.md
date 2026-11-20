@@ -26,6 +26,9 @@ Rule: server data lives only in TanStack Query hooks of each feature (no global 
 ### [ADR-0016](0016-use-mui-with-one-theme-as-the-ui-library-of-the-react-client.md): Use MUI with one theme as the UI library of the React client
 Rule: v3 uses only MUI, styled through one theme in `src/app/theme.ts` that copies v2's tokens and breakpoints (768px, 1024px) and is the single source of colors, typography, spacing and breakpoints; adjustments use `sx` or `styled()`, icons come from `@mui/icons-material`, and no other styling system (Tailwind, CSS modules, Sass) or component kit is added.
 
+### [ADR-0017](0017-guard-the-react-client-dependencies-against-supply-chain-attacks.md): Guard the React client's dependencies against supply-chain attacks
+Rule: v3 keeps exact versions and a committed lockfile, adopts a version only after 7 days (reviewed security fixes earlier), installs in CI with `npm ci --ignore-scripts`, gates pull requests on `npm audit --audit-level=high` and pins GitHub Actions by SHA; Dependabot runs weekly with a 7-day cooldown, grouped minor/patch, separate majors and at most 5 open PRs, and nothing merges without review.
+
 ## auth
 
 ### [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md): Limit a professional's access to students of their assigned assessments
