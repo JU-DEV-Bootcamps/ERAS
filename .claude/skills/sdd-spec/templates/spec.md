@@ -23,9 +23,10 @@ The system SHALL <observable behavior> <for which actor> <under which constraint
 <!-- Scenario = Acceptance Criterion (AC).
      - Heading: exactly 4 '#', "AC-<n> <short title>". n starts at 1, unique in the CHANGE (not per file),
        never renumbered, never reused.
-     - One scenario = one behavior = one automated test per affected side (BE / FE).
-     - Line right under the heading: **Side:** BE | FE | BE + FE (the sides whose test proves the AC;
-       it becomes the Side column of the traceability table in tasks.md).
+     - One scenario = one behavior = one automated test per affected side.
+     - Line right under the heading: **Side:** with the sides of openspec/sides.conf whose test proves the AC,
+       whole names joined with " + ", each once (for example BE, FE or BE + FE); it becomes the Side column of
+       the traceability table in tasks.md.
      - WHEN and THEN are mandatory. Use concrete values ("Main", 409), exact role names, observable results.
      - Cover, for every new endpoint or route: the happy path, each allowed role, each DENIED role,
        and each validation failure. Any change to who can do what is its own AC. -->

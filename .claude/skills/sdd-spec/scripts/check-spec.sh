@@ -2,12 +2,19 @@
 # Checks the project rules for the spec of one change that `openspec validate` does not enforce.
 # Usage (from the repository root): bash .claude/skills/sdd-spec/scripts/check-spec.sh <change-id>
 # Exit 0 = no errors (warnings may exist). Exit 1 = at least one error.
+# The valid **Side:** values are the sides of openspec/sides.conf, joined with " + " (ADR-0011).
 set -u
+
+. "$(dirname "$0")/../../sdd-shared/sides.sh"
 
 change="${1:-}"
 dir="openspec/changes/$change"
 if [ -z "$change" ] || [ ! -d "$dir" ]; then
   echo "usage: check-spec.sh <change-id> (run from the repository root; '$dir' not found)" >&2
+  exit 2
+fi
+if ! sides_ok; then
+  echo "check-spec.sh: $SIDES_CONF not found (run from the repository root)" >&2
   exit 2
 fi
 
@@ -57,12 +64,16 @@ for f in $specs; do
     /^#{1,3} / { close_scenario() }
     name != "" && /^- \*\*WHEN\*\*/ { when = 1 }
     name != "" && /^- \*\*THEN\*\*/ { then_ = 1 }
-    name != "" && /^\*\*Side:\*\* (BE|FE|BE \+ FE)$/ { side = 1 }
+    name != "" && /^\*\*Side:\*\* / { side = 1; value = $0; sub(/^\*\*Side:\*\* /, "", value); print "SIDE " name "\t" value }
     /NEEDS CLARIFICATION/ { print "MARKER" }
     /403/ { print "DENIED" }
     END { close_scenario() }
   ')
   echo "$out" | grep -E '^ERROR' && errors=$((errors + $(echo "$out" | grep -cE '^ERROR')))
+  while IFS="$(printf '\t')" read -r scenario value; do
+    [ -n "$scenario" ] || continue
+    why=$(sides_check "$value") || err "$f: ${scenario#SIDE } **Side:** $why"
+  done <<< "$(echo "$out" | grep '^SIDE ')"
   all_keys="$all_keys
 $(echo "$out" | grep -E '^KEY ' | sed 's/^KEY //')"
   markers_in_file=$(echo "$out" | grep -c '^MARKER')

@@ -2,12 +2,19 @@
 # Checks design.md and tasks.md of one change against the project rules that `openspec validate` does not enforce.
 # Usage (from the repository root): bash .claude/skills/sdd-plan/scripts/check-plan.sh <change-id>
 # Exit 0 = no errors (warnings may exist). Exit 1 = at least one error.
+# The sides are the ones of openspec/sides.conf, matched by their whole name (ADR-0011).
 set -u
+
+. "$(dirname "$0")/../../sdd-shared/sides.sh"
 
 change="${1:-}"
 dir="openspec/changes/$change"
 if [ -z "$change" ] || [ ! -d "$dir" ]; then
   echo "usage: check-plan.sh <change-id> (run from the repository root; '$dir' not found)" >&2
+  exit 2
+fi
+if ! sides_ok; then
+  echo "check-plan.sh: $SIDES_CONF not found (run from the repository root)" >&2
   exit 2
 fi
 
@@ -45,17 +52,7 @@ expected=""
 if [ "$skip_specs" -eq 0 ]; then
   specs=$(find "$dir/specs" -name spec.md 2>/dev/null | sort)
   [ -z "$specs" ] && err "no spec.md under $dir/specs (set skip_specs: true if the change has no spec)"
-  for f in $specs; do
-    expected="$expected
-$(tr -d '\r' < "$f" | awk '
-      /^#### Scenario: AC-[0-9]+ / { key = $3 }
-      /^\*\*Side:\*\* / {
-        side = $0; sub(/^\*\*Side:\*\* /, "", side)
-        if (side ~ /BE/) print key "|BE"
-        if (side ~ /FE/) print key "|FE"
-      }')"
-  done
-  expected=$(echo "$expected" | sed '/^$/d' | sort -u)
+  expected=$(sides_of_specs $specs | sed '/^$/d' | sort -u)
 fi
 
 rows=$(tr -d '\r' < "$tasks" | awk '
@@ -88,7 +85,9 @@ untracked=$(tr -d '\r' < "$tasks" | grep -nE '^\s*[-*] [0-9]+\.[0-9]+ ' || true)
 
 groups=$(tr -d '\r' < "$tasks" | grep -E '^## [0-9]+\.' || true)
 [ -z "$groups" ] && err "tasks.md has no numbered task group"
-echo "$groups" | grep -qE 'BE|FE|Infra' || warn "no task group is named by side (BE, FE or Infra)"
+side_names=$(sides_list)
+echo "$groups" | grep -qwF "$(printf '%s\nInfra\n' "$side_names")" ||
+  warn "no task group is named by side ($(echo $side_names | sed 's/ /, /g') or Infra)"
 last_group=$(echo "$groups" | tail -1)
 echo "$last_group" | grep -qi 'verif' || err "the last task group must be the verification group (it is '$last_group')"
 verif_text=$(tr -d '\r' < "$tasks" | awk '/^## [0-9]+\./ { g = $0 } g ~ /[Vv]erif/ { print }')

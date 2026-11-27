@@ -49,7 +49,9 @@ No code changes without an approved spec (see §8).
 | Path | What it is |
 |---|---|
 | `ERAS-BE/` | **Git submodule.** Backend: .NET 8, Onion Architecture, EF Core 9 + PostgreSQL 15, MediatR 12, Keycloak JWT. Solution: `ERAS-BE/Eras.sln` |
-| `ERAS-FE/` | **Git submodule.** Frontend: Angular 19 (standalone), Angular Material 3, keycloak-js, ApexCharts |
+| `ERAS-FE/` | **Git submodule.** Frontend v2: Angular 19 (standalone), Angular Material 3, keycloak-js, ApexCharts |
+| `ERAS-FE-React/` | **Local repository, not yet a submodule** (no remote yet; each clone ignores it through `.git/info/exclude`). Frontend v3: React 19 + TypeScript + Vite (ADR-0012). A second, permanent client of the same backend; its rules are in `ERAS-FE-React/AGENTS.md` (ADR-0007) |
+| `openspec/sides.conf` | The SDD sides: every submodule whose tests prove an AC, with its test folder, AC key form and gates (ADR-0011) |
 | `openspec/specs/` | Living specs: the current, agreed behavior of the system, grouped by capability |
 | `openspec/changes/<change-id>/` | Proposed or in-progress changes (proposal, spec deltas, design, tasks) |
 | `openspec/changes/archive/` | Completed changes (history) |
@@ -62,7 +64,8 @@ No code changes without an approved spec (see §8).
 
 | Document | Source of truth for |
 |---|---|
-| `AGENTS.md` (this file) | The shared rules: principles, conventions, workflow, limits. Backend and frontend rules are in `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md` (ADR-0007) |
+| `AGENTS.md` (this file) | The shared rules: principles, conventions, workflow, limits. The rules of each side are in that submodule's own `AGENTS.md`, for example `ERAS-BE/AGENTS.md` and `ERAS-FE/AGENTS.md` (ADR-0007) |
+| `openspec/sides.conf` | The sides an AC can name on its `**Side:**` line, where each side's tests live, how they carry the AC key, and each side's §8.7 gates (ADR-0011) |
 | `CLAUDE.md` | Claude Code specifics only; it imports this file |
 | `README.md` | Onboarding: what ERAS is, how to set up and run it |
 | `openspec/config.yaml` | The rules OpenSpec injects into its artifacts (AC format, traceability table, design triggers) |
@@ -131,7 +134,9 @@ The frontend architecture (layers and paths) live in `ERAS-FE/AGENTS.md` §4.2. 
 
 ### 4.3 Cross-cutting contracts
 
-| Concern | Backend | Frontend |
+The Backend column is the contract every web client uses; it does not change per client. The `FE` column is how the v2 client (`ERAS-FE`, Angular) implements it. Any other client of `openspec/sides.conf` names its own implementation in its own `AGENTS.md` §4.3, never here (ADR-0007, ADR-0011).
+
+| Concern | Backend (contract for every client) | FE (`ERAS-FE`, v2) |
 |---|---|---|
 | Roles (Keycloak client roles) | `ErasRole` (`Domain/Entities/UserManagement`), names from config `Keycloak:RoleNames:*` | `ERASRoles` enum (`core/models/profile.model.ts`), names from `environment.roleNames` |
 | Role values | `ERAS Administrator`, `ERAS Student Services Officer`, `ERAS Professional` (plus Guest = no ERAS role). Administrator passes every check | Same values. Per-route access is in `ROUTE_METADATA`, per-endpoint access in `ErasPolicies` and the handlers. Any change to who can do what is an AC |
@@ -146,8 +151,9 @@ The frontend architecture (layers and paths) live in `ERAS-FE/AGENTS.md` §4.2. 
 
 ### 5.1 Branches, commits and submodules
 
-- Code commits happen **inside** `ERAS-BE/` or `ERAS-FE/`, on a branch in that submodule. Specs are committed in this parent repo.
+- Code commits happen **inside** a submodule (the `submodule` of each side in `openspec/sides.conf`, for example `ERAS-BE/` or `ERAS-FE/`), on a branch in that submodule. Specs are committed in this parent repo.
 - After the submodule PR merges, bump the submodule pointer in the parent repo. Never commit a pointer to an unpushed submodule commit.
+- A change that touches several submodules has one PR per submodule; each merges on its own, through the review of the team that owns that submodule, in any order. The parent ship PR bumps the pointer of every side the change declares, and only those, once all of them are merged (`check-archive.sh` checks it).
 - Branch names: `<prefix>/<storyNumber>/<storyTitle>`, where prefix is `feature|bugfix|refactor|ci|docs|chore|style|release` (for example `feature/BE608/rejectduplicateconfig`).
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `ci:`, `chore:`). commitlint enforces this in ERAS-FE.
 
@@ -155,7 +161,9 @@ The frontend architecture (layers and paths) live in `ERAS-FE/AGENTS.md` §4.2. 
 
 - **AC = one `#### Scenario:`** in a change's delta spec, numbered `AC-<n>`. Numbers are unique within the change, stable and never reused.
 - Global AC key: **`<change-id>/AC-<n>`**.
-- For **each side the AC affects** (BE, FE or both), there is **exactly one** test tagged with that AC key. Each tagged test is tagged with **exactly one** AC key.
+- For **each side the AC affects**, there is **exactly one** test tagged with that AC key. Each tagged test is tagged with **exactly one** AC key.
+- The sides are the ones in `openspec/sides.conf`. A scenario names its sides on a `**Side:**` line, joined with ` + ` (for example `**Side:** BE + FE`). A side is matched by its whole name, so `FE` and `FE-React` are different sides. The registry also says where each side's tests live and how they carry the key (an xUnit `[Trait("AC", …)]` or an `it()` title starting with `[<key>]`); the submodule's own `AGENTS.md` says how to write them.
+- Several clients can cover the same AC with the same key, each with its own test. `bash .claude/skills/sdd-shared/check-parity.sh` lists the ACs one client of a product covers and another does not; it is informative and never blocks.
 - Extra helper or edge-case tests are welcome but carry **no** AC tag.
 - A test file lives where the project's tests already live (§6.3, §7.3). Tags are what make the mapping traceable, not file names.
 - If a later change MODIFIES a requirement, its new scenario gets that change's AC key, and the existing test is updated and **re-tagged** to it.
@@ -291,18 +299,23 @@ Full table with what each one does: [`openspec/sdd-conventions.md`](openspec/sdd
 | `/sdd-archive <change-id>` | 🟨 | 6. Archive |
 | `/sdd-adr ["<decision>"]` | 🟨 | 1. Propose (or any time) |
 
+Which command when (the `/sdd-*` skills carry the ERAS gates; the generic `/opsx:*` commands do not):
+
+| You want to… | Use |
+|---|---|
+| Build a feature or change behavior | `/sdd-spec` → `/sdd-clarify` → `/sdd-plan` → `/sdd-implement` → `/sdd-validate-impl` → `/sdd-verify` → `/sdd-archive` |
+| Change something with no observable behavior (CI, docs, refactor, tooling) | `/opsx:propose` with `skip_specs: true`, then `/opsx:apply`; archive it with `/sdd-archive` |
+| Only think or investigate | `/opsx:explore` |
+
+When a request is only a bare `#<n>`, follow the lookup rule in `CLAUDE.md` ("Claude Code specifics").
+
 ### 8.6 AC traceability check (Git Bash)
 
-For each AC in a change, this lists how many BE and FE tests carry its key. Each side the AC affects must show **exactly 1**.
+For each AC in a change and each side its `**Side:**` line names, this counts the tests that carry its key, in that side's test folder from `openspec/sides.conf`. Each side the AC affects must show **exactly 1**; it also reports a key tagged on a side the spec does not declare, and a focused or skipped tagged test.
 
 ```bash
-CHANGE=<change-id>
-for ac in $(grep -rhoE '^#### Scenario: AC-[0-9]+' "openspec/changes/$CHANGE/specs" | awk '{print $3}' | sort -uV); do
-  key="$CHANGE/$ac"
-  be=$(grep -rF "[Trait(\"AC\", \"$key\")]" ERAS-BE/test --include=*.cs | wc -l)
-  fe=$(grep -rF "'[$key]" ERAS-FE/src/app --include=*.spec.ts | wc -l)
-  echo "$key  BE=$be  FE=$fe"
-done
+bash .claude/skills/sdd-implement/scripts/check-impl.sh <change-id>           # work in progress: missing tests are warnings
+bash .claude/skills/sdd-implement/scripts/check-impl.sh <change-id> --final   # before reporting done: they are errors
 ```
 
 ### 8.7 Definition of Done (checklist)
@@ -312,6 +325,7 @@ done
 - [ ] AC traceability check (§8.6) shows exactly 1 test per AC per affected side
 - [ ] BE: build with `-warnaserror`, `dotnet format --verify-no-changes` and `dotnet test` all green, coverage ≥ 25%
 - [ ] FE: `npm run lint` and the headless `npm test` green, coverage ≥ 15%, `npm run build` OK
+- [ ] Any other side the change declares: every `gate.*` of that side in `openspec/sides.conf` green, coverage ≥ 15% for a web client (`bash .claude/skills/sdd-verify/scripts/run-gates.sh <change-id>` runs the gates of every declared side)
 - [ ] Every ADR the change links is `Accepted`, and the parent-repo commit carries the change folder and its ADR files (§8.3 step 5)
 - [ ] Submodule PRs link the change and are merged, and the ship PR bumps the parent pointer to the merged commits
 - [ ] The change is archived (`/sdd-archive`) as the last commit of the ship PR, after its approval and before it merges
@@ -322,7 +336,7 @@ done
 
 Hard limits for every contributor, human or agent. Each one restates a rule from the sections above.
 
-- **No code without an approved change.** Nothing changes in `ERAS-BE/`, `ERAS-FE/` or the infrastructure files without an OpenSpec change that passes `openspec validate --strict` and is approved (§8.1, §8.3).
+- **No code without an approved change.** Nothing changes in a submodule (`ERAS-BE/`, `ERAS-FE/` or any other side of `openspec/sides.conf`) or the infrastructure files without an OpenSpec change that passes `openspec validate --strict` and is approved (§8.1, §8.3).
 - **Only a human approves.** Only a human sets `**Status:** Approved`, `**Plan:** Approved` and an ADR's `Accepted` (§8.4).
 - **Never commit or push unless asked.** No skill commits. Never commit a submodule pointer to an unpushed commit (§5.1).
 - **Secrets stay out.** Never read, print or commit `.env`, `deploy/.env.prod`, `environment.development.ts` or the encryption keys in `appsettings*.json`. Secrets come from environment variables or user-secrets (§1.1 principle 8, §6.2).

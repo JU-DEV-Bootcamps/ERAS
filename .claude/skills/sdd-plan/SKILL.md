@@ -10,7 +10,7 @@ In this repo the OpenSpec artifacts of the plan are **`design.md`** (the plan: h
 plan is `design.md` and not a separate `plan.md`. Rules: `AGENTS.md` §3–§8 and `openspec/config.yaml`.
 
 **Boundary.** Write only `design.md` and `tasks.md` of the change, and the `**Plan:**` line of `proposal.md`.
-Do NOT write code or tests, do NOT touch `ERAS-BE/` or `ERAS-FE/`, do NOT edit the spec (a problem in the
+Do NOT write code or tests, do NOT touch any submodule (the sides of `openspec/sides.conf`), do NOT edit the spec (a problem in the
 spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or print secrets (`.env`,
 `deploy/.env.prod`, `environment.development.ts`, keys in `appsettings*.json`).
 
@@ -38,7 +38,7 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
    `openspec instructions design --change "<change-id>" --json` and `... tasks ...`: treat `context` and
    `rules` as constraints for you (do not copy them into the files).
 
-3. **Read the code (read-only).** For each capability, find what exists today in `ERAS-BE/` and `ERAS-FE/`:
+3. **Read the code (read-only).** For each capability, find what exists today in the submodule of each side the spec declares (`openspec/sides.conf`):
    the feature folder, the closest golden-path reference (`Features/RemissionManagement/`,
    `AssessmentsController`), existing policies in `ErasPolicies`, FE route metadata, models and services.
    Use an Explore agent for broad searches and keep only conclusions. Cite real paths; if a path does not exist,
@@ -49,9 +49,10 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
      persistence (migration if the schema changes) → thin controller with `[Authorize(Policy = ...)]`.
    - FE follows the golden path (§7.1): lazy route with `canActivateAuthRole` + `ROUTE_METADATA` roles, model
      mirroring the BE DTO, service extending `BaseApiService`, standalone OnPush component, `PermissionsService`.
+   - Any other side follows the golden path of its own `<submodule>/AGENTS.md` (read it if it exists).
    - Use only target-style patterns; never plan the legacy ones listed in §6.2/§7.2. Do not plan refactors
      outside the change's scope: write them under Follow-ups.
-   - If the API contract changes, BE DTO, FE model and FE service move in the **same** change (principle 9).
+   - If the API contract changes, BE DTO and the model and service of every web client the change declares move in the **same** change (principle 9).
    - Ownership and scope rules live in the handler and must already be ACs; if one is missing, that is a
      spec gap, not a task.
    - Respect the Accepted ADRs in `openspec/adr/` (read the summary `openspec/adr/SUMMARY.md`; the index is `openspec/adr/README.md`). A decision that
@@ -72,14 +73,15 @@ spec goes back to `/sdd-spec` or `/sdd-clarify`), do NOT commit. Never read or p
      (ask the user before writing it). A decision local to this change gets no ADR line.
 
 7. **Write `tasks.md`** from the template.
-   - Groups by side (BE, FE, Infra), in dependency order, then a final **Verification** group (§8.7 gates).
+   - Groups by side (the sides of `openspec/sides.conf` the change declares, plus Infra), in dependency order, then a final **Verification** group (§8.7 gates).
    - For every AC the **test task comes before its implementation task** in the same group. Every group lands
      its own tests; never collect tests into the last group.
    - Every task is `- [ ] <group>.<n> <description>` and states how to verify it. One session of work each.
    - Cite the AC as `(AC-n)` in both its test task and its implementation task. A test task starts with
      "Write" (the checker uses both conventions to verify test-first order).
-   - Test tasks name the tag to use: BE `[Trait("Change", ...)]` + `[Trait("AC", "<change-id>/AC-n")]`,
-     FE `it()` title starting `[<change-id>/AC-n]`. One tagged test per AC per side, never two ACs in one test.
+   - Test tasks name the tag to use, in the side's form from `openspec/sides.conf`: BE `[Trait("Change", ...)]` +
+     `[Trait("AC", "<change-id>/AC-n")]`, a web client such as FE an `it()` title starting `[<change-id>/AC-n]`.
+     One tagged test per AC per side, never two ACs in one test.
    - Include the migration task (new migration, never edit an applied one) when the schema changes, and the
      docs a task owes (for example Swagger-visible changes), inside that task's group.
    - End with `## Traceability`: `| AC | Scenario | Side | Test |`, one row per AC per side, with the planned test

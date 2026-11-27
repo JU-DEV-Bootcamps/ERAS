@@ -14,6 +14,21 @@ Rule: keep manuals as files in `manuals/` at the root of the parent repository, 
 ### [ADR-0010](0010-use-jspdf-autotable-for-vector-pdf-tables.md): Use jspdf-autotable to build vector PDF tables in the frontend
 Rule: build PDF tables in the frontend from plain columns and rows with `jspdf-autotable` on top of `jspdf` (real text, headers repeated on every page), loaded with a dynamic `import()`; new table exports do not use DOM snapshots.
 
+### [ADR-0012](0012-adopt-react-as-the-second-web-client-and-its-stack.md): Adopt React as the second web client and its stack
+Rule: ERAS v3 is a permanent second web client in `ERAS-FE-React` (side `FE-React`), built with React 19, TypeScript strict and Vite, React Router, TanStack Query, React Hook Form + Zod, react-i18next (en, es, pt-BR; English first), keycloak-js and Axios, tested with Vitest, React Testing Library and MSW; a library is installed by the first change that uses it, and the lint, typecheck, test (≥ 15%) and build gates block every pull request.
+
+### [ADR-0014](0014-call-the-backend-from-the-react-client-through-hand-written-axios-services.md): Call the backend from the React client through hand-written axios services, without code generators
+Rule: v3 calls the backend only through reviewed source code on the one client of `src/core/http/` (no Orval or other generator); failures become `ApiError` and the backend's `detailed` stack trace is never kept, shown or logged; each feature owns its DTO `interface`s in `types.ts` and typed calls in `api.ts`, validates critical responses with Zod and tests them with MSW.
+
+### [ADR-0015](0015-keep-server-state-in-tanstack-query-and-fix-the-layers-of-the-react-client.md): Keep server state in TanStack Query and fix the layers of the React client
+Rule: server data lives only in TanStack Query hooks of each feature (no global store, no copies in `useState`); the HTTP client reaches screens through `HttpClientProvider` / `useHttpClient()`; the layers `app`, `core`, `features/<feature>`, `shared` are final, a feature never imports another, and a boundaries lint plugin enforces it.
+
+### [ADR-0016](0016-use-mui-with-one-theme-as-the-ui-library-of-the-react-client.md): Use MUI with one theme as the UI library of the React client
+Rule: v3 uses only MUI, styled through one theme in `src/app/theme.ts` that copies v2's tokens and breakpoints (768px, 1024px) and is the single source of colors, typography, spacing and breakpoints; adjustments use `sx` or `styled()`, icons come from `@mui/icons-material`, and no other styling system (Tailwind, CSS modules, Sass) or component kit is added.
+
+### [ADR-0017](0017-guard-the-react-client-dependencies-against-supply-chain-attacks.md): Guard the React client's dependencies against supply-chain attacks
+Rule: v3 keeps exact versions and a committed lockfile, adopts a version only after 7 days (reviewed security fixes earlier), installs in CI with `npm ci --ignore-scripts`, gates pull requests on `npm audit --audit-level=high` and pins GitHub Actions by SHA; Dependabot runs weekly with a 7-day cooldown, grouped minor/patch, separate majors and at most 5 open PRs, and nothing merges without review.
+
 ## auth
 
 ### [ADR-0005](0005-limit-professional-access-to-students-of-assigned-assessments.md): Limit a professional's access to students of their assigned assessments
@@ -21,6 +36,9 @@ Rule: a professional only reaches students of assessments whose `AssignedProfess
 
 ### [ADR-0009](0009-limit-professional-profile-to-professionals.md): Limit the professional profile endpoints to the ERAS Professional role
 Rule: the endpoints `GET` and `PUT api/v1/users/me/professional-profile` declare the policy `ProfessionalOnly`, which requires only the `ERAS Professional` role; Administrator, Officer and Guest get 403. This is an exception to "Administrator passes every check" (AGENTS.md §4.3) and applies only to endpoints that declare `ProfessionalOnly`.
+
+### [ADR-0013](0013-authenticate-the-react-client-with-its-own-keycloak-public-client.md): Authenticate the React client with its own Keycloak public client, PKCE and in-memory tokens
+Rule: v3 logs in through its own public Keycloak client in each environment (authorization code + PKCE S256, redirect, no check-sso iframe), keeps tokens only in memory, refreshes them before expiry and reads roles from the same roles resource as v2; the client has exact web origins and v2's audience mapper, so the backend accepts its tokens unchanged.
 
 ## data
 
@@ -40,3 +58,6 @@ Rule: backend and frontend rules live only in `ERAS-BE/AGENTS.md` and `ERAS-FE/A
 
 ### [ADR-0008](0008-review-and-sign-adrs-before-accepting.md): Review and sign an ADR before it is accepted
 Rule: an ADR is reviewed like a PR with the checklist in `README.md`; anyone with write access reviews and signs, one sign-off is enough, and the result is recorded in `Reviewed by` and `Signed by`. Only a human accepts; skills never fill those fields.
+
+### [ADR-0011](0011-declare-the-sdd-sides-in-one-registry.md): Declare the SDD sides in one registry
+Rule: declare every side (the backend and each web client) once in `openspec/sides.conf`; scripts, skills and rules read it and never name a client by hand, and a `**Side:**` value names whole registered sides joined with ` + `. Adding or removing a client is one `[section]` there plus that client's own `AGENTS.md` (ADR-0007).

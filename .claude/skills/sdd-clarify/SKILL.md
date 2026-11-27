@@ -8,7 +8,7 @@ Reduce the risk in a **Draft spec** before anyone reviews or implements it, by a
 whose answers change behavior, and writing those answers back into the spec.
 
 **Boundary.** Edit only `proposal.md` and `specs/**/spec.md` of the change. Do NOT write `design.md`,
-`tasks.md` or code, do NOT touch `ERAS-BE/` or `ERAS-FE/`, do NOT commit, and never set
+`tasks.md` or code, do NOT touch any submodule (the sides of `openspec/sides.conf`), do NOT commit, and never set
 `Status: Approved` (only a human does). Never read or print secrets.
 
 **Templates:**
@@ -28,7 +28,7 @@ whose answers change behavior, and writing those answers back into the spec.
    - No spec files yet → stop and point to `/sdd-spec`.
 
 2. **Gather context before asking** (read-only). Existing specs for the same capability
-   (`openspec show "<id>" --type spec`), the current behavior in `ERAS-BE/` / `ERAS-FE/`, `AGENTS.md`
+   (`openspec show "<id>" --type spec`), the current behavior in the submodules of `openspec/sides.conf`, `AGENTS.md`
    and `openspec/config.yaml`. **Never ask what the code, the specs or AGENTS.md already answer**;
    fix the spec from that evidence and mention it in the report instead.
 

@@ -11,6 +11,14 @@ errors=0
 err() { echo "ERROR: $*"; errors=$((errors + 1)); }
 
 [ -d "$skills" ] || { echo "no .claude/skills under $root" >&2; exit 2; }
+# The submodule folders whose cited paths are checked come from <root>/openspec/sides.conf (ADR-0011).
+SIDES_CONF="$root/openspec/sides.conf"
+. "$(dirname "$0")/../../sdd-shared/sides.sh"
+prefixes='\.claude'
+for s in $(sides_list); do
+  sm=$(sides_get "$s" submodule)
+  [ -n "$sm" ] && prefixes="$prefixes|$sm"
+done
 sections=$( [ -f "$agents" ] && tr -d '\r' < "$agents" | grep -oE '^#{2,3} [0-9]+(\.[0-9]+)?' | grep -oE '[0-9]+(\.[0-9]+)?')
 
 count=0
@@ -25,7 +33,7 @@ for dir in "$skills"/sdd-*/; do
   [ "$fm_name" = "$name" ] || err "$name: frontmatter name is '$fm_name', expected '$name'"
   echo "$text" | sed -n '2,/^---$/p' | grep -q '^description:' || err "$name: frontmatter has no description"
 
-  for p in $(echo "$text" | grep -oE '`(\.claude|ERAS-FE|ERAS-BE)/[A-Za-z0-9_./-]+\.(md|sh)`' | tr -d '`' | sort -u); do
+  for p in $(echo "$text" | grep -oE '`('"$prefixes"')/[A-Za-z0-9_./-]+\.(md|sh)`' | tr -d '`' | sort -u); do
     [ -e "$root/$p" ] && continue
     echo "$text" | grep -F "$p" | grep -qi 'if .*exist' && continue
     err "$name: cites '$p' which does not exist"

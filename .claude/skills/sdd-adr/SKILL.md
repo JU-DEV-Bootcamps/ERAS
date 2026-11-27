@@ -10,7 +10,7 @@ decision that outlives the change. Conventions: `openspec/sdd-conventions.md`, `
 
 **Boundary.** Write only in `openspec/adr/`: the new ADR, the index `README.md`, the summary `SUMMARY.md`, and the
 Status line of an ADR being superseded. When the ADR comes from a change, also add or fix the `**ADR:** ADR-NNNN` line of that
-D-block in the change's `design.md`. Do NOT write code, do NOT touch `ERAS-BE/` or `ERAS-FE/`, do NOT edit
+D-block in the change's `design.md`. Do NOT write code, do NOT touch any submodule (the sides of `openspec/sides.conf`), do NOT edit
 specs, do NOT commit. Never read or print secrets (`.env`, `deploy/.env.prod`, `environment.development.ts`,
 keys in `appsettings*.json`).
 

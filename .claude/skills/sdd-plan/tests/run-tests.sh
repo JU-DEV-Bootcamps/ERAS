@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Self-test of the SDD check scripts (check-spec, check-plan, check-impl, verify-gate, run-gates, check-adr, check-archive, check-skills) against fixtures built from the worked examples.
-# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|verify|gates|spec|adr|archive|skills]
+# Self-test of the SDD check scripts (check-spec, check-plan, check-impl, verify-gate, run-gates, check-adr, check-archive, check-skills,
+# the side registry reader sides.sh and check-parity) against fixtures built from the worked examples and the real openspec/sides.conf.
+# Usage (any directory): bash .claude/skills/sdd-plan/tests/run-tests.sh [plan|impl|verify|gates|spec|adr|archive|skills|sides|parity]
 # With no argument every section runs (about 5 minutes on Windows); with one, only that section.
 # Exit 0 = every case behaved as expected.
 set -u
@@ -9,6 +10,7 @@ only="${1:-all}"
 section() { [ "$only" = all ] || [ "$only" = "$1" ]; }
 
 skills="$(cd "$(dirname "$0")/../.." && pwd)"
+registry="$skills/../../openspec/sides.conf"
 id="608-reject-duplicate-configuration-name"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
@@ -20,6 +22,7 @@ new_change() {
   rm -rf "$work/repo"
   mkdir -p "$work/repo/openspec/changes/$id/specs/configuration-management" "$work/repo/ERAS-BE/test" "$work/repo/ERAS-FE/src/app"
   local c="$work/repo/openspec/changes/$id"
+  [ -f "$registry" ] && cp "$registry" "$work/repo/openspec/sides.conf"
   printf 'schema: spec-driven\ncreated: 2026-01-01\n' > "$c/.openspec.yaml"
   cp "$skills/sdd-spec/examples/$id/proposal.md" "$c/proposal.md"
   cp "$skills/sdd-spec/examples/$id/specs/configuration-management/spec.md" "$c/specs/configuration-management/spec.md"
@@ -29,6 +32,10 @@ new_change() {
 }
 
 tag_be() { printf '    [Trait("AC", "%s/%s")]\n' "$id" "$1" >> "$work/repo/ERAS-BE/test/$2.cs"; }
+# AC-3 is the first FE-only scenario of the example: to_fe_react moves it to FE-React
+to_fe_react() { sed -i '0,/^\*\*Side:\*\* FE$/s//**Side:** FE-React/' "$work/repo/openspec/changes/$id/specs/configuration-management/spec.md"; }
+# all_fe_to_react: every FE of the example becomes FE-React (BE stays)
+all_fe_to_react() { sed -i 's/^\*\*Side:\*\* FE$/**Side:** FE-React/; s/^\*\*Side:\*\* BE + FE$/**Side:** BE + FE-React/' "$work/repo/openspec/changes/$id/specs/configuration-management/spec.md"; }
 tag_fe() { printf "  it('[%s/%s] %s', () => {});\n" "$id" "$1" "$3" >> "$work/repo/ERAS-FE/src/app/$2.spec.ts"; }
 
 add_all_tests() {
@@ -83,6 +90,12 @@ new_change;  sed -i 's/$/\r/' "$(c)/tasks.md" "$(c)/design.md" "$(c)/proposal.md
 new_change;  printf 'schema: spec-driven\nskip_specs: true\n' > "$(c)/.openspec.yaml"; rm -r "$(c)/design.md" "$(c)/specs"
              printf '# Tasks\n\n## 1. Docs\n\n- [ ] 1.1 Add the page and verify it renders\n\n## 2. Verification\n\n- [ ] 2.1 Verify the link works\n' > "$(c)/tasks.md"
              expect "plan: skip_specs change needs only proposal and tasks" 0 "Result: 0 error(s)" $plan
+new_change;  to_fe_react; sed -i '/^| AC-3 /s/| FE |/| FE-React |/' "$(c)/tasks.md"
+             expect "plan: an FE-React AC with an FE-React row passes" 0 "Result: 0 error(s)" $plan
+new_change;  to_fe_react
+             expect "plan: an FE-React AC needs an FE-React row" 1 "no row for AC-3 on side FE-React" $plan
+new_change;  to_fe_react
+             expect "plan: an FE-React AC does not declare an FE row" 1 "Traceability row AC-3 / FE is not declared" $plan
 
 fi
 
@@ -108,6 +121,31 @@ new_change;  add_all_tests; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
              expect "impl: unchecked task fails --final" 1 "still unchecked" $impl --final
 new_change;  add_all_tests; sed -i '0,/^- \[x\]/s//- [ ]/' "$(c)/tasks.md"
              expect "impl: unchecked task is a warning in progress" 0 "still unchecked" $impl
+# FE-React: AC-3 moves from FE to FE-React (to_fe_react), its test lives in ERAS-FE-React/src/*.test.tsx
+tag_fr() { mkdir -p "$work/repo/ERAS-FE-React/src"; printf "  it('[%s/%s] %s', () => {});\n" "$id" "$1" "$3" >> "$work/repo/ERAS-FE-React/src/$2.test.tsx"; }
+react_tests() {
+  to_fe_react
+  for ac in AC-1 AC-2 AC-4 AC-6; do tag_be "$ac" "Tests$ac"; done
+  for ac in AC-5 AC-6; do tag_fe "$ac" "unit-$ac" "does the thing"; done
+  tag_fr AC-3 unit-AC-3 "shows the conflict"
+  sed -i 's/^- \[ \]/- [x]/' "$(c)/tasks.md"
+}
+new_change;  react_tests
+             expect "impl: an FE-React AC needs no Angular test" 0 "Result: 0 error(s)" $impl --final
+new_change;  react_tests; tag_fe AC-3 unit-AC-3 "angular one"
+             expect "impl: an Angular test of an FE-React AC fails" 1 "an FE test is tagged $id/AC-3 but the spec does not declare it for FE" $impl
+new_change;  react_tests; tag_fr AC-1 WrongSideReact "wrong side"
+             expect "impl: a React test of a BE AC fails" 1 "an FE-React test is tagged $id/AC-1 but the spec does not declare it for FE-React" $impl
+new_change;  react_tests; sed -i 's/^\*\*Side:\*\* FE-React$/**Side:** FE + FE-React/' "$(c)/specs/configuration-management/spec.md"
+             expect "impl: FE + FE-React needs the Angular test too" 1 "$id/AC-3 on FE has no tagged test" $impl --final
+new_change;  react_tests; sed -i 's/^\*\*Side:\*\* FE-React$/**Side:** FE + FE-React/' "$(c)/specs/configuration-management/spec.md"; tag_fe AC-3 unit-AC-3 "angular one"
+             expect "impl: FE + FE-React with one test per side passes" 0 "Result: 0 error(s)" $impl --final
+new_change;  react_tests; tag_fr AC-3 other "second one"
+             expect "impl: two React tests for one AC" 1 "$id/AC-3 on FE-React has 2 tagged tests" $impl
+new_change;  react_tests; printf "  it.only('x', () => {});\n" >> "$work/repo/ERAS-FE-React/src/unit-AC-3.test.tsx"
+             expect "impl: focused React test" 1 "focused or skipped test in ERAS-FE-React/src/unit-AC-3.test.tsx" $impl
+new_change;  react_tests; rm -r "$work/repo/ERAS-FE-React"
+             expect "impl: a missing FE-React submodule is a missing test, not a crash" 1 "$id/AC-3 on FE-React has no tagged test" $impl --final
 
 fi
 
@@ -182,6 +220,16 @@ new_change; expect "gates: a missing tool is unrunnable" 3 "UNRUNNABLE  FE lint:
 new_change; expect "gates: --be runs only the backend" 0 "Result: 5 passed, 0 failed, 0 unrunnable" env PATH="$stubs:$PATH" bash "$gates_script" "$id" --be
 new_change; printf 'schema: spec-driven\nskip_specs: true\n' > "$(c)/.openspec.yaml"; rm -r "$(c)/specs"
             expect "gates: a change with no side runs only openspec validate" 0 "Result: 1 passed, 0 failed, 0 unrunnable" rg
+new_change; expect "gates: --fe runs only the 3 FE gates" 0 "Result: 4 passed, 0 failed, 0 unrunnable" env PATH="$stubs:$PATH" bash "$gates_script" "$id" --fe
+new_change; mkdir -p ERAS-FE-React
+            expect "gates: --side FE-React runs only the 4 FE-React gates" 0 "Result: 5 passed, 0 failed, 0 unrunnable" env PATH="$stubs:$PATH" bash "$gates_script" "$id" --side FE-React
+new_change; mkdir -p ERAS-FE-React
+            expect "gates: an FE-React gate is named" 0 "PASS        FE-React typecheck" env PATH="$stubs:$PATH" bash "$gates_script" "$id" --side FE-React
+no_fe_gate() { local out; out=$(rg); echo "$out"; if echo "$out" | grep -qE '^(PASS|FAIL|UNRUNNABLE) +FE (lint|test|build)'; then echo "an FE gate ran"; return 1; fi; }
+new_change; all_fe_to_react; mkdir -p ERAS-FE-React
+            expect "gates: a spec with FE-React and no FE runs no FE gate" 0 "Result: 9 passed, 0 failed, 0 unrunnable" no_fe_gate
+new_change; expect "gates: a side whose submodule is missing is unrunnable" 3 "UNRUNNABLE  FE-React gates: the submodule 'ERAS-FE-React' is not checked out" env PATH="$stubs:$PATH" bash "$gates_script" "$id" --side FE-React
+new_change; expect "gates: an unknown side is bad usage" 2 "unknown side 'FE-Angular'" env PATH="$stubs:$PATH" bash "$gates_script" "$id" --side FE-Angular
 fi
 
 if section spec && [ -f "$skills/sdd-spec/scripts/check-spec.sh" ]; then
@@ -191,6 +239,15 @@ if section spec && [ -f "$skills/sdd-spec/scripts/check-spec.sh" ]; then
                expect "spec: duplicate AC numbers" 1 "duplicate AC numbers" $spec
   new_change;  sed -i '0,/^\*\*Side:\*\* BE$/{//d}' "$(c)/specs/configuration-management/spec.md"
                expect "spec: scenario without Side" 1 "has no **Side:** line" $spec
+  sp() { echo "$(c)/specs/configuration-management/spec.md"; }
+  new_change;  sed -i '0,/^\*\*Side:\*\* FE$/s//**Side:** FE-React/' "$(sp)"
+               expect "spec: a registered side FE-React passes" 0 "Result: 0 error(s)" $spec
+  new_change;  sed -i '0,/^\*\*Side:\*\* FE$/s//**Side:** FE + FE-React/' "$(sp)"
+               expect "spec: FE + FE-React passes" 0 "Result: 0 error(s)" $spec
+  new_change;  sed -i '0,/^\*\*Side:\*\* FE$/s//**Side:** FE-Angular/' "$(sp)"
+               expect "spec: an unknown side fails" 1 "names 'FE-Angular', which is not a side" $spec
+  new_change;  sed -i '0,/^\*\*Side:\*\* FE$/s//**Side:** FE + FE/' "$(sp)"
+               expect "spec: a repeated side fails" 1 "names 'FE' twice" $spec
 fi
 
 if section adr; then
@@ -313,6 +370,19 @@ ready_change; mkdir -p openspec/adr
               printf '# ADRs\n\n### process\n\n| [ADR-0001](0001-x.md) | x | Proposed | — |\n' > openspec/adr/README.md
               printf '\n**ADR:** ADR-0001\n' >> "$(c)/design.md"
               expect "archive: linked ADR not Accepted" 1 "must be Accepted" $archc
+# A git fixture where the three submodule pointers are the same as on origin/develop (no bump on this branch).
+pointers_unbumped() {
+  git init -q . && git -c core.autocrlf=false add openspec
+  for sm in ERAS-BE ERAS-FE ERAS-FE-React; do
+    git update-index --add --cacheinfo "160000,$(printf '%s' "$sm" | sha1sum | cut -c1-40),$sm"
+  done
+  git -c user.name=t -c user.email=t@t commit -qm fixture && git update-ref refs/remotes/origin/develop HEAD
+}
+no_fe_pointer_error() { local out; out=$($archc); echo "$out"; if echo "$out" | grep -qF "bump the ERAS-FE pointer"; then echo "asked for the ERAS-FE pointer"; return 1; fi; return 0; }
+ready_change; all_fe_to_react; pointers_unbumped
+              expect "archive: an FE-React spec needs the ERAS-FE-React pointer" 1 "the spec has FE-React ACs but this branch does not bump the ERAS-FE-React pointer" $archc
+ready_change; all_fe_to_react; pointers_unbumped
+              expect "archive: an FE-React spec does not ask for the ERAS-FE pointer" 0 "does not bump the ERAS-BE pointer" no_fe_pointer_error
 fi
 
 if section skills; then
@@ -354,7 +424,52 @@ new_skills_root; printf 'AGENTS\n' > "$work/sk/AGENTS.md"
                  expect "skills: skill missing from AGENTS.md" 1 "not documented in AGENTS.md" sk
 new_skills_root; rm "$work/sk/.claude/skills/sdd-a/scripts/x.sh"
                  expect "skills: allowed-tools script missing" 1 "allowed-tools names" sk
+with_registry() { mkdir -p "$work/sk/openspec" "$work/sk/ERAS-FE-React"; cp "$registry" "$work/sk/openspec/sides.conf"; printf '# rules\n' > "$work/sk/ERAS-FE-React/AGENTS.md"; }
+new_skills_root; with_registry; printf 'Read `ERAS-FE-React/AGENTS.md` first.\n' >> "$(skill_file)"
+                 expect "skills: a path in a registered submodule passes" 0 "Result: 0 error(s)" sk
+new_skills_root; with_registry; printf 'Read `ERAS-FE-React/docs/missing.md` first.\n' >> "$(skill_file)"
+                 expect "skills: a dangling path in a registered submodule fails" 1 "cites 'ERAS-FE-React/docs/missing.md' which does not exist" sk
 expect "skills: the real skills pass" 0 "Result: 0 error(s)" bash "$skills/sdd-plan/tests/check-skills.sh"
+fi
+
+if section sides; then
+echo "== sides.sh"
+# sides <function> [args]: run one reader function in the fixture repository (real openspec/sides.conf)
+sides() { ( cd "$work/repo" && . "$skills/sdd-shared/sides.sh" && "$@" ); }
+# sides_in <conf> <function> [args]: the same with another registry file
+sides_in() { local conf="$1"; shift; ( cd "$work/repo" && SIDES_CONF="$conf" && . "$skills/sdd-shared/sides.sh" && "$@" ); }
+joined() { "$@" | paste -sd' ' -; }
+one_spec() { printf '## ADDED Requirements\n\n### Requirement: R\n\n#### Scenario: AC-1 x\n**Side:** %s\n' "$1" > "$work/one.md"; }
+fe_react_is_not_fe() { one_spec FE-React; if sides sides_of_specs "$work/one.md" | grep -qxF 'AC-1|FE'; then echo "FE-React matched FE"; return 1; fi; sides sides_of_specs "$work/one.md"; }
+
+new_change; expect "sides: the registry lists its sides in order" 0 "BE FE FE-React" joined sides sides_list
+new_change; expect "sides: a key of a side" 0 "ERAS-FE-React" sides sides_get FE-React submodule
+new_change; expect "sides: the gates of a side, in order" 0 "lint test build" joined eval 'sides sides_gates FE | cut -f1'
+new_change; expect "sides: FE + FE-React is two sides" 0 "FE FE-React" joined sides sides_split "FE + FE-React"
+new_change; expect "sides: FE-React never matches FE" 0 "AC-1|FE-React" fe_react_is_not_fe
+new_change; expect "sides: a part of a name is not a side" 1 "" sides sides_has FE-Rea
+new_change; expect "sides: three registered sides are valid" 0 "" sides sides_check "BE + FE + FE-React"
+new_change; expect "sides: an unknown side is reported" 1 "'FE-Angular', which is not a side" sides sides_check "FE-Angular"
+new_change; expect "sides: a repeated side is reported" 1 "names 'FE' twice" sides sides_check "FE + FE"
+new_change; expect "sides: sides must be joined with ' + '" 1 "must join the sides with ' + '" sides sides_check "BE  + FE"
+new_change; printf '# [Fake] in a comment\n\n[ONE]\n# gate.hidden = no\nsubmodule = X1\n\n[TWO]\nsubmodule = X2\n' > "$work/alt.conf"
+            expect "sides: comments and blank lines are ignored" 0 "ONE TWO" joined sides_in "$work/alt.conf" sides_list
+no_hidden_gate() { if sides_in "$work/alt.conf" sides_gates ONE | grep -q hidden; then echo "read a commented gate"; return 1; fi; echo "no gate"; }
+new_change; expect "sides: a commented key is not read" 0 "no gate" no_hidden_gate
+fi
+
+if section parity; then
+echo "== check-parity"
+par="bash $skills/sdd-shared/check-parity.sh"
+# not_listed <AC-n>: the report runs, exits 0 and has no line for that scenario
+not_listed() { local out code; out=$($par); code=$?; echo "$out"; [ "$code" -eq 0 ] || return 1; if echo "$out" | grep -qE ": $1 "; then echo "$1 is listed"; return 1; fi; }
+new_change; expect "parity: an FE-only AC is missing FE-React" 0 "AC-3 Conflict message is shown on the form: has FE, missing FE-React" $par
+new_change; to_fe_react
+            expect "parity: an FE-React-only AC is missing FE" 0 "AC-3 Conflict message is shown on the form: has FE-React, missing FE" $par
+new_change; sed -i '0,/^\*\*Side:\*\* FE$/s//**Side:** FE + FE-React/' "$(c)/specs/configuration-management/spec.md"
+            expect "parity: an AC on FE + FE-React is not listed" 0 "" not_listed AC-3
+new_change; expect "parity: a BE-only AC is not listed" 0 "" not_listed AC-1
+new_change; expect "parity: gaps never fail the report" 0 "never fails" $par
 fi
 
 echo
