@@ -2,7 +2,7 @@
 
 ERAS is a Jala University platform for detecting and following up on student risk.
 This repository is the **parent repo**: it holds the specs, the local stack and the deploy files, and it
-pulls in the backend and frontend as git submodules.
+pulls in the backend and the two web clients (v2 Angular and v3 React) as git submodules.
 
 > **Rule number one:** this project uses Spec-Driven Development (SDD). No code change is made without
 > an approved spec. Read [Spec-Driven Development](#spec-driven-development-sdd) before your first change.
@@ -28,6 +28,7 @@ pulls in the backend and frontend as git submodules.
 |---|---|
 | `ERAS-BE/` | **Git submodule.** Backend: .NET 8, Onion Architecture, EF Core + PostgreSQL, MediatR, Keycloak JWT. Solution: `ERAS-BE/Eras.sln` |
 | `ERAS-FE/` | **Git submodule.** Frontend: Angular 19 (standalone components), Angular Material |
+| `ERAS-FE-React/` | **Git submodule.** Frontend v3: React 19 + TypeScript + Vite, MUI. A second, permanent client of the same backend; its rules are in `ERAS-FE-React/AGENTS.md` |
 | `openspec/specs/` | Living specs: the current, agreed behavior of the system, grouped by capability |
 | `openspec/changes/` | Proposed or in-progress changes (proposal, spec deltas, design, tasks). Finished ones go to `archive/` |
 | `Keycloak/` | Local realm `ERAS` export: clients, roles, seed users |
